@@ -1,0 +1,3106 @@
+; Zilog eZ80 ANSI C Compiler Release 3.4
+; -optsize -noreduceopt -nomodsect -peephole -globalopt
+; -localcse -const=ROM 
+	FILE	"SRC\MENU.C"
+	.assume ADL=1
+	SEGMENT CODE
+;    1	/*
+;    2	 
+;    3	 Copyright (c) 2019 Hannes Eberhard
+;    4	 
+;    5	 Permission is hereby granted, free of charge, to any person obtaining a copy
+;    6	 of this software and associated documentation files (the "Software"), to deal
+;    7	 in the Software without restriction, including without limitation the rights
+;    8	 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+;    9	 copies of the Software, and to permit persons to whom the Software is
+;   10	 furnished to do so, subject to the following conditions:
+;   11	 
+;   12	 The above copyright notice and this permission notice shall be included in all
+;   13	 copies or substantial portions of the Software.
+;   14	 
+;   15	 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+;   16	 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+;   17	 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+;   18	 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+;   19	 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+;   20	 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+;   21	 SOFTWARE.
+;   22	 
+;   23	 */
+;   24	
+;   25	#include "includes.h"
+;   26	
+;   27	menu_item* new_menu_item(char* title, char* indicator) {
+_new_menu_item:
+	LD	HL,-3
+	CALL	__frameset
+;   28	    
+;   29	    menu_item* result = calloc(1, sizeof(menu_item));
+	LD	BC,6
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	CALL	_calloc
+	POP	BC
+	POP	BC
+	LD	(IX+-3),HL
+;   30	    
+;   31	    if (result == NULL) {
+;   32	    }
+;   33	    
+;   34	    result->title = title;
+	LD	BC,(IX+6)
+	LD	IY,(IX+-3)
+	LD	(IY+0),BC
+;   35	    result->indicator = indicator;
+	LD	BC,(IX+9)
+	LD	(IY+3),BC
+;   36	    
+;   37	    return result;
+	LD	HL,(IX+-3)
+;   38	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _new_menu_item ***************************
+;Name                         Addr/Register   Size   Type
+;_calloc                             IMPORT  -----   function
+;result                                IX-3      3   variable
+;indicator                             IX+9      3   parameter
+;title                                 IX+6      3   parameter
+
+
+; Stack Frame Size: 15 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;   39	
+;   40	menu_tab* new_menu_tab(char* title, uint8_t item_count, ...) {
+_new_menu_tab:
+	LD	HL,-7
+	CALL	__frameset
+;   41	    
+;   42	    uint8_t i;
+;   43	    va_list arguments;
+;   44	    menu_tab* result = calloc(1, sizeof(menu_tab));
+	LD	BC,49
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	CALL	_calloc
+	POP	BC
+	POP	BC
+	LD	(IX+-4),HL
+;   45	    
+;   46	    if (result == NULL) {
+;   47	    }
+;   48	    
+;   49	    result->title = title;
+	LD	BC,(IX+6)
+	LD	IY,(IX+-4)
+	LD	(IY+0),BC
+;   50	    result->item_count = item_count;
+	LD	A,(IX+9)
+	LD	(IY+3),A
+;   51	    
+;   52	    va_start(arguments, item_count);
+	LEA	IY,IX+12
+	LD	(IX+-7),IY
+;   53	    
+;   54	    for (i = 0; i < item_count; i++) {
+	LD	(IX+-1),0
+	JR	L_8
+L_6:
+;   55	        result->items[i] = va_arg(arguments, menu_item*);
+	LD	IY,(IX+-7)
+	LEA	BC,IY+3
+	LD	(IX+-7),BC
+	LD	IY,(IX+-7)
+	LEA	HL,IY+-3
+	LD	IY,(IX+-4)
+	LD	DE,(HL)
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LEA	HL,IY+4
+	ADD	HL,BC
+	LD	(HL),DE
+	INC	(IX+-1)
+;   56	    }
+L_8:
+	LD	A,(IX+-1)
+	CP	A,(IX+9)
+	JR	C,L_6
+;   57	    
+;   58	    va_end(arguments);
+;   59	    
+;   60	    return result;
+	LD	HL,(IX+-4)
+;   61	    
+;   62	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _new_menu_tab ***************************
+;Name                         Addr/Register   Size   Type
+;_calloc                             IMPORT  -----   function
+;arguments                             IX-7      3   variable
+;result                                IX-4      3   variable
+;i                                     IX-1      1   variable
+;item_count                            IX+9      1   parameter
+;title                                 IX+6      3   parameter
+
+
+; Stack Frame Size: 19 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;   63	
+;   64	menu* new_menu(uint8_t tab_count, ...) {
+_new_menu:
+	LD	HL,-7
+	CALL	__frameset
+;   65	    
+;   66	    uint8_t i;
+;   67	    va_list arguments;
+;   68	    menu* result = calloc(1, sizeof(menu));
+	LD	BC,16
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	CALL	_calloc
+	POP	BC
+	POP	BC
+	LD	(IX+-7),HL
+;   69	    
+;   70	    if (result == NULL) {
+;   71	    }
+;   72	    
+;   73	    va_start(arguments, tab_count);
+	LEA	BC,IX+9
+	LD	(IX+-4),BC
+;   74	    
+;   75	    result->tab_count = tab_count;
+	LD	A,(IX+6)
+	LD	IY,(IX+-7)
+	LD	(IY+0),A
+;   76	    
+;   77	    for (i = 0; i < tab_count; i++) {
+	LD	(IX+-1),0
+	JR	L_16
+L_14:
+;   78	        result->tabs[i] = va_arg(arguments, menu_tab*);
+	LD	IY,(IX+-4)
+	LEA	BC,IY+3
+	LD	(IX+-4),BC
+	LD	IY,(IX+-4)
+	LEA	HL,IY+-3
+	LD	IY,(IX+-7)
+	LD	DE,(HL)
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LEA	HL,IY+1
+	ADD	HL,BC
+	LD	(HL),DE
+	INC	(IX+-1)
+;   79	    }
+L_16:
+	LD	A,(IX+-1)
+	CP	A,(IX+6)
+	JR	C,L_14
+;   80	    
+;   81	    va_end(arguments);
+;   82	    
+;   83	    return result;
+	LD	HL,(IX+-7)
+;   84	    
+;   85	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _new_menu ***************************
+;Name                         Addr/Register   Size   Type
+;_calloc                             IMPORT  -----   function
+;result                                IX-7      3   variable
+;arguments                             IX-4      3   variable
+;i                                     IX-1      1   variable
+;tab_count                             IX+6      1   parameter
+
+
+; Stack Frame Size: 16 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;   86	
+;   87	void free_menu(menu* source) {
+_free_menu:
+	LD	HL,-5
+	CALL	__frameset
+;   88	    
+;   89	    uint8_t i, j;
+;   90	    
+;   91	    for (i = 0; i < source->tab_count; i++) {
+	LD	(IX+-1),0
+	JR	L_27
+L_25:
+;   92	        for (j = 0; j < source->tabs[i]->item_count; j++) {
+	LD	(IX+-2),0
+	JR	L_23
+L_21:
+;   93	            free(source->tabs[i]->items[j]);
+	LD	A,(IX+-2)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	IY,(IX+-5)
+	LD	IY,(IY)
+	LD	BC,HL
+	LEA	HL,IY+4
+	ADD	HL,BC
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_free
+	POP	BC
+	INC	(IX+-2)
+;   94	        }
+L_23:
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LD	IY,(IX+6)
+	LEA	HL,IY+1
+	ADD	HL,BC
+	LD	(IX+-5),HL
+	LD	IY,(HL)
+	LD	A,(IX+-2)
+	CP	A,(IY+3)
+	JR	C,L_21
+;   95	        free(source->tabs[i]);
+	LD	HL,(IX+-5)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_free
+	POP	BC
+	INC	(IX+-1)
+;   96	    }
+L_27:
+	LD	A,(IX+-1)
+	LD	IY,(IX+6)
+	CP	A,(IY+0)
+	JR	C,L_25
+;   97	    
+;   98	    free(source);
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_free
+	POP	BC
+;   99	    
+;  100	    return;
+;  101	    
+;  102	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _free_menu ***************************
+;Name                         Addr/Register   Size   Type
+;_free                               IMPORT  -----   function
+;G_0                                   IX-5      3   variable
+;j                                     IX-2      1   variable
+;i                                     IX-1      1   variable
+;source                                IX+6      3   parameter
+
+
+; Stack Frame Size: 14 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  103	
+;  104	void draw_menu(menu* source, uint8_t selected_tab, uint8_t selected_item) {
+_draw_menu:
+	LD	HL,-13
+	CALL	__frameset
+;  105	    
+;  106	    uint8_t i;
+;  107	    uint16_t header_width = LCD_WIDTH / source->tab_count;
+	LD	IY,(IX+6)
+	LD	A,(IY+0)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	LD	HL,320
+	CALL	__idivs
+	LD	(IX+-3),L
+	LD	(IX+-2),H
+;  108	    
+;  109	    gfx_FillScreen(GCOL_BACKGROUND_PRIMARY);
+	LD	BC,1
+	PUSH	BC
+	CALL	_gfx_FillScreen
+	POP	BC
+;  110	    
+;  111	    gfx_SetColor(GCOL_HEADER);
+	LD	BC,6
+	PUSH	BC
+	CALL	_gfx_SetColor
+	POP	BC
+;  112	    gfx_FillRectangle(0, 0, LCD_WIDTH, HEADER_HEIGHT);
+	LD	BC,20
+	PUSH	BC
+	LD	BC,320
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	PUSH	BC
+	CALL	_gfx_FillRectangle
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+;  113	    
+;  114	    if (source->tab_count > 1) {
+	LD	IY,(IX+6)
+	LD	A,1
+	CP	A,(IY+0)
+	JR	NC,L_38
+;  115	        for (i = 0; i < source->tab_count; i++) {
+	LD	(IX+-1),0
+	JR	L_36
+L_34:
+;  116	            if (selected_tab == i) {
+	LD	A,(IX+9)
+	CP	A,(IX+-1)
+	JR	NZ,L_32
+;  117	                gfx_SetTextFGColor(GCOL_SYMBOLIC3);
+	LD	BC,12
+	PUSH	BC
+	CALL	_gfx_SetTextFGColor
+	POP	BC
+;  118	                gfx_SetColor(GCOL_BACKGROUND_PRIMARY);
+	LD	BC,1
+	PUSH	BC
+	CALL	_gfx_SetColor
+	POP	BC
+;  119	                gfx_FillRectangle(i * header_width, 0, header_width, HEADER_HEIGHT);
+	LD	BC,20
+	PUSH	BC
+	LD	BC,(IX+-3)
+	CALL	__stoiu
+	PUSH	HL
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+-3)
+	CALL	__stoiu
+	LD	DE,HL
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	LD	HL,DE
+	CALL	__imuls
+	PUSH	HL
+	CALL	_gfx_FillRectangle
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+;  120	            } else {
+	JR	L_33
+L_32:
+;  121	                gfx_SetTextFGColor(GCOL_WHITE);
+	LD	BC,8
+	PUSH	BC
+	CALL	_gfx_SetTextFGColor
+	POP	BC
+;  122	            }
+L_33:
+;  123	            gfx_print(source->tabs[i]->title, header_width * i + (header_width - gfx_GetStringWidth(source->tabs[i]->title)) / 2, (HEADER_HEIGHT - FONT_HEIGHT) / 2);
+	LD	BC,6
+	PUSH	BC
+	LD	C,(IX+-1)
+	LD	B,0
+	LD	HL,BC
+	LD	BC,(IX+-3)
+	CALL	__smulu
+	LD	BC,(IX+-3)
+	LD	A,(IX+-1)
+	LD	IY,(IX+6)
+	LD	DE,HL
+	CALL	__stoiu
+	LD	(IX+-9),HL
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LEA	HL,IY+1
+	ADD	HL,BC
+	LD	IY,(HL)
+	LD	BC,(IY+0)
+	PUSH	BC
+	LD	(IX+-12),DE
+	LD	(IX+-13),D
+	CALL	_gfx_GetStringWidth
+	LD	DE,(IX+-12)
+	LD	D,(IX+-13)
+	LD	BC,HL
+	LD	HL,(IX+-9)
+	POP	IY
+	LD	A,1
+	OR	A,A
+	SBC	HL,BC
+	CALL	__ishru_b
+	LD	BC,HL
+	LD	HL,DE
+	ADD.SIS	HL,BC
+	PUSH	HL
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	LD	IY,(IX+6)
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LEA	HL,IY+1
+	ADD	HL,BC
+	LD	IY,(HL)
+	LD	BC,(IY+0)
+	PUSH	BC
+	CALL	_gfx_print
+	POP	BC
+	POP	BC
+	POP	BC
+	INC	(IX+-1)
+;  124	        }
+L_36:
+	LD	A,(IX+-1)
+	LD	IY,(IX+6)
+	CP	A,(IY+0)
+	JR	C,L_34
+	JR	L_39
+;  125	    } else {
+L_38:
+;  126	        gfx_print(source->tabs[0]->title, (header_width - gfx_GetStringWidth(source->tabs[0]->title)) / 2, (HEADER_HEIGHT - FONT_HEIGHT) / 2);
+	LD	BC,6
+	PUSH	BC
+	LD	BC,(IX+-3)
+	LD	IY,(IX+6)
+	LD	IY,(IY+1)
+	LD	DE,(IY+0)
+	PUSH	DE
+	CALL	__stoiu
+	LD	DE,HL
+	LD	(IX+-12),DE
+	LD	(IX+-13),D
+	CALL	_gfx_GetStringWidth
+	LD	DE,(IX+-12)
+	LD	D,(IX+-13)
+	POP	BC
+	LD	BC,HL
+	LD	HL,DE
+	OR	A,A
+	SBC	HL,BC
+	LD	A,1
+	CALL	__ishru_b
+	PUSH	HL
+	LD	IY,(IX+6)
+	LD	IY,(IY+1)
+	LD	BC,(IY+0)
+	PUSH	BC
+	CALL	_gfx_print
+	POP	BC
+	POP	BC
+	POP	BC
+;  127	    }
+L_39:
+;  128	    
+;  129	    gfx_SetColor(GCOL_BACKGROUND_SECONDARY);
+	LD	BC,2
+	PUSH	BC
+	CALL	_gfx_SetColor
+	POP	BC
+;  130	    
+;  131	    for (i = 0; i < source->tabs[selected_tab]->item_count; i++) {
+	LD	(IX+-1),0
+	JR	L_50
+L_48:
+;  132	        
+;  133	        if (i % 2 == 1) {
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	LD	BC,2
+	CALL	__irems
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_44
+;  134	            gfx_FillRectangle(0, (1.5 + i) * HEADER_HEIGHT, LCD_WIDTH, HEADER_HEIGHT);
+	LD	BC,20
+	PUSH	BC
+	LD	BC,320
+	PUSH	BC
+	UEXT	HL
+	LD	L,(IX+-1)
+	LD	A,H
+	LD	BC,HL
+	CALL	__ultof
+	LD	HL,12582912
+	LD	E,63
+	CALL	__fadd
+	LD	HL,10485760
+	LD	E,65
+	CALL	__fmul
+	CALL	__ftol
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	CALL	_gfx_FillRectangle
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+;  135	        }
+L_44:
+;  136	        
+;  137	        if (selected_item == i) {
+	LD	A,(IX+12)
+	CP	A,(IX+-1)
+	JR	NZ,L_43
+;  138	            gfx_SetTextFGColor(GCOL_SYMBOLIC3);
+	LD	BC,12
+	PUSH	BC
+	CALL	_gfx_SetTextFGColor
+	POP	BC
+;  139	        } else {
+	JR	L_45
+L_43:
+;  140	            gfx_SetTextFGColor(GCOL_TEXT_PRIMARY);
+	LD	BC,3
+	PUSH	BC
+	CALL	_gfx_SetTextFGColor
+	POP	BC
+;  141	        }
+L_45:
+;  142	        
+;  143	        gfx_SetTextXY(MARGIN, (1.5 + i) * HEADER_HEIGHT + (HEADER_HEIGHT - FONT_HEIGHT) / 2);
+	UEXT	HL
+	LD	L,(IX+-1)
+	LD	A,H
+	LD	BC,HL
+	CALL	__ultof
+	LD	HL,12582912
+	LD	E,63
+	CALL	__fadd
+	LD	HL,10485760
+	LD	E,65
+	CALL	__fmul
+	LD	HL,12582912
+	LD	E,64
+	CALL	__fadd
+	CALL	__ftol
+	PUSH	BC
+	LD	BC,10
+	PUSH	BC
+	CALL	_gfx_SetTextXY
+	POP	BC
+	POP	BC
+;  144	        if (i < 10) gfx_PrintInt(i + 1, 0);
+	LD	A,(IX+-1)
+	CP	A,10
+	JR	NC,L_47
+	LD	BC,0
+	PUSH	BC
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	INC	HL
+	PUSH	HL
+	CALL	_gfx_PrintInt
+	POP	BC
+	POP	BC
+L_47:
+;  145	        gfx_print_justified(source->tabs[selected_tab]->items[i]->title, JUST_LEFT, 1.5 * MARGIN, JUST_NULL, 0);
+	LD	BC,0
+	PUSH	BC
+	PUSH	BC
+	LD	BC,15
+	PUSH	BC
+	LD	BC,5
+	PUSH	BC
+	LD	A,(IX+9)
+	UEXT	HL
+	LD	L,A
+	LD	A,(IX+-1)
+	LD	IY,(IX+6)
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LEA	HL,IY+1
+	ADD	HL,BC
+	LD	IY,(HL)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LEA	HL,IY+4
+	ADD	HL,BC
+	LD	IY,(HL)
+	LD	BC,(IY+0)
+	PUSH	BC
+	CALL	_gfx_print_justified
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+;  146	        gfx_print_justified(source->tabs[selected_tab]->items[i]->indicator, JUST_RIGHT, 0, JUST_NULL, 0);
+	LD	BC,0
+	PUSH	BC
+	PUSH	BC
+	PUSH	BC
+	LD	BC,3
+	PUSH	BC
+	LD	A,(IX+9)
+	LD	IY,(IX+6)
+	UEXT	HL
+	LD	L,A
+	LD	A,(IX+-1)
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LEA	HL,IY+1
+	ADD	HL,BC
+	LD	IY,(HL)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LEA	HL,IY+4
+	ADD	HL,BC
+	LD	IY,(HL)
+	LD	BC,(IY+3)
+	PUSH	BC
+	CALL	_gfx_print_justified
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	INC	(IX+-1)
+;  147	        
+;  148	    }
+L_50:
+	LD	A,(IX+9)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LD	IY,(IX+6)
+	LEA	HL,IY+1
+	ADD	HL,BC
+	LD	(IX+-6),HL
+	LD	A,(IX+9)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LEA	HL,IY+1
+	ADD	HL,BC
+	LD	IY,(HL)
+	LD	A,(IX+-1)
+	CP	A,(IY+3)
+	JR	C,L_48
+;  149	    
+;  150	    return;
+;  151	    
+;  152	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _draw_menu ***************************
+;Name                         Addr/Register   Size   Type
+;_gfx_print_justified                IMPORT  -----   function
+;_gfx_PrintInt                       IMPORT  -----   function
+;_gfx_SetTextXY                      IMPORT  -----   function
+;_gfx_GetStringWidth                 IMPORT  -----   function
+;_gfx_print                          IMPORT  -----   function
+;_gfx_SetTextFGColor                 IMPORT  -----   function
+;_gfx_FillRectangle                  IMPORT  -----   function
+;_gfx_SetColor                       IMPORT  -----   function
+;_gfx_FillScreen                     IMPORT  -----   function
+;G_2                                   IX-6      3   variable
+;header_width                          IX-3      2   variable
+;i                                     IX-1      1   variable
+;selected_item                        IX+12      1   parameter
+;selected_tab                          IX+9      1   parameter
+;source                                IX+6      3   parameter
+
+
+; Stack Frame Size: 28 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  153	
+;  154	uint8_t handle_menu(menu* source, uint8_t* selected_tab, uint8_t* selected_item) {
+_handle_menu:
+	LD	HL,-1
+	CALL	__frameset
+;  155	    
+;  156	    sk_key_t key;
+;  157	    
+;  158	    while (true) {
+L_116:
+;  159	        
+;  160	        draw_menu(source, *selected_tab, *selected_item);
+	LD	HL,(IX+12)
+	LD	C,(HL)
+	LD	B,0
+	PUSH	BC
+	LD	HL,(IX+9)
+	LD	C,(HL)
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_draw_menu
+	POP	BC
+	POP	BC
+	POP	BC
+;  161	        key = wait_for_any_keyup();
+	CALL	_wait_for_any_keyup
+	LD	(IX+-1),A
+;  162	        
+;  163	        switch (key) {
+	UEXT	HL
+	LD	L,A
+	CALL	__case8
+L__16:
+	DW	21
+	DB	1
+	DW24	L_60	
+
+	DB	2
+	DW24	L_64	
+
+	DB	3
+	DW24	L_68	
+
+	DB	4
+	DW24	L_56	
+
+	DB	9
+	DW24	L_53	
+
+	DB	10
+	DW24	L_55	
+
+	DB	15
+	DW24	L_54	
+
+	DB	18
+	DW24	L_92	
+
+	DB	19
+	DW24	L_101	
+
+	DB	20
+	DW24	L_110	
+
+	DB	26
+	DW24	L_89	
+
+	DB	27
+	DW24	L_98	
+
+	DB	28
+	DW24	L_107	
+
+	DB	34
+	DW24	L_87	
+
+	DB	35
+	DW24	L_95	
+
+	DB	36
+	DW24	L_104	
+
+	DB	49
+	DW24	L_84	
+
+	DB	50
+	DW24	L_81	
+
+	DB	51
+	DW24	L_78	
+
+	DB	52
+	DW24	L_75	
+
+	DB	53
+	DW24	L_72	
+
+	DW24	L_116	
+
+;  164	            case sk_Enter:
+L_53:
+;  165	                return RETS_SUCCESS;
+	LD	A,2
+	JR	L_117
+;  166	            case sk_Clear:
+L_54:
+;  167	                return RETS_ERROR;
+	LD	A,1
+	JR	L_117
+;  168	            case sk_Add:
+L_55:
+;  169	                return RETS_CHANGED;
+	LD	A,3
+	JR	L_117
+;  170	            case sk_Up:
+L_56:
+;  171	                if (*selected_item > 0) (*selected_item)--;
+	LD	HL,(IX+12)
+	LD	A,(HL)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	OR	A,A
+	SBC	HL,HL
+	OR	A,A
+	SBC	HL,BC
+	CALL	__setflag
+	JP	P,L_116
+	LD	HL,(IX+12)
+	LD	A,(HL)
+	DEC	A
+	LD	HL,(IX+12)
+	LD	(HL),A
+;  172	                break;
+	JR	L_116
+;  173	            case sk_Down:
+L_60:
+;  174	                if (*selected_item < source->tabs[*selected_tab]->item_count - 1) (*selected_item)++;
+	LD	HL,(IX+9)
+	LD	A,(HL)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LD	IY,(IX+6)
+	LEA	HL,IY+1
+	ADD	HL,BC
+	LD	IY,(HL)
+	LD	A,(IY+3)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	LD	HL,(IX+12)
+	LD	A,(HL)
+	DEC	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	SBC	HL,BC
+	CALL	__setflag
+	JP	P,L_116
+	LD	HL,(IX+12)
+	LD	A,(HL)
+	INC	A
+	LD	HL,(IX+12)
+	LD	(HL),A
+;  175	                break;
+	JR	L_116
+;  176	            case sk_Left:
+L_64:
+;  177	                if (*selected_tab > 0) (*selected_tab)--;
+	LD	HL,(IX+9)
+	LD	A,(HL)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	OR	A,A
+	SBC	HL,HL
+	OR	A,A
+	SBC	HL,BC
+	CALL	__setflag
+	JP	P,L_67
+	LD	HL,(IX+9)
+	LD	A,(HL)
+	DEC	A
+	LD	HL,(IX+9)
+	LD	(HL),A
+L_67:
+;  178	                *selected_item = 0;
+	LD	HL,(IX+12)
+	LD	(HL),0
+;  179	                break;
+	JR	L_116
+;  180	            case sk_Right:
+L_68:
+;  181	                if (*selected_tab < source->tab_count - 1) (*selected_tab)++;
+	LD	IY,(IX+6)
+	LD	A,(IY+0)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	LD	HL,(IX+9)
+	LD	A,(HL)
+	DEC	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	SBC	HL,BC
+	CALL	__setflag
+	JP	P,L_71
+	LD	HL,(IX+9)
+	LD	A,(HL)
+	INC	A
+	LD	HL,(IX+9)
+	LD	(HL),A
+L_71:
+;  182	                *selected_item = 0;
+	LD	HL,(IX+12)
+	LD	(HL),0
+;  183	                break;
+	JR	L_116
+;  184	            case sk_Yequ:
+L_72:
+;  185	                if (source->tab_count > 0) {
+	XOR	A,A
+	LD	IY,(IX+6)
+	CP	A,(IY+0)
+	JR	NC,L_116
+;  186	                    *selected_tab = 0;
+	LD	HL,(IX+9)
+	LD	(HL),0
+;  187	                    *selected_item = 0;
+	LD	HL,(IX+12)
+	LD	(HL),0
+;  188	                }
+;  189	                break;
+	JR	L_116
+;  190	            case sk_Window:
+L_75:
+;  191	                if (source->tab_count > 1) {
+	LD	A,1
+	LD	IY,(IX+6)
+	CP	A,(IY+0)
+	JR	NC,L_116
+;  192	                    *selected_tab = 1;
+	LD	HL,(IX+9)
+	LD	(HL),1
+;  193	                    *selected_item = 0;
+	LD	HL,(IX+12)
+	LD	(HL),0
+;  194	                }
+;  195	                break;
+	JR	L_116
+;  196	            case sk_Zoom:
+L_78:
+;  197	                if (source->tab_count > 2) {
+	LD	A,2
+	LD	IY,(IX+6)
+	CP	A,(IY+0)
+	JR	NC,L_116
+;  198	                    *selected_tab = 2;
+	LD	HL,(IX+9)
+	LD	(HL),2
+;  199	                    *selected_item = 0;
+	LD	HL,(IX+12)
+	LD	(HL),0
+;  200	                }
+;  201	                break;
+	JR	L_116
+;  202	            case sk_Trace:
+L_81:
+;  203	                if (source->tab_count > 3) {
+	LD	A,3
+	LD	IY,(IX+6)
+	CP	A,(IY+0)
+	JR	NC,L_116
+;  204	                    *selected_tab = 3;
+	LD	HL,(IX+9)
+	LD	(HL),3
+;  205	                    *selected_item = 0;
+	LD	HL,(IX+12)
+	LD	(HL),0
+;  206	                }
+;  207	                break;
+	JR	L_116
+;  208	            case sk_Graph:
+L_84:
+;  209	                if (source->tab_count > 4) {
+	LD	A,4
+	LD	IY,(IX+6)
+	CP	A,(IY+0)
+	JR	NC,L_116
+;  210	                    *selected_tab = 4;
+	LD	HL,(IX+9)
+	LD	(HL),4
+;  211	                    *selected_item = 0;
+	LD	HL,(IX+12)
+	LD	(HL),0
+;  212	                }
+;  213	                break;
+	JR	L_116
+;  214	            case sk_1:
+L_87:
+;  215	                if (source->tabs[*selected_tab]->item_count > 0) {
+	LD	HL,(IX+9)
+	LD	A,(HL)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LD	IY,(IX+6)
+	LEA	HL,IY+1
+	ADD	HL,BC
+	LD	IY,(HL)
+	XOR	A,A
+	CP	A,(IY+3)
+	JR	NC,L_89
+;  216	                    *selected_item = 0;
+	LD	HL,(IX+12)
+	LD	(HL),0
+;  217	                    return RETS_SUCCESS;
+	LD	A,2
+	JR	L_117
+;  218	                }
+;  219	            case sk_2:
+L_89:
+;  220	                if (source->tabs[*selected_tab]->item_count > 1) {
+	LD	HL,(IX+9)
+	LD	A,(HL)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LD	IY,(IX+6)
+	LEA	HL,IY+1
+	ADD	HL,BC
+	LD	IY,(HL)
+	LD	A,1
+	CP	A,(IY+3)
+	JR	NC,L_92
+;  221	                    *selected_item = 1;
+	LD	HL,(IX+12)
+	LD	(HL),1
+;  222	                    return RETS_SUCCESS;
+	LD	A,2
+	JR	L_117
+;  223	                }
+;  224	            case sk_3:
+L_92:
+;  225	                if (source->tabs[*selected_tab]->item_count > 2) {
+	LD	HL,(IX+9)
+	LD	A,(HL)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LD	IY,(IX+6)
+	LEA	HL,IY+1
+	ADD	HL,BC
+	LD	IY,(HL)
+	LD	A,2
+	CP	A,(IY+3)
+	JR	NC,L_95
+;  226	                    *selected_item = 2;
+	LD	HL,(IX+12)
+	LD	(HL),A
+;  227	                    return RETS_SUCCESS;
+	JR	L_117
+;  228	                }
+;  229	            case sk_4:
+L_95:
+;  230	                if (source->tabs[*selected_tab]->item_count > 3) {
+	LD	HL,(IX+9)
+	LD	A,(HL)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LD	IY,(IX+6)
+	LEA	HL,IY+1
+	ADD	HL,BC
+	LD	IY,(HL)
+	LD	A,3
+	CP	A,(IY+3)
+	JR	NC,L_98
+;  231	                    *selected_item = 3;
+	LD	HL,(IX+12)
+	LD	(HL),3
+;  232	                    return RETS_SUCCESS;
+	LD	A,2
+	JR	L_117
+;  233	                }
+;  234	            case sk_5:
+L_98:
+;  235	                if (source->tabs[*selected_tab]->item_count > 4) {
+	LD	HL,(IX+9)
+	LD	A,(HL)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LD	IY,(IX+6)
+	LEA	HL,IY+1
+	ADD	HL,BC
+	LD	IY,(HL)
+	LD	A,4
+	CP	A,(IY+3)
+	JR	NC,L_101
+;  236	                    *selected_item = 4;
+	LD	HL,(IX+12)
+	LD	(HL),4
+;  237	                    return RETS_SUCCESS;
+	LD	A,2
+	JR	L_117
+;  238	                }
+;  239	            case sk_6:
+L_101:
+;  240	                if (source->tabs[*selected_tab]->item_count > 5) {
+	LD	HL,(IX+9)
+	LD	A,(HL)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LD	IY,(IX+6)
+	LEA	HL,IY+1
+	ADD	HL,BC
+	LD	IY,(HL)
+	LD	A,5
+	CP	A,(IY+3)
+	JR	NC,L_104
+;  241	                    *selected_item = 5;
+	LD	HL,(IX+12)
+	LD	(HL),5
+;  242	                    return RETS_SUCCESS;
+	LD	A,2
+	JR	L_117
+;  243	                }
+;  244	            case sk_7:
+L_104:
+;  245	                if (source->tabs[*selected_tab]->item_count > 6) {
+	LD	HL,(IX+9)
+	LD	A,(HL)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LD	IY,(IX+6)
+	LEA	HL,IY+1
+	ADD	HL,BC
+	LD	IY,(HL)
+	LD	A,6
+	CP	A,(IY+3)
+	JR	NC,L_107
+;  246	                    *selected_item = 6;
+	LD	HL,(IX+12)
+	LD	(HL),6
+;  247	                    return RETS_SUCCESS;
+	LD	A,2
+	JR	L_117
+;  248	                }
+;  249	            case sk_8:
+L_107:
+;  250	                if (source->tabs[*selected_tab]->item_count > 7) {
+	LD	HL,(IX+9)
+	LD	A,(HL)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LD	IY,(IX+6)
+	LEA	HL,IY+1
+	ADD	HL,BC
+	LD	IY,(HL)
+	LD	A,7
+	CP	A,(IY+3)
+	JR	NC,L_110
+;  251	                    *selected_item = 7;
+	LD	HL,(IX+12)
+	LD	(HL),7
+;  252	                    return RETS_SUCCESS;
+	LD	A,2
+	JR	L_117
+;  253	                }
+;  254	            case sk_9:
+L_110:
+;  255	                if (source->tabs[*selected_tab]->item_count > 8) {
+	LD	HL,(IX+9)
+	LD	A,(HL)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LD	IY,(IX+6)
+	LEA	HL,IY+1
+	ADD	HL,BC
+	LD	IY,(HL)
+	LD	A,8
+	CP	A,(IY+3)
+	JR	NC,L_116
+;  256	                    *selected_item = 8;
+	LD	HL,(IX+12)
+	LD	(HL),8
+;  257	                    return RETS_SUCCESS;
+	LD	A,2
+;  258	                }
+;  259	            default: break;
+;  260	        }
+;  261	        
+;  262	    }
+;  263	    
+;  264	}
+L_117:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _handle_menu ***************************
+;Name                         Addr/Register   Size   Type
+;_wait_for_any_keyup                 IMPORT  -----   function
+;_draw_menu                          IMPORT  -----   function
+;key                                   IX-1      1   variable
+;selected_item                        IX+12      3   parameter
+;selected_tab                          IX+9      3   parameter
+;source                                IX+6      3   parameter
+
+
+; Stack Frame Size: 16 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  265	
+;  266	char* draw_handle_function_menu(uint8_t tab) {
+_draw_handle_function_menu:
+	LD	HL,-9
+	CALL	__frameset
+;  267	    
+;  268	    bool running = true;
+	LD	(IX+-6),1
+;  269	    uint8_t selected_tab = tab;
+	LD	A,(IX+6)
+	LD	(IX+-5),A
+;  270	    uint8_t selected_item = 0;
+	LD	(IX+-4),0
+;  271	    char* result = calloc(10, sizeof(char));
+	LD	BC,1
+	PUSH	BC
+	LD	BC,10
+	PUSH	BC
+	CALL	_calloc
+	POP	BC
+	POP	BC
+	LD	(IX+-3),HL
+;  272	    
+;  273	    menu* menu_data = new_menu(4,
+;  274	                               new_menu_tab("Algebra", 4,
+;  275	                                            new_menu_item("simplify()", ""),
+;  276	                                            new_menu_item("solve()", ""),
+;  277	                                            new_menu_item("Factors()", ""),
+;  278	                                            new_menu_item("Value()", "")),
+;  279	                               new_menu_tab("Analysis", 5,
+;  280	                                            new_menu_item("Derivative()", ""),
+;  281	                                            new_menu_item("Integral()", ""),
+;  282	                                            new_menu_item("Tangent()", ""),
+;  283	                                            new_menu_item("Normal()", ""),
+;  284	                                            new_menu_item("Angle()", "")),
+;  285	                               new_menu_tab("Vector", 6,
+;  286	                                            new_menu_item("VectorMagnitude()", ""),
+;  287	                                            new_menu_item("VectorNormalized()", ""),
+;  288	                                            new_menu_item("VectorAngle()", ""),
+;  289	                                            new_menu_item("VectorDotProduct()", ""),
+;  290	                                            new_menu_item("VectorCrossProduct()", ""),
+;  291	                                            new_menu_item("VectorTripleProduct()", "")),
+;  292	                               new_menu_tab("Misc", 6,
+;  293	                                            new_menu_item("abs()", ""),
+;  294	                                            new_menu_item("ln()", ""),
+;  295	                                            new_menu_item("log()", ""),
+;  296	                                            new_menu_item("sin(), cos(), tan()", ""),
+;  297	                                            new_menu_item("arcsin(), arccos(), acrtan()", ""),
+;  298	                                            new_menu_item("approximate()", ""),
+;  299	                                            new_menu_item("List()", "")));
+	LD	BC,L__36
+	PUSH	BC
+	LD	BC,L__37
+	PUSH	BC
+	CALL	_new_menu_item
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,L__38
+	PUSH	BC
+	LD	BC,L__39
+	PUSH	BC
+	CALL	_new_menu_item
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,L__40
+	PUSH	BC
+	LD	BC,L__41
+	PUSH	BC
+	CALL	_new_menu_item
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,L__42
+	PUSH	BC
+	LD	BC,L__43
+	PUSH	BC
+	CALL	_new_menu_item
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,L__44
+	PUSH	BC
+	LD	BC,L__45
+	PUSH	BC
+	CALL	_new_menu_item
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,L__46
+	PUSH	BC
+	LD	BC,L__47
+	PUSH	BC
+	CALL	_new_menu_item
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,L__48
+	PUSH	BC
+	LD	BC,L__49
+	PUSH	BC
+	CALL	_new_menu_item
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,6
+	PUSH	BC
+	LD	BC,L__50
+	PUSH	BC
+	CALL	_new_menu_tab
+	LD	IY,27
+	ADD	IY,SP
+	LD	SP,IY
+	PUSH	HL
+	LD	BC,L__51
+	PUSH	BC
+	LD	BC,L__52
+	PUSH	BC
+	CALL	_new_menu_item
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,L__53
+	PUSH	BC
+	LD	BC,L__54
+	PUSH	BC
+	CALL	_new_menu_item
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,L__55
+	PUSH	BC
+	LD	BC,L__56
+	PUSH	BC
+	CALL	_new_menu_item
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,L__57
+	PUSH	BC
+	LD	BC,L__58
+	PUSH	BC
+	CALL	_new_menu_item
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,L__59
+	PUSH	BC
+	LD	BC,L__60
+	PUSH	BC
+	CALL	_new_menu_item
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,L__61
+	PUSH	BC
+	LD	BC,L__62
+	PUSH	BC
+	CALL	_new_menu_item
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,6
+	PUSH	BC
+	LD	BC,L__63
+	PUSH	BC
+	CALL	_new_menu_tab
+	LD	IY,24
+	ADD	IY,SP
+	LD	SP,IY
+	PUSH	HL
+	LD	BC,L__64
+	PUSH	BC
+	LD	BC,L__65
+	PUSH	BC
+	CALL	_new_menu_item
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,L__66
+	PUSH	BC
+	LD	BC,L__67
+	PUSH	BC
+	CALL	_new_menu_item
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,L__68
+	PUSH	BC
+	LD	BC,L__69
+	PUSH	BC
+	CALL	_new_menu_item
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,L__70
+	PUSH	BC
+	LD	BC,L__71
+	PUSH	BC
+	CALL	_new_menu_item
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,L__72
+	PUSH	BC
+	LD	BC,L__73
+	PUSH	BC
+	CALL	_new_menu_item
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,5
+	PUSH	BC
+	LD	BC,L__74
+	PUSH	BC
+	CALL	_new_menu_tab
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,L__75
+	PUSH	BC
+	LD	BC,L__76
+	PUSH	BC
+	CALL	_new_menu_item
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,L__77
+	PUSH	BC
+	LD	BC,L__78
+	PUSH	BC
+	CALL	_new_menu_item
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,L__79
+	PUSH	BC
+	LD	BC,L__80
+	PUSH	BC
+	CALL	_new_menu_item
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,L__81
+	PUSH	BC
+	LD	BC,L__82
+	PUSH	BC
+	CALL	_new_menu_item
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,4
+	PUSH	BC
+	LD	BC,L__83
+	PUSH	BC
+	CALL	_new_menu_tab
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,4
+	PUSH	BC
+	CALL	_new_menu
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	(IX+-9),HL
+;  300	    
+;  301	    memset(result, 0, 10);
+	LD	BC,10
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_memset
+	POP	BC
+	POP	BC
+	POP	BC
+;  302	    
+;  303	    while (running) {
+	JR	L_151
+L_152:
+;  304	        switch (handle_menu(menu_data, &selected_tab, &selected_item)) {
+	PEA	IX+-4
+	PEA	IX+-5
+	LD	BC,(IX+-9)
+	PUSH	BC
+	CALL	_handle_menu
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	CALL	__seqcase
+L__84:
+	DW	3
+	DW	1
+	DB	0
+	DW24	L_150	
+
+	DW24	L_118	
+
+	DW24	L_151	
+
+	DW24	L_151	
+
+;  305	                
+;  306	            case RETS_SUCCESS:
+L_118:
+;  307	                
+;  308	                if (selected_tab == 0) {
+	LD	A,(IX+-5)
+	OR	A,A
+	JR	NZ,L_147
+;  309	                    switch (selected_item) {
+	LD	A,(IX+-4)
+	UEXT	HL
+	LD	L,A
+	CALL	__seqcase
+L__86:
+	DW	4
+	DW	0
+	DB	0
+	DW24	L_119	
+
+	DW24	L_120	
+
+	DW24	L_121	
+
+	DW24	L_122	
+
+	DW24	L_148	
+
+;  310	                        case 0: strcpy(result, "simplify("); break;
+L_119:
+	LD	BC,L__87
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_strcpy
+	POP	BC
+	POP	BC
+	JR	L_148
+;  311	                        case 1: strcpy(result, "solve("); break;
+L_120:
+	LD	BC,L__88
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_strcpy
+	POP	BC
+	POP	BC
+	JR	L_148
+;  312	                        case 2: strcpy(result, "Fac("); break;
+L_121:
+	LD	BC,L__89
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_strcpy
+	POP	BC
+	POP	BC
+	JR	L_148
+;  313	                        case 3: strcpy(result, "Val("); break;
+L_122:
+	LD	BC,L__90
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_strcpy
+	POP	BC
+	POP	BC
+	JR	L_148
+;  314	                    }
+;  315	                } else if (selected_tab == 1) {
+L_147:
+	LD	A,(IX+-5)
+	CP	A,1
+	JR	NZ,L_145
+;  316	                    switch (selected_item) {
+	LD	A,(IX+-4)
+	UEXT	HL
+	LD	L,A
+	CALL	__seqcase
+L__92:
+	DW	5
+	DW	0
+	DB	0
+	DW24	L_123	
+
+	DW24	L_124	
+
+	DW24	L_125	
+
+	DW24	L_126	
+
+	DW24	L_127	
+
+	DW24	L_148	
+
+;  317	                        case 0: strcpy(result, "Deriv("); break;
+L_123:
+	LD	BC,L__93
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_strcpy
+	POP	BC
+	POP	BC
+	JR	L_148
+;  318	                        case 1: strcpy(result, "Int("); break;
+L_124:
+	LD	BC,L__94
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_strcpy
+	POP	BC
+	POP	BC
+	JR	L_148
+;  319	                        case 2: strcpy(result, "Tang("); break;
+L_125:
+	LD	BC,L__95
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_strcpy
+	POP	BC
+	POP	BC
+	JR	L_148
+;  320	                        case 3: strcpy(result, "Norm("); break;
+L_126:
+	LD	BC,L__96
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_strcpy
+	POP	BC
+	POP	BC
+	JR	L_148
+;  321	                        case 4: strcpy(result, "Ang("); break;
+L_127:
+	LD	BC,L__97
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_strcpy
+	POP	BC
+	POP	BC
+	JR	L_148
+;  322	                    }
+;  323	                } else if (selected_tab == 2) {
+L_145:
+	LD	A,(IX+-5)
+	CP	A,2
+	JR	NZ,L_143
+;  324	                    switch (selected_item) {
+	LD	A,(IX+-4)
+	UEXT	HL
+	LD	L,A
+	CALL	__seqcase
+L__99:
+	DW	6
+	DW	0
+	DB	0
+	DW24	L_128	
+
+	DW24	L_129	
+
+	DW24	L_130	
+
+	DW24	L_131	
+
+	DW24	L_132	
+
+	DW24	L_133	
+
+	DW24	L_148	
+
+;  325	                        case 0: strcpy(result, "VMag("); break;
+L_128:
+	LD	BC,L__100
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_strcpy
+	POP	BC
+	POP	BC
+	JR	L_148
+;  326	                        case 1: strcpy(result, "VNormed("); break;
+L_129:
+	LD	BC,L__101
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_strcpy
+	POP	BC
+	POP	BC
+	JR	L_148
+;  327	                        case 2: strcpy(result, "VAng("); break;
+L_130:
+	LD	BC,L__102
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_strcpy
+	POP	BC
+	POP	BC
+	JR	L_148
+;  328	                        case 3: strcpy(result, "VDotP("); break;
+L_131:
+	LD	BC,L__103
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_strcpy
+	POP	BC
+	POP	BC
+	JR	L_148
+;  329	                        case 4: strcpy(result, "VCrossP("); break;
+L_132:
+	LD	BC,L__104
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_strcpy
+	POP	BC
+	POP	BC
+	JR	L_148
+;  330	                        case 5: strcpy(result, "VTripleP("); break;
+L_133:
+	LD	BC,L__105
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_strcpy
+	POP	BC
+	POP	BC
+	JR	L_148
+;  331	                    }
+;  332	                } else if (selected_tab == 3) {
+L_143:
+	LD	A,(IX+-5)
+	CP	A,3
+	JR	NZ,L_148
+;  333	                    switch (selected_item) {
+	LD	A,(IX+-4)
+	UEXT	HL
+	LD	L,A
+	CALL	__seqcase
+L__107:
+	DW	7
+	DW	0
+	DB	0
+	DW24	L_134	
+
+	DW24	L_135	
+
+	DW24	L_136	
+
+	DW24	L_137	
+
+	DW24	L_138	
+
+	DW24	L_139	
+
+	DW24	L_140	
+
+	DW24	L_148	
+
+;  334	                        case 0: strcpy(result, "abs("); break;
+L_134:
+	LD	BC,L__108
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_strcpy
+	POP	BC
+	POP	BC
+	JR	L_148
+;  335	                        case 1: strcpy(result, "ln("); break;
+L_135:
+	LD	BC,L__109
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_strcpy
+	POP	BC
+	POP	BC
+	JR	L_148
+;  336	                        case 2: strcpy(result, "log("); break;
+L_136:
+	LD	BC,L__110
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_strcpy
+	POP	BC
+	POP	BC
+	JR	L_148
+;  337	                        case 3: strcpy(result, "sin("); break;
+L_137:
+	LD	BC,L__111
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_strcpy
+	POP	BC
+	POP	BC
+	JR	L_148
+;  338	                        case 4: strcpy(result, "arcsin("); break;
+L_138:
+	LD	BC,L__112
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_strcpy
+	POP	BC
+	POP	BC
+	JR	L_148
+;  339	                        case 5: strcpy(result, "approx("); break;
+L_139:
+	LD	BC,L__113
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_strcpy
+	POP	BC
+	POP	BC
+	JR	L_148
+;  340	                        case 6: strcpy(result, "Ls("); break;
+L_140:
+	LD	BC,L__114
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_strcpy
+	POP	BC
+	POP	BC
+;  341	                    }
+;  342	                }
+L_148:
+;  343	                
+;  344	                running = false;
+	LD	(IX+-6),0
+;  345	                break;
+	JR	L_151
+;  346	                
+;  347	            case RETS_CHANGED:
+;  348	                break;
+;  349	                
+;  350	            case RETS_ERROR:
+L_150:
+;  351	                running = false;
+	LD	(IX+-6),0
+;  352	                break;
+;  353	                
+;  354	        }
+;  355	    }
+L_151:
+	LD	A,(IX+-6)
+	OR	A,A
+	JR	NZ,L_152
+;  356	    
+;  357	    free_menu(menu_data);
+	LD	BC,(IX+-9)
+	PUSH	BC
+	CALL	_free_menu
+	POP	BC
+;  358	    
+;  359	    return result;
+	LD	HL,(IX+-3)
+;  360	    
+;  361	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _draw_handle_function_menu ***************************
+;Name                         Addr/Register   Size   Type
+;_free_menu                          IMPORT  -----   function
+;_strcpy                             IMPORT  -----   function
+;_handle_menu                        IMPORT  -----   function
+;_memset                             IMPORT  -----   function
+;_new_menu_item                      IMPORT  -----   function
+;_new_menu_tab                       IMPORT  -----   function
+;_new_menu                           IMPORT  -----   function
+;_calloc                             IMPORT  -----   function
+;menu_data                             IX-9      3   variable
+;running                               IX-6      1   variable
+;selected_tab                          IX-5      1   variable
+;selected_item                         IX-4      1   variable
+;result                                IX-3      3   variable
+;tab                                   IX+6      1   parameter
+
+
+; Stack Frame Size: 18 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	SEGMENT STRSECT
+L__36:
+	DB	0
+L__37:
+	DB	"List()"
+	DB	0
+L__38:
+	DB	0
+L__39:
+	DB	"approximate()"
+	DB	0
+L__40:
+	DB	0
+L__41:
+	DB	"arcsin(), arccos(), acrtan()"
+	DB	0
+L__42:
+	DB	0
+L__43:
+	DB	"sin(), cos(), tan()"
+	DB	0
+L__44:
+	DB	0
+L__45:
+	DB	"log()"
+	DB	0
+L__46:
+	DB	0
+L__47:
+	DB	"ln()"
+	DB	0
+L__48:
+	DB	0
+L__49:
+	DB	"abs()"
+	DB	0
+L__50:
+	DB	"Misc"
+	DB	0
+L__51:
+	DB	0
+L__52:
+	DB	"VectorTripleProduct()"
+	DB	0
+L__53:
+	DB	0
+L__54:
+	DB	"VectorCrossProduct()"
+	DB	0
+L__55:
+	DB	0
+L__56:
+	DB	"VectorDotProduct()"
+	DB	0
+L__57:
+	DB	0
+L__58:
+	DB	"VectorAngle()"
+	DB	0
+L__59:
+	DB	0
+L__60:
+	DB	"VectorNormalized()"
+	DB	0
+L__61:
+	DB	0
+L__62:
+	DB	"VectorMagnitude()"
+	DB	0
+L__63:
+	DB	"Vector"
+	DB	0
+L__64:
+	DB	0
+L__65:
+	DB	"Angle()"
+	DB	0
+L__66:
+	DB	0
+L__67:
+	DB	"Normal()"
+	DB	0
+L__68:
+	DB	0
+L__69:
+	DB	"Tangent()"
+	DB	0
+L__70:
+	DB	0
+L__71:
+	DB	"Integral()"
+	DB	0
+L__72:
+	DB	0
+L__73:
+	DB	"Derivative()"
+	DB	0
+L__74:
+	DB	"Analysis"
+	DB	0
+L__75:
+	DB	0
+L__76:
+	DB	"Value()"
+	DB	0
+L__77:
+	DB	0
+L__78:
+	DB	"Factors()"
+	DB	0
+L__79:
+	DB	0
+L__80:
+	DB	"solve()"
+	DB	0
+L__81:
+	DB	0
+L__82:
+	DB	"simplify()"
+	DB	0
+L__83:
+	DB	"Algebra"
+	DB	0
+L__87:
+	DB	"simplify("
+	DB	0
+L__88:
+	DB	"solve("
+	DB	0
+L__89:
+	DB	"Fac("
+	DB	0
+L__90:
+	DB	"Val("
+	DB	0
+L__93:
+	DB	"Deriv("
+	DB	0
+L__94:
+	DB	"Int("
+	DB	0
+L__95:
+	DB	"Tang("
+	DB	0
+L__96:
+	DB	"Norm("
+	DB	0
+L__97:
+	DB	"Ang("
+	DB	0
+L__100:
+	DB	"VMag("
+	DB	0
+L__101:
+	DB	"VNormed("
+	DB	0
+L__102:
+	DB	"VAng("
+	DB	0
+L__103:
+	DB	"VDotP("
+	DB	0
+L__104:
+	DB	"VCrossP("
+	DB	0
+L__105:
+	DB	"VTripleP("
+	DB	0
+L__108:
+	DB	"abs("
+	DB	0
+L__109:
+	DB	"ln("
+	DB	0
+L__110:
+	DB	"log("
+	DB	0
+L__111:
+	DB	"sin("
+	DB	0
+L__112:
+	DB	"arcsin("
+	DB	0
+L__113:
+	DB	"approx("
+	DB	0
+L__114:
+	DB	"Ls("
+	DB	0
+	SEGMENT CODE
+;  362	
+;  363	char* draw_handle_history_menu(history* last_queries, uint8_t tab) {
+_draw_handle_history_menu:
+	LD	HL,-11
+	CALL	__frameset
+;  364	    
+;  365	    uint8_t i;
+;  366	    uint8_t selected_tab = tab;
+	LD	A,(IX+9)
+	LD	(IX+-11),A
+;  367	    uint8_t selected_item = 0;
+	LD	(IX+-2),0
+;  368	    char* result = NULL;
+	LD	BC,0
+	LD	(IX+-5),BC
+;  369	    
+;  370	    bool running = true;
+	LD	(IX+-9),1
+;  371	    
+;  372	    menu* menu_data = new_menu(2,
+;  373	                               new_menu_tab("Queries", 0),
+;  374	                               new_menu_tab("Results", 0));
+	PUSH	BC
+	LD	BC,L__117
+	PUSH	BC
+	CALL	_new_menu_tab
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,0
+	PUSH	BC
+	LD	BC,L__118
+	PUSH	BC
+	CALL	_new_menu_tab
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_menu
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	(IX+-8),HL
+;  375	    
+;  376	    for (i = 0; i < last_queries->item_count; i++) {
+	LD	(IX+-1),0
+	JR	L_158
+L_156:
+;  377	        menu_data->tabs[0]->items[i] = new_menu_item(last_queries->items[i]->input, "");
+	LD	BC,L__119
+	PUSH	BC
+	LD	A,(IX+-1)
+	LD	IY,(IX+6)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LEA	HL,IY+1
+	ADD	HL,BC
+	LD	IY,(HL)
+	LD	BC,(IY+0)
+	PUSH	BC
+	CALL	_new_menu_item
+	POP	BC
+	POP	BC
+	LD	IY,(IX+-8)
+	LD	IY,(IY+1)
+	LD	A,(IX+-1)
+	LD	BC,HL
+	UEXT	HL
+	LD	L,A
+	LD	DE,HL
+	ADD	HL,HL
+	ADD	HL,DE
+	LD	DE,HL
+	LEA	HL,IY+4
+	ADD	HL,DE
+;  378	        menu_data->tabs[1]->items[i] = new_menu_item(last_queries->items[i]->output, "");
+	LD	DE,L__120
+	PUSH	DE
+	LD	(HL),BC
+	LD	A,(IX+-1)
+	LD	IY,(IX+6)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LEA	HL,IY+1
+	ADD	HL,BC
+	LD	IY,(HL)
+	LD	BC,(IY+3)
+	PUSH	BC
+	CALL	_new_menu_item
+	LD	BC,HL
+	POP	DE
+	POP	DE
+	LD	IY,(IX+-8)
+	LEA	HL,IY+4
+	LD	IY,(HL)
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	LD	DE,HL
+	ADD	HL,HL
+	ADD	HL,DE
+	LD	DE,HL
+	LEA	HL,IY+4
+	ADD	HL,DE
+	LD	(HL),BC
+	INC	(IX+-1)
+;  379	    }
+L_158:
+	LD	IY,(IX+6)
+	LD	A,(IY+0)
+	LD	(IX+-10),A
+	LD	A,(IX+-1)
+	CP	A,(IX+-10)
+	JR	C,L_156
+;  380	    
+;  381	    menu_data->tabs[0]->item_count = last_queries->item_count;
+	LD	IY,(IX+-8)
+	LD	IY,(IY+1)
+	LD	A,(IX+-10)
+	LD	(IY+3),A
+;  382	    menu_data->tabs[1]->item_count = last_queries->item_count;
+	LD	IY,(IX+-8)
+	LEA	HL,IY+4
+	LD	IY,(IX+6)
+	LD	A,(IY+0)
+	LD	IY,(HL)
+	LD	(IY+3),A
+;  383	    
+;  384	    while (running) {
+	JR	L_166
+L_167:
+;  385	        switch (handle_menu(menu_data, &selected_tab, &selected_item)) {
+	PEA	IX+-2
+	PEA	IX+-11
+	LD	BC,(IX+-8)
+	PUSH	BC
+	CALL	_handle_menu
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	CALL	__seqcase
+L__122:
+	DW	3
+	DW	1
+	DB	0
+	DW24	L_164	
+
+	DW24	L_160	
+
+	DW24	L_166	
+
+	DW24	L_166	
+
+;  386	                
+;  387	            case RETS_SUCCESS:
+L_160:
+;  388	                if (selected_tab == 0) {
+	LD	A,(IX+-11)
+	OR	A,A
+	JR	NZ,L_162
+;  389	                    result = calloc(strlen(last_queries->items[selected_item]->input) + 1, sizeof(char));
+	LD	BC,1
+	PUSH	BC
+	LD	A,(IX+-2)
+	LD	IY,(IX+6)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LEA	HL,IY+1
+	ADD	HL,BC
+	LD	IY,(HL)
+	LD	BC,(IY+0)
+	PUSH	BC
+	CALL	_strlen
+	POP	BC
+	INC	HL
+	PUSH	HL
+	CALL	_calloc
+	POP	BC
+	POP	BC
+	LD	(IX+-5),HL
+;  390	                    memset(result, 0, strlen(last_queries->items[selected_item]->input) + 1);
+	LD	A,(IX+-2)
+	LD	IY,(IX+6)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LEA	HL,IY+1
+	ADD	HL,BC
+	LD	IY,(HL)
+	LD	BC,(IY+0)
+	PUSH	BC
+	CALL	_strlen
+	POP	BC
+	INC	HL
+	PUSH	HL
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+-5)
+	PUSH	BC
+	CALL	_memset
+	POP	BC
+	POP	BC
+	POP	BC
+;  391	                    strcpy(result, last_queries->items[selected_item]->input);
+	LD	A,(IX+-2)
+	LD	IY,(IX+6)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LEA	HL,IY+1
+	ADD	HL,BC
+	LD	IY,(HL)
+	LD	BC,(IY+0)
+	PUSH	BC
+	LD	BC,(IX+-5)
+	PUSH	BC
+	CALL	_strcpy
+	POP	BC
+	POP	BC
+;  392	                } else {
+	JR	L_163
+L_162:
+;  393	                    result = calloc(strlen(last_queries->items[selected_item]->output) + 1, sizeof(char));
+	LD	BC,1
+	PUSH	BC
+	LD	A,(IX+-2)
+	LD	IY,(IX+6)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LEA	HL,IY+1
+	ADD	HL,BC
+	LD	IY,(HL)
+	LD	BC,(IY+3)
+	PUSH	BC
+	CALL	_strlen
+	POP	BC
+	INC	HL
+	PUSH	HL
+	CALL	_calloc
+	POP	BC
+	POP	BC
+	LD	(IX+-5),HL
+;  394	                    memset(result, 0, strlen(last_queries->items[selected_item]->output) + 1);
+	LD	A,(IX+-2)
+	LD	IY,(IX+6)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LEA	HL,IY+1
+	ADD	HL,BC
+	LD	IY,(HL)
+	LD	BC,(IY+3)
+	PUSH	BC
+	CALL	_strlen
+	POP	BC
+	INC	HL
+	PUSH	HL
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+-5)
+	PUSH	BC
+	CALL	_memset
+	POP	BC
+	POP	BC
+	POP	BC
+;  395	                    strcpy(result, last_queries->items[selected_item]->output);
+	LD	A,(IX+-2)
+	LD	IY,(IX+6)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LEA	HL,IY+1
+	ADD	HL,BC
+	LD	IY,(HL)
+	LD	BC,(IY+3)
+	PUSH	BC
+	LD	BC,(IX+-5)
+	PUSH	BC
+	CALL	_strcpy
+	POP	BC
+	POP	BC
+;  396	                }
+L_163:
+;  397	                running = false;
+	LD	(IX+-9),0
+;  398	                break;
+	JR	L_166
+;  399	                
+;  400	            case RETS_ERROR:
+L_164:
+;  401	                result = calloc(1, sizeof(char));
+	LD	BC,1
+	PUSH	BC
+	PUSH	BC
+	CALL	_calloc
+	POP	BC
+	POP	BC
+	LD	(IX+-5),HL
+;  402	                strcpy(result, "");
+	LD	BC,L__124
+	PUSH	BC
+	LD	BC,(IX+-5)
+	PUSH	BC
+	CALL	_strcpy
+	POP	BC
+	POP	BC
+;  403	                running = false;
+	LD	(IX+-9),0
+;  404	                break;
+;  405	                
+;  406	            case RETS_CHANGED:
+;  407	                break;
+;  408	                
+;  409	        }
+;  410	    }
+L_166:
+	LD	A,(IX+-9)
+	OR	A,A
+	JR	NZ,L_167
+;  411	    
+;  412	    free_menu(menu_data);
+	LD	BC,(IX+-8)
+	PUSH	BC
+	CALL	_free_menu
+	POP	BC
+;  413	    
+;  414	    return result;
+	LD	HL,(IX+-5)
+;  415	    
+;  416	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _draw_handle_history_menu ***************************
+;Name                         Addr/Register   Size   Type
+;_free_menu                          IMPORT  -----   function
+;_strcpy                             IMPORT  -----   function
+;_memset                             IMPORT  -----   function
+;_strlen                             IMPORT  -----   function
+;_calloc                             IMPORT  -----   function
+;_handle_menu                        IMPORT  -----   function
+;_new_menu_item                      IMPORT  -----   function
+;_new_menu_tab                       IMPORT  -----   function
+;_new_menu                           IMPORT  -----   function
+;selected_tab                         IX-11      1   variable
+;G_4                                  IX-10      1   variable
+;running                               IX-9      1   variable
+;menu_data                             IX-8      3   variable
+;result                                IX-5      3   variable
+;selected_item                         IX-2      1   variable
+;i                                     IX-1      1   variable
+;tab                                   IX+9      1   parameter
+;last_queries                          IX+6      3   parameter
+
+
+; Stack Frame Size: 23 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	SEGMENT STRSECT
+L__117:
+	DB	"Results"
+	DB	0
+L__118:
+	DB	"Queries"
+	DB	0
+L__119:
+	DB	0
+L__120:
+	DB	0
+L__124:
+	DB	0
+	SEGMENT CODE
+;  417	
+;  418	void draw_handle_mode_menu(void) {
+_draw_handle_mode_menu:
+	LD	HL,-24
+	CALL	__frameset
+;  419	    
+;  420	    uint8_t selected_tab = 0;
+	LD	(IX+-1),0
+;  421	    uint8_t selected_item = 0;
+	LD	(IX+-2),0
+;  422	    
+;  423	    bool running = true;
+	LD	(IX+-3),1
+;  424	    
+;  425	    menu* menu_data = new_menu(2,
+;  426	                               new_menu_tab("About & Help", 2,
+;  427	                                            new_menu_item("About", ""),
+;  428	                                            new_menu_item("Terms", "")),
+;  429	                               new_menu_tab("Settings", 3,
+;  430	                                            new_menu_item("Dark Mode", (dark_mode) ? "Enabled" : "Disabled"),
+	LD	A,(_dark_mode)
+	OR	A,A
+	JR	Z,L_172
+	LD	BC,L__128
+	LD	(IX+-15),BC
+	JR	L_173
+L_172:
+	LD	BC,L__129
+	LD	(IX+-15),BC
+L_173:
+;  431	                                            /* new_menu_item("Sleep Timer", (sleep_timer) ? "Enabled" : "Disabled"), */
+;  432	                                            new_menu_item("Use Spaces", (use_spaces) ? "Enabled" : "Disabled"),
+	LD	A,(_use_spaces)
+	OR	A,A
+	JR	Z,L_176
+	LD	BC,L__131
+	LD	(IX+-18),BC
+	JR	L_177
+L_176:
+	LD	BC,L__132
+	LD	(IX+-18),BC
+L_177:
+;  433	                                            new_menu_item("Reset", "")));
+	LD	BC,L__133
+	PUSH	BC
+	LD	BC,L__134
+	PUSH	BC
+	CALL	_new_menu_item
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+-18)
+	PUSH	BC
+	LD	BC,L__135
+	PUSH	BC
+	CALL	_new_menu_item
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+-15)
+	PUSH	BC
+	LD	BC,L__136
+	PUSH	BC
+	CALL	_new_menu_item
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,3
+	PUSH	BC
+	LD	BC,L__137
+	PUSH	BC
+	CALL	_new_menu_tab
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,L__138
+	PUSH	BC
+	LD	BC,L__139
+	PUSH	BC
+	CALL	_new_menu_item
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,L__140
+	PUSH	BC
+	LD	BC,L__141
+	PUSH	BC
+	CALL	_new_menu_item
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,L__142
+	PUSH	BC
+	CALL	_new_menu_tab
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_menu
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	(IX+-6),HL
+;  434	    
+;  435	    while (running) {
+	JR	L_206
+L_207:
+;  436	        switch (handle_menu(menu_data, &selected_tab, &selected_item)) {
+	PEA	IX+-2
+	PEA	IX+-1
+	LD	BC,(IX+-6)
+	PUSH	BC
+	CALL	_handle_menu
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	CALL	__seqcase
+L__143:
+	DW	3
+	DW	1
+	DB	0
+	DW24	L_204	
+
+	DW24	L_178	
+
+	DW24	L_206	
+
+	DW24	L_206	
+
+;  437	                
+;  438	            case RETS_SUCCESS:
+L_178:
+;  439	                
+;  440	                if (selected_tab == 0) {
+	LD	A,(IX+-1)
+	OR	A,A
+	JR	NZ,L_202
+;  441	                    switch (selected_item) {
+	LD	A,(IX+-2)
+	UEXT	HL
+	LD	L,A
+	CALL	__case8
+L__145:
+	DW	2
+	DB	0
+	DW24	L_179	
+
+	DB	1
+	DW24	L_180	
+
+	DW24	L_206	
+
+;  442	                        case 0: about(); break;
+L_179:
+	CALL	_about
+	JR	L_206
+;  443	                        case 1: about_terms(); break;
+L_180:
+	CALL	_about_terms
+	JR	L_206
+;  444	                    }
+;  445	                } else if (selected_tab == 1) {
+L_202:
+	LD	A,(IX+-1)
+	CP	A,1
+	JR	NZ,L_206
+;  446	                    switch (selected_item) {
+	LD	A,(IX+-2)
+	UEXT	HL
+	LD	L,A
+	CALL	__seqcase
+L__147:
+	DW	3
+	DW	0
+	DB	0
+	DW24	L_181	
+
+	DW24	L_190	
+
+	DW24	L_199	
+
+	DW24	L_206	
+
+;  447	                        case 0:
+L_181:
+;  448	                            dark_mode = !dark_mode;
+	LD	A,(_dark_mode)
+	OR	A,A
+	JR	NZ,L_183
+	LD	BC,1
+	LD	(IX+-21),BC
+	JR	L_184
+L_183:
+	LD	BC,0
+	LD	(IX+-21),BC
+L_184:
+	LD	A,(IX+-21)
+;  449	                            set_setting(0, dark_mode);
+	LD	C,A
+	LD	B,0
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	(_dark_mode),A
+	CALL	_set_setting
+	POP	BC
+	POP	BC
+;  450	                            menu_data->tabs[1]->items[0]->indicator = (dark_mode) ? "Enabled" : "Disabled";
+	LD	A,(_dark_mode)
+	OR	A,A
+	JR	Z,L_188
+	LD	BC,L__150
+	LD	(IX+-24),BC
+	JR	L_189
+L_188:
+	LD	BC,L__151
+	LD	(IX+-24),BC
+L_189:
+	LD	IY,(IX+-6)
+	LD	IY,(IY+4)
+	LD	IY,(IY+4)
+	LD	BC,(IX+-24)
+	LD	(IY+3),BC
+;  451	                            break;
+	JR	L_206
+;  452	                        /* case 1:
+;  453	                            sleep_timer = !sleep_timer;
+;  454	                            set_setting(1, sleep_timer);
+;  455	                            menu_data->tabs[1]->items[1]->indicator = (sleep_timer) ? "Enabled" : "Disabled";
+;  456	                            break; */
+;  457	                        case 1:
+L_190:
+;  458	                            use_spaces = !use_spaces;
+	LD	A,(_use_spaces)
+	OR	A,A
+	JR	NZ,L_192
+	LD	BC,1
+	LD	(IX+-9),BC
+	JR	L_193
+L_192:
+	LD	BC,0
+	LD	(IX+-9),BC
+L_193:
+	LD	A,(IX+-9)
+;  459	                            set_setting(2, use_spaces);
+	LD	C,A
+	LD	B,0
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	LD	(_use_spaces),A
+	CALL	_set_setting
+	POP	BC
+	POP	BC
+;  460	                            menu_data->tabs[1]->items[1]->indicator = (use_spaces) ? "Enabled" : "Disabled";
+	LD	A,(_use_spaces)
+	OR	A,A
+	JR	Z,L_197
+	LD	BC,L__154
+	LD	(IX+-12),BC
+	JR	L_198
+L_197:
+	LD	BC,L__155
+	LD	(IX+-12),BC
+L_198:
+	LD	IY,(IX+-6)
+	LD	IY,(IY+4)
+	LD	IY,(IY+7)
+	LD	BC,(IX+-12)
+	LD	(IY+3),BC
+;  461	                            break;
+	JR	L_206
+;  462	                        case 2:
+L_199:
+;  463	                            ti_Delete("C3_SET");
+	LD	BC,L__156
+	PUSH	BC
+	CALL	_ti_Delete
+	POP	BC
+;  464	                            ti_Delete("C3_HIST");
+	LD	BC,L__157
+	PUSH	BC
+	CALL	_ti_Delete
+	POP	BC
+;  465	                            running = false;
+	LD	(IX+-3),0
+;  466	                            break;
+	JR	L_206
+;  467	                    }
+;  468	                }
+;  469	                
+;  470	                break;
+;  471	                
+;  472	            case RETS_ERROR:
+L_204:
+;  473	                running = false;
+	LD	(IX+-3),0
+;  474	                break;
+;  475	                
+;  476	            case RETS_CHANGED:
+;  477	                break;
+;  478	                
+;  479	        }
+;  480	    }
+L_206:
+	LD	A,(IX+-3)
+	OR	A,A
+	JR	NZ,L_207
+;  481	    
+;  482	    free_menu(menu_data);
+	LD	BC,(IX+-6)
+	PUSH	BC
+	CALL	_free_menu
+	POP	BC
+;  483	    
+;  484	    return;
+;  485	    
+;  486	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _draw_handle_mode_menu ***************************
+;Name                         Addr/Register   Size   Type
+;_free_menu                          IMPORT  -----   function
+;_ti_Delete                          IMPORT  -----   function
+;_set_setting                        IMPORT  -----   function
+;_about_terms                        IMPORT  -----   function
+;_about                              IMPORT  -----   function
+;_handle_menu                        IMPORT  -----   function
+;_new_menu_item                      IMPORT  -----   function
+;_new_menu_tab                       IMPORT  -----   function
+;_new_menu                           IMPORT  -----   function
+;_use_spaces                         IMPORT      1   variable
+;_dark_mode                          IMPORT      1   variable
+;temp186                              IX-24      3   variable
+;temp185                              IX-21      3   variable
+;temp174                              IX-18      3   variable
+;temp170                              IX-15      3   variable
+;temp195                              IX-12      3   variable
+;temp194                               IX-9      3   variable
+;menu_data                             IX-6      3   variable
+;running                               IX-3      1   variable
+;selected_item                         IX-2      1   variable
+;selected_tab                          IX-1      1   variable
+
+
+; Stack Frame Size: 30 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	SEGMENT STRSECT
+L__128:
+	DB	"Enabled"
+	DB	0
+L__129:
+	DB	"Disabled"
+	DB	0
+L__131:
+	DB	"Enabled"
+	DB	0
+L__132:
+	DB	"Disabled"
+	DB	0
+L__133:
+	DB	0
+L__134:
+	DB	"Reset"
+	DB	0
+L__135:
+	DB	"Use Spaces"
+	DB	0
+L__136:
+	DB	"Dark Mode"
+	DB	0
+L__137:
+	DB	"Settings"
+	DB	0
+L__138:
+	DB	0
+L__139:
+	DB	"Terms"
+	DB	0
+L__140:
+	DB	0
+L__141:
+	DB	"About"
+	DB	0
+L__142:
+	DB	"About & Help"
+	DB	0
+L__150:
+	DB	"Enabled"
+	DB	0
+L__151:
+	DB	"Disabled"
+	DB	0
+L__154:
+	DB	"Enabled"
+	DB	0
+L__155:
+	DB	"Disabled"
+	DB	0
+L__156:
+	DB	"C3_SET"
+	DB	0
+L__157:
+	DB	"C3_HIST"
+	DB	0
+	XREF _about_terms:ROM
+	XREF _about:ROM
+	XREF _gfx_print_justified:ROM
+	XREF _gfx_print:ROM
+	XREF _dark_mode:ROM
+	XREF _set_setting:ROM
+	XREF _wait_for_any_keyup:ROM
+	XREF _gfx_GetStringWidth:ROM
+	XREF _gfx_SetTextFGColor:ROM
+	XREF _gfx_SetTextXY:ROM
+	XREF _gfx_PrintInt:ROM
+	XREF _gfx_FillRectangle:ROM
+	XREF _gfx_FillScreen:ROM
+	XREF _gfx_SetColor:ROM
+	XREF _use_spaces:ROM
+	XREF _strlen:ROM
+	XREF _strcpy:ROM
+	XREF _memset:ROM
+	XREF _ti_Delete:ROM
+	XREF _free:ROM
+	XREF _calloc:ROM
+	XREF __idivs:ROM
+	XREF __imuls:ROM
+	XREF __smulu:ROM
+	XREF __irems:ROM
+	XREF __fadd:ROM
+	XREF __fmul:ROM
+	XREF __ftol:ROM
+	XREF __ultof:ROM
+	XREF __stoiu:ROM
+	XREF __frameset:ROM
+	XREF __setflag:ROM
+	XREF __case8:ROM
+	XREF __seqcase:ROM
+	XREF __ishru_b:ROM
+	XDEF _draw_handle_mode_menu
+	XDEF _draw_handle_history_menu
+	XDEF _draw_handle_function_menu
+	XDEF _handle_menu
+	XDEF _draw_menu
+	XDEF _free_menu
+	XDEF _new_menu
+	XDEF _new_menu_tab
+	XDEF _new_menu_item
+	END

@@ -1,0 +1,557 @@
+; Zilog eZ80 ANSI C Compiler Release 3.4
+; -optsize -noreduceopt -nomodsect -peephole -globalopt
+; -localcse -const=ROM 
+	FILE	"SRC\SCREENS.C"
+	.assume ADL=1
+	SEGMENT CODE
+;    1	/*
+;    2	 
+;    3	 Copyright (c) 2019 Hannes Eberhard
+;    4	 
+;    5	 Permission is hereby granted, free of charge, to any person obtaining a copy
+;    6	 of this software and associated documentation files (the "Software"), to deal
+;    7	 in the Software without restriction, including without limitation the rights
+;    8	 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+;    9	 copies of the Software, and to permit persons to whom the Software is
+;   10	 furnished to do so, subject to the following conditions:
+;   11	 
+;   12	 The above copyright notice and this permission notice shall be included in all
+;   13	 copies or substantial portions of the Software.
+;   14	 
+;   15	 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+;   16	 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+;   17	 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+;   18	 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+;   19	 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+;   20	 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+;   21	 SOFTWARE.
+;   22	 
+;   23	 */
+;   24	
+;   25	#include "includes.h"
+;   26	
+;   27	void press_clear_to_exit(void) {
+_press_clear_to_exit:
+;   28	    gfx_print_justified("Press [CLEAR] to exit", JUST_LEFT, 0, JUST_BOTTOM, 0);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,4
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,5
+	PUSH	BC
+	LD	BC,L__0
+	PUSH	BC
+	CALL	_gfx_print_justified
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+;   29	    wait_for_keyup(sk_Clear);
+	LD	BC,15
+	PUSH	BC
+	CALL	_wait_for_keyup
+	POP	BC
+;   30	}
+	RET	
+
+
+;**************************** _press_clear_to_exit ***************************
+;Name                         Addr/Register   Size   Type
+;_wait_for_keyup                     IMPORT  -----   function
+;_gfx_print_justified                IMPORT  -----   function
+
+
+; Stack Frame Size: 6 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	SEGMENT STRSECT
+L__0:
+	DB	"Press [CLEAR] to exit"
+	DB	0
+	SEGMENT CODE
+;   31	
+;   32	void setup(void) {
+_setup:
+;   33	    
+;   34	    dark_mode = get_setting(0);
+	LD	BC,0
+	PUSH	BC
+	CALL	_get_setting
+	POP	BC
+;   35	    sleep_timer = get_setting(1);
+	LD	BC,1
+	PUSH	BC
+	LD	(_dark_mode),A
+	CALL	_get_setting
+	POP	BC
+;   36	    use_spaces = get_setting(2);
+	LD	BC,2
+	PUSH	BC
+	LD	(_sleep_timer),A
+	CALL	_get_setting
+	POP	BC
+	LD	(_use_spaces),A
+;   37	    
+;   38	    return;
+;   39	    
+;   40	}
+	RET	
+
+
+;**************************** _setup ***************************
+;Name                         Addr/Register   Size   Type
+;_use_spaces                         IMPORT      1   variable
+;_sleep_timer                        IMPORT      1   variable
+;_dark_mode                          IMPORT      1   variable
+;_get_setting                        IMPORT  -----   function
+
+
+; Stack Frame Size: 6 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;   41	
+;   42	return_status terms(void) {
+_terms:
+;   43	    
+;   44	    gfx_FillScreen(GCOL_BACKGROUND_PRIMARY);
+	LD	BC,1
+	PUSH	BC
+	CALL	_gfx_FillScreen
+	POP	BC
+;   45	    
+;   46	    gfx_SetTextFGColor(GCOL_SYMBOLIC3);
+	LD	BC,12
+	PUSH	BC
+	CALL	_gfx_SetTextFGColor
+	POP	BC
+;   47	    gfx_SetTextXY(MARGIN, 20);
+	LD	BC,20
+	PUSH	BC
+	LD	BC,10
+	PUSH	BC
+	CALL	_gfx_SetTextXY
+	POP	BC
+	POP	BC
+;   48	    gfx_print_line("smybolic3", JUST_LEFT);
+	LD	BC,5
+	PUSH	BC
+	LD	BC,L__3
+	PUSH	BC
+	CALL	_gfx_print_line
+	POP	BC
+	POP	BC
+;   49	    gfx_SetTextFGColor(GCOL_TEXT_SECONDARY);
+	LD	BC,4
+	PUSH	BC
+	CALL	_gfx_SetTextFGColor
+	POP	BC
+;   50	    gfx_print_line(VERSION_STRING, JUST_LEFT);
+	LD	BC,5
+	PUSH	BC
+	LD	BC,L__4
+	PUSH	BC
+	CALL	_gfx_print_line
+	POP	BC
+	POP	BC
+;   51	    gfx_SetTextXY(MARGIN, gfx_GetTextY() + 7);
+	CALL	_gfx_GetTextY
+	LD	IY,HL
+	LEA	BC,IY+7
+	PUSH	BC
+	LD	BC,10
+	PUSH	BC
+	CALL	_gfx_SetTextXY
+	POP	BC
+	POP	BC
+;   52	    gfx_SetTextFGColor(GCOL_TEXT_PRIMARY);
+	LD	BC,3
+	PUSH	BC
+	CALL	_gfx_SetTextFGColor
+	POP	BC
+;   53	    gfx_print_line("Copyright (c) 2019 Hannes Eberhard", JUST_LEFT);
+	LD	BC,5
+	PUSH	BC
+	LD	BC,L__5
+	PUSH	BC
+	CALL	_gfx_print_line
+	POP	BC
+	POP	BC
+;   54	    gfx_SetTextXY(MARGIN, gfx_GetTextY() + 7);
+	CALL	_gfx_GetTextY
+	LD	IY,HL
+	LEA	BC,IY+7
+	PUSH	BC
+	LD	BC,10
+	PUSH	BC
+	CALL	_gfx_SetTextXY
+	POP	BC
+	POP	BC
+;   55	    gfx_print_box("Press [ENTER] to accept the following terms or [CLEAR] to quit.", 0, LINE_HEIGHT - 2);
+	LD	BC,3
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,L__6
+	PUSH	BC
+	CALL	_gfx_print_box
+	POP	BC
+	POP	BC
+	POP	BC
+;   56	    gfx_SetTextXY(MARGIN, gfx_GetTextY() + FONT_HEIGHT + LINE_HEIGHT + 7);
+	CALL	_gfx_GetTextY
+	LD	IY,HL
+	LEA	BC,IY+20
+	PUSH	BC
+	LD	BC,10
+	PUSH	BC
+	CALL	_gfx_SetTextXY
+	POP	BC
+	POP	BC
+;   57	    gfx_print_box("THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.", 0, LINE_HEIGHT - 2);
+	LD	BC,3
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,L__7
+	PUSH	BC
+	CALL	_gfx_print_box
+	POP	BC
+	POP	BC
+	POP	BC
+;   58	    
+;   59	    while (true) {
+L_5:
+;   60	        switch (wait_for_any_keyup()) {
+	CALL	_wait_for_any_keyup
+	UEXT	HL
+	LD	L,A
+	CALL	__case8
+L__8:
+	DW	2
+	DB	9
+	DW24	L_2	
+
+	DB	15
+	DW24	L_3	
+
+	DW24	L_5	
+
+;   61	            case sk_Enter: return RETS_SUCCESS;
+L_2:
+	LD	HL,2
+	JR	L_7
+;   62	            case sk_Clear: return RETS_ERROR;
+L_3:
+	LD	HL,1
+;   63	        }
+;   64	    }
+;   65	    
+;   66	    return RETS_SUCCESS;
+;   67	    
+;   68	}
+L_7:
+	RET	
+
+
+;**************************** _terms ***************************
+;Name                         Addr/Register   Size   Type
+;_wait_for_any_keyup                 IMPORT  -----   function
+;_gfx_print_box                      IMPORT  -----   function
+;_gfx_GetTextY                       IMPORT  -----   function
+;_gfx_print_line                     IMPORT  -----   function
+;_gfx_SetTextXY                      IMPORT  -----   function
+;_gfx_SetTextFGColor                 IMPORT  -----   function
+;_gfx_FillScreen                     IMPORT  -----   function
+
+
+; Stack Frame Size: 6 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	SEGMENT STRSECT
+L__3:
+	DB	"smybolic3"
+	DB	0
+L__4:
+	DB	"Version 1.0.0 | 1.0.0"
+	DB	0
+L__5:
+	DB	"Copyright (c) 2019 Hannes Eberhard"
+	DB	0
+L__6:
+	DB	"Press [ENTER] to accept the following terms or [CLEAR] to quit."
+	DB	0
+L__7:
+	DB	"THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
+	DB	0
+	SEGMENT CODE
+;   69	
+;   70	void about(void) {
+_about:
+;   71	    
+;   72	    gfx_FillScreen(GCOL_BACKGROUND_PRIMARY);
+	LD	BC,1
+	PUSH	BC
+	CALL	_gfx_FillScreen
+	POP	BC
+;   73	    
+;   74	    gfx_SetTextFGColor(GCOL_SYMBOLIC3);
+	LD	BC,12
+	PUSH	BC
+	CALL	_gfx_SetTextFGColor
+	POP	BC
+;   75	    gfx_SetTextXY(MARGIN, 20);
+	LD	BC,20
+	PUSH	BC
+	LD	BC,10
+	PUSH	BC
+	CALL	_gfx_SetTextXY
+	POP	BC
+	POP	BC
+;   76	    gfx_print_line("smybolic3", JUST_LEFT);
+	LD	BC,5
+	PUSH	BC
+	LD	BC,L__10
+	PUSH	BC
+	CALL	_gfx_print_line
+	POP	BC
+	POP	BC
+;   77	    gfx_SetTextFGColor(GCOL_TEXT_SECONDARY);
+	LD	BC,4
+	PUSH	BC
+	CALL	_gfx_SetTextFGColor
+	POP	BC
+;   78	    gfx_print_line(VERSION_STRING, JUST_LEFT);
+	LD	BC,5
+	PUSH	BC
+	LD	BC,L__11
+	PUSH	BC
+	CALL	_gfx_print_line
+	POP	BC
+	POP	BC
+;   79	    gfx_SetTextXY(MARGIN, gfx_GetTextY() + 7);
+	CALL	_gfx_GetTextY
+	LD	IY,HL
+	LEA	BC,IY+7
+	PUSH	BC
+	LD	BC,10
+	PUSH	BC
+	CALL	_gfx_SetTextXY
+	POP	BC
+	POP	BC
+;   80	    gfx_SetTextFGColor(GCOL_TEXT_PRIMARY);
+	LD	BC,3
+	PUSH	BC
+	CALL	_gfx_SetTextFGColor
+	POP	BC
+;   81	    gfx_print_line("Copyright  (c)  2019  Hannes  Eberhard", JUST_LEFT);
+	LD	BC,5
+	PUSH	BC
+	LD	BC,L__12
+	PUSH	BC
+	CALL	_gfx_print_line
+	POP	BC
+	POP	BC
+;   82	    gfx_SetTextXY(MARGIN, gfx_GetTextY() + 20);
+	CALL	_gfx_GetTextY
+	LD	IY,HL
+	LEA	BC,IY+20
+	PUSH	BC
+	LD	BC,10
+	PUSH	BC
+	CALL	_gfx_SetTextXY
+	POP	BC
+	POP	BC
+;   83	    gfx_print_line("Help  &  contact:", JUST_LEFT);
+	LD	BC,5
+	PUSH	BC
+	LD	BC,L__13
+	PUSH	BC
+	CALL	_gfx_print_line
+	POP	BC
+	POP	BC
+;   84	    gfx_print_line("symbolic-3.web.app", JUST_LEFT);
+	LD	BC,5
+	PUSH	BC
+	LD	BC,L__14
+	PUSH	BC
+	CALL	_gfx_print_line
+	POP	BC
+	POP	BC
+;   85	    gfx_SetTextXY(MARGIN, gfx_GetTextY() + 25);
+	CALL	_gfx_GetTextY
+	LD	IY,HL
+	LEA	BC,IY+25
+	PUSH	BC
+	LD	BC,10
+	PUSH	BC
+	CALL	_gfx_SetTextXY
+	POP	BC
+	POP	BC
+;   86	    gfx_print_box("The use of the 'CE-Programming  Toolchain'  (github.com/CE-Programming/toolchain), licensed  under the LGPL-3.0 license, is hereby acknowledged.", 0, LINE_HEIGHT);
+	LD	BC,5
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,L__15
+	PUSH	BC
+	CALL	_gfx_print_box
+	POP	BC
+	POP	BC
+	POP	BC
+;   87	    
+;   88	    press_clear_to_exit();
+	CALL	_press_clear_to_exit
+;   89	    
+;   90	    return;
+;   91	    
+;   92	}
+	RET	
+
+
+;**************************** _about ***************************
+;Name                         Addr/Register   Size   Type
+;_press_clear_to_exit                IMPORT  -----   function
+;_gfx_print_box                      IMPORT  -----   function
+;_gfx_GetTextY                       IMPORT  -----   function
+;_gfx_print_line                     IMPORT  -----   function
+;_gfx_SetTextXY                      IMPORT  -----   function
+;_gfx_SetTextFGColor                 IMPORT  -----   function
+;_gfx_FillScreen                     IMPORT  -----   function
+
+
+; Stack Frame Size: 6 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	SEGMENT STRSECT
+L__10:
+	DB	"smybolic3"
+	DB	0
+L__11:
+	DB	"Version 1.0.0 | 1.0.0"
+	DB	0
+L__12:
+	DB	"Copyright  (c)  2019  Hannes  Eberhard"
+	DB	0
+L__13:
+	DB	"Help  &  contact:"
+	DB	0
+L__14:
+	DB	"symbolic-3.web.app"
+	DB	0
+L__15:
+	DB	"The use of the 'CE-Programming  Toolchain'  (github.com/CE-Programming/toolchain), licensed  under the LGPL-3.0 license, is hereby acknowledged."
+	DB	0
+	SEGMENT CODE
+;   93	
+;   94	void about_terms(void) {
+_about_terms:
+;   95	    
+;   96	    gfx_FillScreen(GCOL_BACKGROUND_PRIMARY);
+	LD	BC,1
+	PUSH	BC
+	CALL	_gfx_FillScreen
+	POP	BC
+;   97	    
+;   98	    gfx_SetTextFGColor(GCOL_TEXT_PRIMARY);
+	LD	BC,3
+	PUSH	BC
+	CALL	_gfx_SetTextFGColor
+	POP	BC
+;   99	    gfx_SetTextXY(MARGIN, 20);
+	LD	BC,20
+	PUSH	BC
+	LD	BC,10
+	PUSH	BC
+	CALL	_gfx_SetTextXY
+	POP	BC
+	POP	BC
+;  100	    gfx_print_box("You've accepted the following terms:", 0, LINE_HEIGHT);
+	LD	BC,5
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,L__17
+	PUSH	BC
+	CALL	_gfx_print_box
+	POP	BC
+	POP	BC
+	POP	BC
+;  101	    gfx_SetTextXY(MARGIN, gfx_GetTextY() + FONT_HEIGHT + LINE_HEIGHT + 7);
+	CALL	_gfx_GetTextY
+	LD	IY,HL
+	LEA	BC,IY+20
+	PUSH	BC
+	LD	BC,10
+	PUSH	BC
+	CALL	_gfx_SetTextXY
+	POP	BC
+	POP	BC
+;  102	    gfx_print_box("THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.", 0, LINE_HEIGHT);
+	LD	BC,5
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,L__18
+	PUSH	BC
+	CALL	_gfx_print_box
+	POP	BC
+	POP	BC
+	POP	BC
+;  103	    
+;  104	    press_clear_to_exit();
+	CALL	_press_clear_to_exit
+;  105	    
+;  106	    return;
+;  107	    
+;  108	}
+	RET	
+
+
+;**************************** _about_terms ***************************
+;Name                         Addr/Register   Size   Type
+;_press_clear_to_exit                IMPORT  -----   function
+;_gfx_GetTextY                       IMPORT  -----   function
+;_gfx_print_box                      IMPORT  -----   function
+;_gfx_SetTextXY                      IMPORT  -----   function
+;_gfx_SetTextFGColor                 IMPORT  -----   function
+;_gfx_FillScreen                     IMPORT  -----   function
+
+
+; Stack Frame Size: 6 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	SEGMENT STRSECT
+L__17:
+	DB	"You've accepted the following terms:"
+	DB	0
+L__18:
+	DB	"THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
+	DB	0
+	XREF _gfx_print_box:ROM
+	XREF _gfx_print_line:ROM
+	XREF _gfx_print_justified:ROM
+	XREF _dark_mode:ROM
+	XREF _get_setting:ROM
+	XREF _wait_for_keyup:ROM
+	XREF _wait_for_any_keyup:ROM
+	XREF _sleep_timer:ROM
+	XREF _gfx_SetTextFGColor:ROM
+	XREF _gfx_SetTextXY:ROM
+	XREF _gfx_GetTextY:ROM
+	XREF _gfx_FillScreen:ROM
+	XREF _use_spaces:ROM
+	XREF __case8:ROM
+	XDEF _about_terms
+	XDEF _about
+	XDEF _terms
+	XDEF _setup
+	XDEF _press_clear_to_exit
+	END

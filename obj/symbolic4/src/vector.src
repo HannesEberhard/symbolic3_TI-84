@@ -1,0 +1,1064 @@
+; Zilog eZ80 ANSI C Compiler Release 3.4
+; -optsize -noreduceopt -nomodsect -peephole -globalopt
+; -localcse -const=ROM 
+	FILE	"SRC\SYMBOLIC4\SRC\VECTOR.C"
+	.assume ADL=1
+	SEGMENT CODE
+;    1	
+;    2	/*
+;    3	 
+;    4	 Copyright (c) 2019 Hannes Eberhard
+;    5	 
+;    6	 Permission is hereby granted, free of charge, to any person obtaining a copy
+;    7	 of this software and associated documentation files (the "Software"), to deal
+;    8	 in the Software without restriction, including without limitation the rights
+;    9	 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+;   10	 copies of the Software, and to permit persons to whom the Software is
+;   11	 furnished to do so, subject to the following conditions:
+;   12	 
+;   13	 The above copyright notice and this permission notice shall be included in all
+;   14	 copies or substantial portions of the Software.
+;   15	 
+;   16	 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+;   17	 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+;   18	 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+;   19	 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+;   20	 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+;   21	 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+;   22	 SOFTWARE.
+;   23	 
+;   24	 */
+;   25	
+;   26	#include "symbolic4.h"
+;   27	
+;   28	uint8_t vector_magnitude(expression** result, expression* source, bool persistent) {
+_vector_magnitude:
+	LD	HL,-1
+	CALL	__frameset
+;   29	    
+;   30	    uint8_t i;
+;   31	    
+;   32	    *result = new_expression(EXPT_OPERATION, EXPI_EXPONENTATION, 2,
+;   33	                             new_expression(EXPT_OPERATION, EXPI_ADDITION, 0),
+;   34	                             new_literal(1, 1, 2));
+	LD	BC,0
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,0
+	PUSH	BC
+	LD	BC,5
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,9
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	IY,(IX+6)
+	LD	(IY),HL
+;   35	    
+;   36	    for (i = 0; i < source->child_count; i++) {
+	LD	(IX+-1),0
+	JR	L_3
+L_1:
+;   37	        append_child((*result)->children[0], new_expression(EXPT_OPERATION, EXPI_EXPONENTATION, 2,
+;   38	                                                            copy_expression(source->children[i]),
+;   39	                                                            new_literal(1, 2, 1)));
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	LD	IY,(IX+9)
+	LD	BC,(IY+11)
+	LD	DE,HL
+	ADD	HL,HL
+	ADD	HL,DE
+	ADD	HL,BC
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,9
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	HL,(IX+6)
+	LD	IY,(HL)
+	LD	HL,(IY+11)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_append_child
+	POP	BC
+	POP	BC
+	INC	(IX+-1)
+;   40	    }
+L_3:
+	LD	A,(IX+-1)
+	LD	IY,(IX+9)
+	CP	A,(IY+10)
+	JR	C,L_1
+;   41	    
+;   42	    simplify(*result, true);
+	LD	BC,1
+	PUSH	BC
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_simplify
+	POP	BC
+	POP	BC
+;   43	    
+;   44	    if (!persistent) free_expression(source, false);
+	LD	A,(IX+12)
+	OR	A,A
+	JR	NZ,L_6
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+9)
+	PUSH	BC
+	CALL	_free_expression
+	POP	BC
+	POP	BC
+L_6:
+;   45	    
+;   46	    return RETS_SUCCESS;
+	LD	A,2
+;   47	    
+;   48	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _vector_magnitude ***************************
+;Name                         Addr/Register   Size   Type
+;_free_expression                    IMPORT  -----   function
+;_simplify                           IMPORT  -----   function
+;_copy_expression                    IMPORT  -----   function
+;_append_child                       IMPORT  -----   function
+;_new_literal                        IMPORT  -----   function
+;_new_expression                     IMPORT  -----   function
+;i                                     IX-1      1   variable
+;persistent                           IX+12      1   parameter
+;source                                IX+9      3   parameter
+;result                                IX+6      3   parameter
+
+
+; Stack Frame Size: 16 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;   49	
+;   50	uint8_t vector_normalized(expression** result, expression* source, expression* magnitude, bool persistent) {
+_vector_normalized:
+	LD	HL,-7
+	CALL	__frameset
+;   51	    
+;   52	    uint8_t i;
+;   53	    expression* source_magnitude;
+;   54	    expression* factor;
+;   55	    
+;   56	    vector_magnitude(&source_magnitude, source, true);
+	LD	BC,1
+	PUSH	BC
+	LD	BC,(IX+9)
+	PUSH	BC
+	PEA	IX+-4
+	CALL	_vector_magnitude
+	POP	BC
+	POP	BC
+	POP	BC
+;   57	    
+;   58	    factor = new_expression(EXPT_OPERATION, EXPI_DIVISION, 2,
+;   59	                            copy_expression(magnitude),
+;   60	                            source_magnitude);
+	LD	BC,(IX+-4)
+	PUSH	BC
+	LD	BC,(IX+12)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,8
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	(IX+-7),HL
+;   61	    
+;   62	    *result = new_expression(EXPT_STRUCTURE, EXPI_LIST, 0);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,40
+	PUSH	BC
+	LD	BC,4
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	IY,(IX+6)
+	LD	(IY),HL
+;   63	    
+;   64	    for (i = 0; i < source->child_count; i++) {
+	LD	(IX+-1),0
+	JR	L_11
+L_9:
+;   65	        append_child(*result, new_expression(EXPT_OPERATION, EXPI_MULTIPLICATION, 2,
+;   66	                                             copy_expression(factor),
+;   67	                                             copy_expression(source->children[i])));
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	LD	IY,(IX+9)
+	LD	DE,(IY+11)
+	ADD	HL,BC
+	ADD	HL,DE
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+-7)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,7
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_append_child
+	POP	BC
+	POP	BC
+	INC	(IX+-1)
+;   68	    }
+L_11:
+	LD	A,(IX+-1)
+	LD	IY,(IX+9)
+	CP	A,(IY+10)
+	JR	C,L_9
+;   69	    
+;   70	    simplify(*result, true);
+	LD	BC,1
+	PUSH	BC
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_simplify
+	POP	BC
+	POP	BC
+;   71	    
+;   72	    if (!persistent) {
+	LD	A,(IX+15)
+	OR	A,A
+	JR	NZ,L_14
+;   73	        free_expression(source, false);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+9)
+	PUSH	BC
+	CALL	_free_expression
+	POP	BC
+	POP	BC
+;   74	        free_expression(magnitude, false);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+12)
+	PUSH	BC
+	CALL	_free_expression
+	POP	BC
+	POP	BC
+;   75	    }
+L_14:
+;   76	    
+;   77	    return RETS_SUCCESS;
+	LD	A,2
+;   78	    
+;   79	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _vector_normalized ***************************
+;Name                         Addr/Register   Size   Type
+;_free_expression                    IMPORT  -----   function
+;_simplify                           IMPORT  -----   function
+;_append_child                       IMPORT  -----   function
+;_copy_expression                    IMPORT  -----   function
+;_new_expression                     IMPORT  -----   function
+;_vector_magnitude                   IMPORT  -----   function
+;factor                                IX-7      3   variable
+;source_magnitude                      IX-4      3   variable
+;i                                     IX-1      1   variable
+;persistent                           IX+15      1   parameter
+;magnitude                            IX+12      3   parameter
+;source                                IX+9      3   parameter
+;result                                IX+6      3   parameter
+
+
+; Stack Frame Size: 25 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;   80	
+;   81	uint8_t vector_angle(expression** result, expression* source_1, expression* source_2, bool persistent) {
+_vector_angle:
+	LD	HL,-9
+	CALL	__frameset
+;   82	    
+;   83	    expression* source_1_magnitude;
+;   84	    expression* source_2_magnitude;
+;   85	    expression* dot_product;
+;   86	    
+;   87	    ERROR_CHECK(vector_magnitude(&source_1_magnitude, source_1, true));
+	LD	BC,1
+	PUSH	BC
+	LD	BC,(IX+9)
+	PUSH	BC
+	PEA	IX+-3
+	CALL	_vector_magnitude
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_18
+	LD	A,1
+	JR	L_24
+L_18:
+;   88	    ERROR_CHECK(vector_magnitude(&source_2_magnitude, source_2, true));
+	PUSH	BC
+	LD	BC,(IX+12)
+	PUSH	BC
+	PEA	IX+-6
+	CALL	_vector_magnitude
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_20
+	LD	A,1
+	JR	L_24
+L_20:
+;   89	    
+;   90	    ERROR_CHECK(vector_dot_product(&dot_product, source_1, source_2, true));
+	PUSH	BC
+	LD	BC,(IX+12)
+	PUSH	BC
+	LD	BC,(IX+9)
+	PUSH	BC
+	PEA	IX+-9
+	CALL	_vector_dot_product
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_21
+	LD	A,1
+	JR	L_24
+L_21:
+;   91	    
+;   92	    *result = new_expression(EXPT_FUNCTION, EXPI_ARCCOS, 1,
+;   93	                             new_expression(EXPT_OPERATION, EXPI_DIVISION, 2,
+;   94	                                            dot_product,
+;   95	                                            new_expression(EXPT_OPERATION, EXPI_MULTIPLICATION, 2,
+;   96	                                                           source_1_magnitude,
+;   97	                                                           source_2_magnitude)));
+	LD	BC,(IX+-6)
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	LD	BC,7
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+-9)
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	LD	BC,8
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,1
+	PUSH	BC
+	LD	BC,17
+	PUSH	BC
+	LD	BC,3
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	IY,(IX+6)
+	LD	(IY),HL
+;   98	    
+;   99	    simplify(*result, true);
+	LD	BC,1
+	PUSH	BC
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_simplify
+	POP	BC
+	POP	BC
+;  100	    
+;  101	    if (!persistent) {
+	LD	A,(IX+15)
+	OR	A,A
+	JR	NZ,L_23
+;  102	        free_expression(source_1, false);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+9)
+	PUSH	BC
+	CALL	_free_expression
+	POP	BC
+	POP	BC
+;  103	        free_expression(source_2, false);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+12)
+	PUSH	BC
+	CALL	_free_expression
+	POP	BC
+	POP	BC
+;  104	    }
+L_23:
+;  105	    
+;  106	    return RETS_SUCCESS;
+	LD	A,2
+;  107	    
+;  108	}
+L_24:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _vector_angle ***************************
+;Name                         Addr/Register   Size   Type
+;_free_expression                    IMPORT  -----   function
+;_simplify                           IMPORT  -----   function
+;_new_expression                     IMPORT  -----   function
+;_vector_dot_product                 IMPORT  -----   function
+;_vector_magnitude                   IMPORT  -----   function
+;dot_product                           IX-9      3   variable
+;source_2_magnitude                    IX-6      3   variable
+;source_1_magnitude                    IX-3      3   variable
+;persistent                           IX+15      1   parameter
+;source_2                             IX+12      3   parameter
+;source_1                              IX+9      3   parameter
+;result                                IX+6      3   parameter
+
+
+; Stack Frame Size: 27 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  109	
+;  110	uint8_t vector_dot_product(expression** result, expression* source_1, expression* source_2, bool persistent) {
+_vector_dot_product:
+	LD	HL,-1
+	CALL	__frameset
+;  111	    
+;  112	    uint8_t i;
+;  113	    
+;  114	    *result = new_expression(EXPT_OPERATION, EXPI_ADDITION, 0);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,5
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	IY,(IX+6)
+	LD	(IY),HL
+;  115	    
+;  116	    for (i = 0; i < source_1->child_count; i++) {
+	LD	(IX+-1),0
+	JR	L_28
+L_26:
+;  117	        append_child(*result, new_expression(EXPT_OPERATION, EXPI_MULTIPLICATION, 2,
+;  118	                                             copy_expression(source_1->children[i]),
+;  119	                                             copy_expression(source_2->children[i])));
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	LD	IY,(IX+12)
+	LD	DE,(IY+11)
+	ADD	HL,BC
+	ADD	HL,DE
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	LD	IY,(IX+9)
+	LD	DE,(IY+11)
+	ADD	HL,BC
+	ADD	HL,DE
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,7
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_append_child
+	POP	BC
+	POP	BC
+	INC	(IX+-1)
+;  120	    }
+L_28:
+	LD	A,(IX+-1)
+	LD	IY,(IX+9)
+	CP	A,(IY+10)
+	JR	C,L_26
+;  121	    
+;  122	    simplify(*result, true);
+	LD	BC,1
+	PUSH	BC
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_simplify
+	POP	BC
+	POP	BC
+;  123	    
+;  124	    if (!persistent) {
+	LD	A,(IX+15)
+	OR	A,A
+	JR	NZ,L_31
+;  125	        free_expression(source_1, false);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+9)
+	PUSH	BC
+	CALL	_free_expression
+	POP	BC
+	POP	BC
+;  126	        free_expression(source_2, false);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+12)
+	PUSH	BC
+	CALL	_free_expression
+	POP	BC
+	POP	BC
+;  127	    }
+L_31:
+;  128	    
+;  129	    return RETS_SUCCESS;
+	LD	A,2
+;  130	    
+;  131	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _vector_dot_product ***************************
+;Name                         Addr/Register   Size   Type
+;_free_expression                    IMPORT  -----   function
+;_simplify                           IMPORT  -----   function
+;_copy_expression                    IMPORT  -----   function
+;_append_child                       IMPORT  -----   function
+;_new_expression                     IMPORT  -----   function
+;i                                     IX-1      1   variable
+;persistent                           IX+15      1   parameter
+;source_2                             IX+12      3   parameter
+;source_1                              IX+9      3   parameter
+;result                                IX+6      3   parameter
+
+
+; Stack Frame Size: 19 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  132	
+;  133	uint8_t vector_cross_product(expression** result, expression* source_1, expression* source_2, bool persistent) {
+_vector_cross_product:
+	LD	HL,-3
+	CALL	__frameset
+;  134	    
+;  135	    uint8_t i, j, k;
+;  136	    
+;  137	    *result = new_expression(EXPT_STRUCTURE, EXPI_LIST, 0);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,40
+	PUSH	BC
+	LD	BC,4
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	IY,(IX+6)
+	LD	(IY),HL
+;  138	    
+;  139	    for (i = 0; i < source_1->child_count; i++) {
+	LD	(IX+-1),0
+	JR	L_36
+L_34:
+;  140	        j = (i + 1) % 3;
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	INC	HL
+	LD	BC,3
+	CALL	__irems
+	LD	(IX+-2),L
+;  141	        k = (i + 2) % 3;
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	LD	BC,3
+	INC	HL
+	INC	HL
+	CALL	__irems
+	LD	(IX+-3),L
+;  142	        append_child(*result, new_expression(EXPT_OPERATION, EXPI_SUBTRACTION, 2,
+;  143	                                             new_expression(EXPT_OPERATION, EXPI_MULTIPLICATION, 2,
+;  144	                                                            copy_expression(source_1->children[j]),
+;  145	                                                            copy_expression(source_2->children[k])),
+;  146	                                             new_expression(EXPT_OPERATION, EXPI_MULTIPLICATION, 2,
+;  147	                                                            copy_expression(source_1->children[k]),
+;  148	                                                            copy_expression(source_2->children[j]))));
+	LD	A,(IX+-2)
+	UEXT	HL
+	LD	L,A
+	LD	IY,(IX+12)
+	LD	BC,(IY+11)
+	LD	DE,HL
+	ADD	HL,HL
+	ADD	HL,DE
+	ADD	HL,BC
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	A,(IX+-3)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	LD	IY,(IX+9)
+	LD	DE,(IY+11)
+	ADD	HL,BC
+	ADD	HL,DE
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,7
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	A,(IX+-3)
+	UEXT	HL
+	LD	L,A
+	LD	IY,(IX+12)
+	LD	BC,(IY+11)
+	LD	DE,HL
+	ADD	HL,HL
+	ADD	HL,DE
+	ADD	HL,BC
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	A,(IX+-2)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	LD	IY,(IX+9)
+	LD	DE,(IY+11)
+	ADD	HL,BC
+	ADD	HL,DE
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,7
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,6
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_append_child
+	POP	BC
+	POP	BC
+	INC	(IX+-1)
+;  149	    }
+L_36:
+	LD	A,(IX+-1)
+	LD	IY,(IX+9)
+	CP	A,(IY+10)
+	JR	C,L_34
+;  150	    
+;  151	    simplify(*result, true);
+	LD	BC,1
+	PUSH	BC
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_simplify
+	POP	BC
+	POP	BC
+;  152	    
+;  153	    if (!persistent) {
+	LD	A,(IX+15)
+	OR	A,A
+	JR	NZ,L_39
+;  154	        free_expression(source_1, false);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+9)
+	PUSH	BC
+	CALL	_free_expression
+	POP	BC
+	POP	BC
+;  155	        free_expression(source_2, false);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+12)
+	PUSH	BC
+	CALL	_free_expression
+	POP	BC
+	POP	BC
+;  156	    }
+L_39:
+;  157	    
+;  158	    return RETS_SUCCESS;
+	LD	A,2
+;  159	    
+;  160	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _vector_cross_product ***************************
+;Name                         Addr/Register   Size   Type
+;_free_expression                    IMPORT  -----   function
+;_simplify                           IMPORT  -----   function
+;_copy_expression                    IMPORT  -----   function
+;_append_child                       IMPORT  -----   function
+;_new_expression                     IMPORT  -----   function
+;k                                     IX-3      1   variable
+;j                                     IX-2      1   variable
+;i                                     IX-1      1   variable
+;persistent                           IX+15      1   parameter
+;source_2                             IX+12      3   parameter
+;source_1                              IX+9      3   parameter
+;result                                IX+6      3   parameter
+
+
+; Stack Frame Size: 21 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  161	
+;  162	uint8_t vector_triple_product(expression** result, expression* source_1, expression* source_2, expression* source_3, bool persistent) {
+_vector_triple_product:
+	CALL	__frameset0
+;  163	    
+;  164	    ERROR_CHECK(vector_cross_product(result, copy_expression(source_1), copy_expression(source_2), false));
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+12)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+9)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_vector_cross_product
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_43
+	LD	A,1
+	JR	L_45
+L_43:
+;  165	    ERROR_CHECK(vector_dot_product(result, copy_expression(*result), copy_expression(source_3), false));
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+15)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_vector_dot_product
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_44
+	LD	A,1
+	JR	L_45
+L_44:
+;  166	    
+;  167	    *result = new_expression(EXPT_FUNCTION, EXPI_ABS, 1, *result);
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,10
+	PUSH	BC
+	LD	BC,3
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	IY,(IX+6)
+	LD	(IY),HL
+;  168	    
+;  169	    simplify(*result, true);
+	LD	BC,1
+	PUSH	BC
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_simplify
+	POP	BC
+	POP	BC
+;  170	    
+;  171	    return RETS_SUCCESS;
+	LD	A,2
+;  172	    
+;  173	}
+L_45:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _vector_triple_product ***************************
+;Name                         Addr/Register   Size   Type
+;_simplify                           IMPORT  -----   function
+;_new_expression                     IMPORT  -----   function
+;_vector_dot_product                 IMPORT  -----   function
+;_copy_expression                    IMPORT  -----   function
+;_vector_cross_product               IMPORT  -----   function
+;persistent                           IX+18      1   parameter
+;source_3                             IX+15      3   parameter
+;source_2                             IX+12      3   parameter
+;source_1                              IX+9      3   parameter
+;result                                IX+6      3   parameter
+
+
+; Stack Frame Size: 21 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	XREF _simplify:ROM
+	XREF _append_child:ROM
+	XREF _free_expression:ROM
+	XREF _copy_expression:ROM
+	XREF _new_literal:ROM
+	XREF _new_expression:ROM
+	XREF __irems:ROM
+	XREF __frameset0:ROM
+	XREF __frameset:ROM
+	XDEF _vector_triple_product
+	XDEF _vector_cross_product
+	XDEF _vector_dot_product
+	XDEF _vector_angle
+	XDEF _vector_normalized
+	XDEF _vector_magnitude
+	END

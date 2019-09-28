@@ -1,0 +1,435 @@
+; Zilog eZ80 ANSI C Compiler Release 3.4
+; -optsize -noreduceopt -nomodsect -peephole -globalopt
+; -localcse -const=ROM 
+	FILE	"SRC\TI_84.C"
+	.assume ADL=1
+	SEGMENT DATA
+_sleep_timer:
+	DB	0
+;    1	/*
+;    2	 
+;    3	 Copyright (c) 2019 Hannes Eberhard
+;    4	 
+;    5	 Permission is hereby granted, free of charge, to any person obtaining a copy
+;    6	 of this software and associated documentation files (the "Software"), to deal
+;    7	 in the Software without restriction, including without limitation the rights
+;    8	 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+;    9	 copies of the Software, and to permit persons to whom the Software is
+;   10	 furnished to do so, subject to the following conditions:
+;   11	 
+;   12	 The above copyright notice and this permission notice shall be included in all
+;   13	 copies or substantial portions of the Software.
+;   14	 
+;   15	 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+;   16	 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+;   17	 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+;   18	 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+;   19	 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+;   20	 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+;   21	 SOFTWARE.
+;   22	 
+;   23	 */
+;   24	
+;   25	#include "includes.h"
+;   26	
+;   27	bool sleep_timer = false;
+	SEGMENT CODE
+;   28	
+;   29	sk_key_t wait_for_any_keydown(void) {
+_wait_for_any_keydown:
+	LD	HL,-1
+	CALL	__frameset
+;   30	    sk_key_t key;
+;   31	    while (!(key = os_GetCSC()));
+L_1:
+	CALL	_os_GetCSC
+	LD	(IX+-1),A
+	OR	A,A
+	JR	Z,L_1
+;   32	    return key;
+	LD	A,(IX+-1)
+;   33	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _wait_for_any_keydown ***************************
+;Name                         Addr/Register   Size   Type
+;_os_GetCSC                          IMPORT  -----   function
+;key                                   IX-1      1   variable
+
+
+; Stack Frame Size: 7 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;   34	
+;   35	void wait_for_keydown(sk_key_t key) {
+_wait_for_keydown:
+	CALL	__frameset0
+;   36	    while (os_GetCSC() != key);
+L_5:
+	CALL	_os_GetCSC
+	LD	B,A
+	LD	A,(IX+6)
+	CP	A,B
+	JR	NZ,L_5
+;   37	    return;
+;   38	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _wait_for_keydown ***************************
+;Name                         Addr/Register   Size   Type
+;_os_GetCSC                          IMPORT  -----   function
+;key                                   IX+6      1   parameter
+
+
+; Stack Frame Size: 9 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;   39	
+;   40	void wait_for_any_key_release(void) {
+_wait_for_any_key_release:
+;   41	    while (os_GetCSC());
+L_9:
+	CALL	_os_GetCSC
+	OR	A,A
+	JR	NZ,L_9
+;   42	    return;
+;   43	}
+	RET	
+
+
+;**************************** _wait_for_any_key_release ***************************
+;Name                         Addr/Register   Size   Type
+;_os_GetCSC                          IMPORT  -----   function
+
+
+; Stack Frame Size: 6 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;   44	
+;   45	sk_key_t wait_for_any_keyup(void) {
+_wait_for_any_keyup:
+	LD	HL,-1
+	CALL	__frameset
+;   46	    sk_key_t key;
+;   47	    while (!(key = os_GetCSC()));
+L_13:
+	CALL	_os_GetCSC
+	LD	(IX+-1),A
+	OR	A,A
+	JR	Z,L_13
+;   48	    wait_for_any_key_release();
+	CALL	_wait_for_any_key_release
+;   49	    return key;
+	LD	A,(IX+-1)
+;   50	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _wait_for_any_keyup ***************************
+;Name                         Addr/Register   Size   Type
+;_wait_for_any_key_release           IMPORT  -----   function
+;_os_GetCSC                          IMPORT  -----   function
+;key                                   IX-1      1   variable
+
+
+; Stack Frame Size: 7 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;   51	
+;   52	void wait_for_keyup(sk_key_t key) {
+_wait_for_keyup:
+	CALL	__frameset0
+;   53	    while (os_GetCSC() != key);
+L_17:
+	CALL	_os_GetCSC
+	LD	B,A
+	LD	A,(IX+6)
+	CP	A,B
+	JR	NZ,L_17
+;   54	    wait_for_any_key_release();
+	CALL	_wait_for_any_key_release
+;   55	    return;
+;   56	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _wait_for_keyup ***************************
+;Name                         Addr/Register   Size   Type
+;_wait_for_any_key_release           IMPORT  -----   function
+;_os_GetCSC                          IMPORT  -----   function
+;key                                   IX+6      1   parameter
+
+
+; Stack Frame Size: 9 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;   57	
+;   58	void set_setting(uint8_t position, bool value) {
+_set_setting:
+	LD	HL,-6
+	CALL	__frameset
+;   59	    
+;   60	    ti_var_t var;
+;   61	    settings data;
+;   62	    
+;   63	    uint8_t bit = (value) ? 1 : 0;
+	LD	A,(IX+9)
+	OR	A,A
+	JR	Z,L_22
+	LD	BC,1
+	LD	(IX+-6),BC
+	JR	L_23
+L_22:
+	LD	BC,0
+	LD	(IX+-6),BC
+L_23:
+	LD	A,(IX+-6)
+	LD	(IX+-3),A
+;   64	    
+;   65	    ti_CloseAll();
+	CALL	_ti_CloseAll
+;   66	    
+;   67	    var = ti_Open("C3_SET", "r");
+	LD	BC,L__11
+	PUSH	BC
+	LD	BC,L__12
+	PUSH	BC
+	CALL	_ti_Open
+	POP	BC
+	POP	BC
+	LD	(IX+-1),A
+;   68	    ti_Read(&data, sizeof(settings), 1, var);
+	LD	C,(IX+-1)
+	LD	B,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	PUSH	BC
+	PEA	IX+-2
+	CALL	_ti_Read
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+;   69	    ti_CloseAll();
+	CALL	_ti_CloseAll
+;   70	    
+;   71	    data.data = (data.data & ~(1 << position)) | (bit << position);
+	LD	A,1
+	LD	B,(IX+6)
+	CALL	__bshl
+	CPL	
+	LD	B,A
+	LD	A,(IX+-2)
+	AND	A,B
+	LD	D,A
+	LD	A,(IX+-3)
+	LD	B,(IX+6)
+	CALL	__bshl
+	LD	B,A
+	LD	A,D
+	OR	A,B
+	LD	(IX+-2),A
+;   72	    
+;   73	    var = ti_Open("C3_SET", "w");
+	LD	BC,L__13
+	PUSH	BC
+	LD	BC,L__14
+	PUSH	BC
+	CALL	_ti_Open
+	POP	BC
+	POP	BC
+	LD	(IX+-1),A
+;   74	    ti_Write(&data, sizeof(settings), 1, var);
+	LD	C,(IX+-1)
+	LD	B,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	PUSH	BC
+	PEA	IX+-2
+	CALL	_ti_Write
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+;   75	    gfx_End();
+	CALL	_gfx_End
+;   76	    ti_SetArchiveStatus(true, var);
+	LD	C,(IX+-1)
+	LD	B,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	CALL	_ti_SetArchiveStatus
+	POP	BC
+	POP	BC
+;   77	    gfx_Begin();
+	CALL	_gfx_Begin
+;   78	    gfx_init();
+	CALL	_gfx_init
+;   79	    ti_CloseAll();
+	CALL	_ti_CloseAll
+;   80	    
+;   81	    return;
+;   82	    
+;   83	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _set_setting ***************************
+;Name                         Addr/Register   Size   Type
+;_gfx_init                           IMPORT  -----   function
+;_gfx_Begin                          IMPORT  -----   function
+;_ti_SetArchiveStatus                IMPORT  -----   function
+;_gfx_End                            IMPORT  -----   function
+;_ti_Write                           IMPORT  -----   function
+;_ti_Read                            IMPORT  -----   function
+;_ti_Open                            IMPORT  -----   function
+;_ti_CloseAll                        IMPORT  -----   function
+;temp20                                IX-6      3   variable
+;bit                                   IX-3      1   variable
+;data                                  IX-2      1   variable
+;var                                   IX-1      1   variable
+;value                                 IX+9      1   parameter
+;position                              IX+6      1   parameter
+
+
+; Stack Frame Size: 18 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	SEGMENT STRSECT
+L__11:
+	DB	"r"
+	DB	0
+L__12:
+	DB	"C3_SET"
+	DB	0
+L__13:
+	DB	"w"
+	DB	0
+L__14:
+	DB	"C3_SET"
+	DB	0
+	SEGMENT CODE
+;   84	
+;   85	bool get_setting(uint8_t position) {
+_get_setting:
+	LD	HL,-2
+	CALL	__frameset
+;   86	    
+;   87	    ti_var_t var;
+;   88	    settings data;
+;   89	    
+;   90	    var = ti_Open("C3_SET", "r");
+	LD	BC,L__16
+	PUSH	BC
+	LD	BC,L__17
+	PUSH	BC
+	CALL	_ti_Open
+	POP	BC
+	POP	BC
+	LD	(IX+-1),A
+;   91	    ti_Read(&data, sizeof(settings), 1, var);
+	LD	C,(IX+-1)
+	LD	B,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	PUSH	BC
+	PEA	IX+-2
+	CALL	_ti_Read
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+;   92	    ti_CloseAll();
+	CALL	_ti_CloseAll
+;   93	    
+;   94	    if ((data.data & (1 << position)) == 0) {
+	LD	A,(IX+6)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	LD	HL,1
+	CALL	__ishl
+	LD	A,(IX+-2)
+	AND	A,L
+	JR	NZ,L_26
+;   95	        return false;
+	XOR	A,A
+	JR	L_27
+;   96	    } else {
+L_26:
+;   97	        return true;
+	LD	A,1
+;   98	    }
+;   99	    
+;  100	}
+L_27:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _get_setting ***************************
+;Name                         Addr/Register   Size   Type
+;_ti_CloseAll                        IMPORT  -----   function
+;_ti_Read                            IMPORT  -----   function
+;_ti_Open                            IMPORT  -----   function
+;data                                  IX-2      1   variable
+;var                                   IX-1      1   variable
+;position                              IX+6      1   parameter
+
+
+; Stack Frame Size: 11 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	SEGMENT STRSECT
+L__16:
+	DB	"r"
+	DB	0
+L__17:
+	DB	"C3_SET"
+	DB	0
+	XREF _gfx_init:ROM
+	XREF _gfx_End:ROM
+	XREF _gfx_Begin:ROM
+	XREF _ti_SetArchiveStatus:ROM
+	XREF _ti_Read:ROM
+	XREF _ti_Write:ROM
+	XREF _ti_Open:ROM
+	XREF _ti_CloseAll:ROM
+	XREF _os_GetCSC:ROM
+	XREF __bshl:ROM
+	XREF __ishl:ROM
+	XREF __frameset0:ROM
+	XREF __frameset:ROM
+	XDEF _get_setting
+	XDEF _set_setting
+	XDEF _wait_for_keyup
+	XDEF _wait_for_any_keyup
+	XDEF _wait_for_any_key_release
+	XDEF _wait_for_keydown
+	XDEF _wait_for_any_keydown
+	XDEF _sleep_timer
+	END

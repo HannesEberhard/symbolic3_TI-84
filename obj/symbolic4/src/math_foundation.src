@@ -1,0 +1,1159 @@
+; Zilog eZ80 ANSI C Compiler Release 3.4
+; -optsize -noreduceopt -nomodsect -peephole -globalopt
+; -localcse -const=ROM 
+	FILE	"SRC\SYMBOLIC4\SRC\MATH_FOUNDATION.C"
+	.assume ADL=1
+	SEGMENT CODE
+;    1	
+;    2	/*
+;    3	 
+;    4	 Copyright (c) 2019 Hannes Eberhard
+;    5	 
+;    6	 Permission is hereby granted, free of charge, to any person obtaining a copy
+;    7	 of this software and associated documentation files (the "Software"), to deal
+;    8	 in the Software without restriction, including without limitation the rights
+;    9	 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+;   10	 copies of the Software, and to permit persons to whom the Software is
+;   11	 furnished to do so, subject to the following conditions:
+;   12	 
+;   13	 The above copyright notice and this permission notice shall be included in all
+;   14	 copies or substantial portions of the Software.
+;   15	 
+;   16	 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+;   17	 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+;   18	 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+;   19	 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+;   20	 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+;   21	 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+;   22	 SOFTWARE.
+;   23	 
+;   24	 */
+;   25	
+;   26	#include "symbolic4.h"
+;   27	
+;   28	uintmax_t min(uintmax_t a, uintmax_t b) {
+_min:
+	LD	HL,-4
+	CALL	__frameset
+;   29	    return (a < b) ? a : b;
+	LD	HL,(IX+6)
+	LD	E,(IX+9)
+	LD	BC,(IX+12)
+	LD	A,(IX+15)
+	CALL	__lcmpu
+	JR	NC,L_2
+	LD	BC,(IX+6)
+	LD	A,(IX+9)
+	LD	(IX+-4),BC
+	LD	(IX+-1),A
+	JR	L_3
+L_2:
+	LD	BC,(IX+12)
+	LD	A,(IX+15)
+	LD	(IX+-4),BC
+	LD	(IX+-1),A
+L_3:
+	LD	HL,(IX+-4)
+	LD	E,(IX+-1)
+;   30	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _min ***************************
+;Name                         Addr/Register   Size   Type
+;temp0                                 IX-4      4   variable
+;b                                    IX+12      4   parameter
+;a                                     IX+6      4   parameter
+
+
+; Stack Frame Size: 22 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;   31	
+;   32	uintmax_t max(uintmax_t a, uintmax_t b) {
+_max:
+	LD	HL,-4
+	CALL	__frameset
+;   33	    return (a > b) ? a : b;
+	LD	HL,(IX+12)
+	LD	E,(IX+15)
+	LD	BC,(IX+6)
+	LD	A,(IX+9)
+	CALL	__lcmpu
+	JR	NC,L_7
+	LD	BC,(IX+6)
+	LD	A,(IX+9)
+	LD	(IX+-4),BC
+	LD	(IX+-1),A
+	JR	L_8
+L_7:
+	LD	BC,(IX+12)
+	LD	A,(IX+15)
+	LD	(IX+-4),BC
+	LD	(IX+-1),A
+L_8:
+	LD	HL,(IX+-4)
+	LD	E,(IX+-1)
+;   34	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _max ***************************
+;Name                         Addr/Register   Size   Type
+;temp5                                 IX-4      4   variable
+;b                                    IX+12      4   parameter
+;a                                     IX+6      4   parameter
+
+
+; Stack Frame Size: 22 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;   35	
+;   36	/**
+;   37	 
+;   38	 @brief Computes the GCD of two integers
+;   39	 
+;   40	 @details
+;   41	 This function computes the greatest common divisor of two integers
+;   42	 using the iterative Euclidean algorithm.
+;   43	 
+;   44	 @param[in] a The first integer.
+;   45	 @param[in] b The second integer.
+;   46	 
+;   47	 @return
+;   48	 - The greatest common divisor.
+;   49	 
+;   50	 */
+;   51	uintmax_t euclidean_gcd(uintmax_t a, uintmax_t b) {
+_euclidean_gcd:
+	LD	HL,-4
+	CALL	__frameset
+;   52	    
+;   53	    uintmax_t t;
+;   54	    
+;   55	    while (b != 0) {
+	JR	L_10
+L_11:
+;   56	        t = b;
+	LD	BC,(IX+12)
+	LD	A,(IX+15)
+	LD	(IX+-4),BC
+	LD	(IX+-1),A
+;   57	        b = a % b;
+	LD	HL,(IX+6)
+	LD	E,(IX+9)
+	LD	BC,(IX+12)
+	LD	A,(IX+15)
+	CALL	__lremu
+	LD	(IX+12),HL
+	LD	(IX+15),E
+;   58	        a = t;
+	LD	BC,(IX+-4)
+	LD	A,(IX+-1)
+	LD	(IX+6),BC
+	LD	(IX+9),A
+;   59	    }
+L_10:
+	LD	HL,(IX+12)
+	LD	E,(IX+15)
+	CALL	__lcmpzero
+	JR	NZ,L_11
+;   60	    
+;   61	    return a;
+	LD	HL,(IX+6)
+	LD	E,(IX+9)
+;   62	    
+;   63	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _euclidean_gcd ***************************
+;Name                         Addr/Register   Size   Type
+;t                                     IX-4      4   variable
+;b                                    IX+12      4   parameter
+;a                                     IX+6      4   parameter
+
+
+; Stack Frame Size: 22 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;   64	
+;   65	expression* prime_factors(uintmax_t source) {
+_prime_factors:
+	LD	HL,-37
+	CALL	__frameset
+;   66	    
+;   67	    uintmax_t factor = 2;
+;   68	    expression* factors = new_expression(EXPT_STRUCTURE, EXPI_LIST, 0);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,40
+	PUSH	BC
+	LD	BC,4
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	(IX+-3),HL
+;   69	    
+;   70	    if (source % factor == 0) {
+	LD	A,(IX+6)
+	AND	A,1
+	UEXT	HL
+	LD	L,A
+	LD	E,H
+	CALL	__lcmpzero
+	JR	NZ,L_16
+;   71	        append_child(factors, new_expression(EXPT_STRUCTURE, EXPI_LIST, 2,
+;   72	                                             new_literal(1, factor, 1),
+;   73	                                             new_literal(1, 0, 1)));
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,40
+	PUSH	BC
+	LD	BC,4
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_append_child
+	POP	BC
+	POP	BC
+;   74	    }
+;   75	    
+;   76	    while (source % factor == 0) {
+	JR	L_16
+L_17:
+;   77	        factors->children[factors->child_count - 1]->children[1]->value.numeric.numerator++;
+	LD	IY,(IX+-3)
+	LD	BC,(IY+11)
+	LD	(IX+-22),BC
+	LD	A,(IY+10)
+	UEXT	HL
+	LD	L,A
+	DEC	HL
+	LD	BC,HL
+	LD	HL,3
+	CALL	__imulu
+	LD	BC,(IX+-22)
+	ADD	HL,BC
+	LD	(IX+-19),HL
+	LD	IY,(HL)
+	LD	BC,(IY+11)
+	LD	(IX+-16),BC
+	LD	IY,(IX+-16)
+	LEA	BC,IY+3
+	LD	(IX+-13),BC
+	LD	HL,BC
+	LD	IY,(HL)
+	LEA	BC,IY+14
+	LD	(IX+-10),BC
+	LD	IY,(IX+-3)
+	LD	A,(IY+10)
+	UEXT	HL
+	LD	L,A
+	DEC	HL
+	LD	BC,HL
+	ADD	HL,HL
+	LD	DE,(IY+11)
+	ADD	HL,BC
+	ADD	HL,DE
+	LD	IY,(HL)
+	LD	IY,(IY+11)
+	LEA	HL,IY+3
+	LD	BC,(HL)
+	LD	IY,(IX+-10)
+	LD	HL,(IY+0)
+	LD	E,(IY+3)
+	LD	A,1
+	CALL	__ladd_b
+	LD	IY,BC
+	LD	(IY+14),HL
+	LD	(IY+17),E
+;   78	        source /= factor;
+	LD	BC,(IX+6)
+	LD	A,(IX+9)
+	LD	L,1
+	CALL	__lshru
+	LD	(IX+6),BC
+	LD	(IX+9),A
+;   79	    }
+L_16:
+	LD	A,(IX+6)
+	AND	A,1
+	UEXT	HL
+	LD	L,A
+	LD	E,H
+	CALL	__lcmpzero
+	JR	Z,L_17
+;   80	    
+;   81	    for (factor = 3; factor <= sqrt(source); factor += 2) {
+	LD	BC,3
+	LD	(IX+-7),BC
+	XOR	A,A
+	LD	(IX+-4),A
+	JR	L_26
+L_24:
+;   82	        
+;   83	        if (source % factor == 0) {
+	LD	HL,(IX+6)
+	LD	E,(IX+9)
+	LD	BC,(IX+-7)
+	LD	A,(IX+-4)
+	CALL	__lremu
+	CALL	__lcmpzero
+	JR	NZ,L_21
+;   84	            append_child(factors, new_expression(EXPT_STRUCTURE, EXPI_LIST, 2,
+;   85	                                                 new_literal(1, factor, 1),
+;   86	                                                 new_literal(1, 0, 1)));
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	C,(IX+-4)
+	LD	B,0
+	PUSH	BC
+	LD	BC,(IX+-7)
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,40
+	PUSH	BC
+	LD	BC,4
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_append_child
+	POP	BC
+	POP	BC
+;   87	        }
+;   88	        
+;   89	        while (source % factor == 0) {
+	JR	L_21
+L_22:
+;   90	            factors->children[factors->child_count - 1]->children[1]->value.numeric.numerator++;
+	LD	IY,(IX+-3)
+	LD	BC,(IY+11)
+	LD	(IX+-37),BC
+	LD	A,(IY+10)
+	UEXT	HL
+	LD	L,A
+	DEC	HL
+	LD	BC,HL
+	LD	HL,3
+	CALL	__imulu
+	LD	BC,(IX+-37)
+	ADD	HL,BC
+	LD	(IX+-34),HL
+	LD	IY,(HL)
+	LD	BC,(IY+11)
+	LD	(IX+-31),BC
+	LD	IY,(IX+-31)
+	LEA	BC,IY+3
+	LD	(IX+-28),BC
+	LD	HL,BC
+	LD	IY,(HL)
+	LEA	BC,IY+14
+	LD	(IX+-25),BC
+	LD	IY,(IX+-3)
+	LD	A,(IY+10)
+	UEXT	HL
+	LD	L,A
+	DEC	HL
+	LD	DE,HL
+	ADD	HL,HL
+	LD	BC,(IY+11)
+	ADD	HL,DE
+	ADD	HL,BC
+	LD	IY,(HL)
+	LD	IY,(IY+11)
+	LEA	HL,IY+3
+	LD	BC,(HL)
+	LD	IY,(IX+-25)
+	LD	HL,(IY+0)
+	LD	E,(IY+3)
+	LD	A,1
+	CALL	__ladd_b
+	LD	IY,BC
+	LD	(IY+14),HL
+	LD	(IY+17),E
+;   91	            source /= factor;
+	LD	HL,(IX+6)
+	LD	E,(IX+9)
+	LD	BC,(IX+-7)
+	LD	A,(IX+-4)
+	CALL	__ldivu
+	LD	(IX+6),HL
+	LD	(IX+9),E
+;   92	        }
+L_21:
+	LD	HL,(IX+6)
+	LD	E,(IX+9)
+	LD	BC,(IX+-7)
+	LD	A,(IX+-4)
+	CALL	__lremu
+	CALL	__lcmpzero
+	JR	Z,L_22
+	LD	HL,(IX+-7)
+	LD	E,(IX+-4)
+	LD	A,2
+	CALL	__ladd_b
+	LD	(IX+-7),HL
+	LD	(IX+-4),E
+;   93	        
+;   94	    }
+L_26:
+	LD	BC,(IX+6)
+	LD	A,(IX+9)
+	CALL	__ultof
+	LD	DE,BC
+	LD	C,A
+	LD	B,0
+	PUSH	BC
+	PUSH	DE
+	CALL	_sqrt
+	POP	BC
+	POP	BC
+	LD	BC,(IX+-7)
+	LD	A,(IX+-4)
+	CALL	__ultof
+	CALL	__fcmp
+	JP	P,L_24
+;   95	    
+;   96	    if (source > 2) {
+	LD	HL,2
+	LD	E,0
+	LD	BC,(IX+6)
+	LD	A,(IX+9)
+	CALL	__lcmpu
+	JR	NC,L_30
+;   97	        append_child(factors, new_expression(EXPT_STRUCTURE, EXPI_LIST, 2,
+;   98	                                             new_literal(1, source, 1),
+;   99	                                             new_literal(1, 1, 1)));
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	C,(IX+9)
+	LD	B,0
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,40
+	PUSH	BC
+	LD	BC,4
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_append_child
+	POP	BC
+	POP	BC
+;  100	    }
+L_30:
+;  101	    
+;  102	    return factors;
+	LD	HL,(IX+-3)
+;  103	    
+;  104	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _prime_factors ***************************
+;Name                         Addr/Register   Size   Type
+;_sqrt                               IMPORT  -----   function
+;_new_literal                        IMPORT  -----   function
+;_append_child                       IMPORT  -----   function
+;_new_expression                     IMPORT  -----   function
+;factor                                IX-7      4   variable
+;factors                               IX-3      3   variable
+;source                                IX+6      4   parameter
+
+
+; Stack Frame Size: 49 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  105	
+;  106	uintmax_t* binomial_coefficients(uint8_t n) {
+_binomial_coefficients:
+	LD	HL,-11
+	CALL	__frameset
+;  107	    
+;  108	    uint8_t i, j;
+;  109	    uintmax_t* coefficients = smart_alloc(n + 1, sizeof(uintmax_t));
+	LD	BC,4
+	PUSH	BC
+	LD	C,(IX+6)
+	INC	C
+	LD	B,0
+	PUSH	BC
+	CALL	_smart_alloc
+	POP	BC
+	POP	BC
+	LD	(IX+-5),HL
+;  110	    memset(coefficients, 0, (n + 1) * sizeof(uintmax_t));
+	LD	A,(IX+6)
+	UEXT	HL
+	LD	L,A
+	INC	HL
+	ADD	HL,HL
+	ADD	HL,HL
+	PUSH	HL
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+-5)
+	PUSH	BC
+	CALL	_memset
+	POP	BC
+	POP	BC
+	POP	BC
+;  111	    
+;  112	    coefficients[0] = 1;
+	LD	HL,(IX+-5)
+	LD	BC,1
+	LD	(HL),BC
+	INC	HL
+	INC	HL
+	INC	HL
+	LD	(HL),0
+;  113	    
+;  114	    for (i = 1; i <= n; i++) {
+	LD	(IX+-2),1
+	JR	L_39
+L_37:
+;  115	        for (j = min(i, n); j > 0; j--) {
+	UEXT	HL
+	LD	C,H
+	LD	B,0
+	LD	L,(IX+6)
+	PUSH	BC
+	PUSH	HL
+	UEXT	HL
+	LD	C,H
+	LD	L,(IX+-2)
+	PUSH	BC
+	PUSH	HL
+	CALL	_min
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	BC,HL
+	LD	(IX+-1),C
+	JR	L_36
+L_34:
+;  116	            coefficients[j] = coefficients[j] + coefficients[j - 1];
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	ADD	HL,HL
+	ADD	HL,HL
+	LD	A,(IX+-1)
+	LD	BC,(IX+-5)
+	ADD	HL,BC
+	LD	IY,HL
+	LD	E,(IY+3)
+	UEXT	HL
+	LD	L,A
+	LD	A,(IX+-1)
+	DEC	HL
+	ADD	HL,HL
+	ADD	HL,HL
+	LD	BC,(IX+-5)
+	ADD	HL,BC
+	LD	(IX+-11),HL
+	UEXT	HL
+	LD	L,A
+	ADD	HL,HL
+	ADD	HL,HL
+	LD	BC,(IX+-5)
+	ADD	HL,BC
+	LD	(IX+-8),HL
+	LD	HL,(IY)
+	LD	IY,(IX+-11)
+	LD	A,(IY+3)
+	LD	BC,(IY)
+	CALL	__ladd
+	LD	IY,(IX+-8)
+	LD	(IY),HL
+	LD	(IY+3),E
+	DEC	(IX+-1)
+;  117	        }
+L_36:
+	XOR	A,A
+	CP	A,(IX+-1)
+	JR	C,L_34
+	INC	(IX+-2)
+;  118	    }
+L_39:
+	LD	A,(IX+6)
+	CP	A,(IX+-2)
+	JR	NC,L_37
+;  119	    
+;  120	    return coefficients;
+	LD	HL,(IX+-5)
+;  121	    
+;  122	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _binomial_coefficients ***************************
+;Name                         Addr/Register   Size   Type
+;_min                                IMPORT  -----   function
+;_memset                             IMPORT  -----   function
+;_smart_alloc                        IMPORT  -----   function
+;coefficients                          IX-5      3   variable
+;i                                     IX-2      1   variable
+;j                                     IX-1      1   variable
+;n                                     IX+6      1   parameter
+
+
+; Stack Frame Size: 20 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  123	
+;  124	uint8_t addition(uintmax_t* result, uintmax_t a, uintmax_t b) {
+_addition:
+	LD	HL,-7
+	CALL	__frameset
+;  125	    if (((double) a + (double) b) < uintmax_max_value()) {
+	LD	BC,(IX+9)
+	LD	A,(IX+12)
+	CALL	__ultof
+	LD	(IX+-7),BC
+	LD	BC,(IX+15)
+	LD	H,A
+	LD	A,(IX+18)
+	CALL	__ultof
+	LD	E,A
+	LD	A,H
+	LD	HL,BC
+	LD	BC,(IX+-7)
+	CALL	__fadd
+	LD	(IX+-4),A
+	LD	(IX+-3),BC
+	CALL	_uintmax_max_value
+	LD	A,E
+	LD	BC,HL
+	LD	HL,(IX+-3)
+	LD	E,(IX+-4)
+	CALL	__fcmp
+	JP	P,L_43
+;  126	        *result = a + b;
+	LD	HL,(IX+15)
+	LD	E,(IX+18)
+	LD	BC,(IX+9)
+	LD	A,(IX+12)
+	CALL	__ladd
+	LD	IY,(IX+6)
+	LD	(IY),HL
+	LD	(IY+3),E
+;  127	        return RETS_SUCCESS;
+	LD	A,2
+	JR	L_44
+;  128	    } else {
+L_43:
+;  129	        return RETS_ERROR;
+	LD	A,1
+;  130	    }
+;  131	}
+L_44:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _addition ***************************
+;Name                         Addr/Register   Size   Type
+;_uintmax_max_value                  IMPORT  -----   function
+;b                                    IX+15      4   parameter
+;a                                     IX+9      4   parameter
+;result                                IX+6      3   parameter
+
+
+; Stack Frame Size: 28 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  132	
+;  133	uint8_t multiplication(uintmax_t* result, uintmax_t a, uintmax_t b) {
+_multiplication:
+	LD	HL,-7
+	CALL	__frameset
+;  134	    if (((double) a * (double) b) < uintmax_max_value()) {
+	LD	BC,(IX+9)
+	LD	A,(IX+12)
+	CALL	__ultof
+	LD	(IX+-7),BC
+	LD	BC,(IX+15)
+	LD	H,A
+	LD	A,(IX+18)
+	CALL	__ultof
+	LD	E,A
+	LD	A,H
+	LD	HL,BC
+	LD	BC,(IX+-7)
+	CALL	__fmul
+	LD	(IX+-4),A
+	LD	(IX+-3),BC
+	CALL	_uintmax_max_value
+	LD	A,E
+	LD	BC,HL
+	LD	HL,(IX+-3)
+	LD	E,(IX+-4)
+	CALL	__fcmp
+	JP	P,L_46
+;  135	        *result = a * b;
+	LD	HL,(IX+15)
+	LD	E,(IX+18)
+	LD	BC,(IX+9)
+	LD	A,(IX+12)
+	CALL	__lmulu
+	LD	IY,(IX+6)
+	LD	(IY),HL
+	LD	(IY+3),E
+;  136	        return RETS_SUCCESS;
+	LD	A,2
+	JR	L_47
+;  137	    } else {
+L_46:
+;  138	        return RETS_ERROR;
+	LD	A,1
+;  139	    }
+;  140	}
+L_47:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _multiplication ***************************
+;Name                         Addr/Register   Size   Type
+;_uintmax_max_value                  IMPORT  -----   function
+;b                                    IX+15      4   parameter
+;a                                     IX+9      4   parameter
+;result                                IX+6      3   parameter
+
+
+; Stack Frame Size: 28 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  141	
+;  142	uint8_t int_power(uintmax_t* result, uintmax_t base, uintmax_t exponent) {
+_int_power:
+	LD	HL,-4
+	CALL	__frameset
+;  143	    *result = 1;
+	LD	HL,(IX+6)
+	LD	BC,1
+	LD	(HL),BC
+	INC	HL
+	INC	HL
+	INC	HL
+	LD	(HL),0
+;  144	    if (pow(base, exponent) < uintmax_max_value()) {
+	LD	BC,(IX+15)
+	LD	A,(IX+18)
+	CALL	__ultof
+	LD	DE,BC
+	LD	C,A
+	LD	B,0
+	PUSH	BC
+	PUSH	DE
+	LD	BC,(IX+9)
+	LD	A,(IX+12)
+	CALL	__ultof
+	LD	DE,BC
+	LD	C,A
+	LD	B,0
+	PUSH	BC
+	PUSH	DE
+	CALL	_pow
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	(IX+-3),HL
+	LD	(IX+-4),E
+	CALL	_uintmax_max_value
+	LD	A,E
+	LD	BC,HL
+	LD	HL,(IX+-3)
+	LD	E,(IX+-4)
+	CALL	__fcmp
+	JP	M,L_51
+	JR	L_54
+;  145	        for ( ; exponent > 0; exponent--) *result *= base;
+L_49:
+	LD	IY,(IX+6)
+	LD	HL,(IY)
+	LD	E,(IY+3)
+	LD	BC,(IX+9)
+	LD	A,(IX+12)
+	CALL	__lmulu
+	LD	(IY),HL
+	LD	(IY+3),E
+	LD	HL,(IX+15)
+	LD	E,(IX+18)
+	LD	BC,1
+	XOR	A,A
+	CALL	__lsub
+	LD	(IX+15),HL
+	LD	(IX+18),E
+L_51:
+	OR	A,A
+	SBC	HL,HL
+	LD	E,0
+	LD	BC,(IX+15)
+	LD	A,(IX+18)
+	CALL	__lcmpu
+	JR	C,L_49
+;  146	        return RETS_SUCCESS;
+	LD	A,2
+	JR	L_55
+;  147	    } else {
+L_54:
+;  148	        return RETS_ERROR;
+	LD	A,1
+;  149	    }
+;  150	}
+L_55:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _int_power ***************************
+;Name                         Addr/Register   Size   Type
+;_uintmax_max_value                  IMPORT  -----   function
+;_pow                                IMPORT  -----   function
+;exponent                             IX+15      4   parameter
+;base                                  IX+9      4   parameter
+;result                                IX+6      3   parameter
+
+
+; Stack Frame Size: 25 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  151	
+;  152	void int_root(uintmax_t* factor, uintmax_t* remainder, uintmax_t base, uintmax_t degree) {
+_int_root:
+	LD	HL,-29
+	CALL	__frameset
+;  153	    
+;  154	    uint8_t i;
+;  155	    uintmax_t temp_result;
+;  156	    expression* factors = prime_factors(base);
+	LD	C,(IX+15)
+	LD	B,0
+	PUSH	BC
+	LD	BC,(IX+12)
+	PUSH	BC
+	CALL	_prime_factors
+	POP	BC
+	POP	BC
+	LD	(IX+-7),HL
+;  157	    
+;  158	    for (i = 0; i < factors->child_count; i++) {
+	LD	(IX+-1),0
+	JR	L_61
+;  159	        while (factors->children[i]->children[1]->value.numeric.numerator >= degree) {
+L_58:
+;  160	            factors->children[i]->children[1]->value.numeric.numerator -= degree;
+	LD	BC,(IX+-4)
+	LD	HL,(IX+-10)
+	ADD	HL,BC
+	LD	(IX+-23),HL
+	LD	IY,(HL)
+	LD	BC,(IY+11)
+	LD	(IX+-20),BC
+	LD	IY,(IX+-20)
+	LEA	HL,IY+3
+	LD	HL,(HL)
+	LD	(IX+-29),HL	; spill
+	LD	IY,(IX+-13)
+	LD	HL,(IY+0)
+	LD	E,(IY+3)
+	LD	BC,(IX+18)
+	LD	A,(IX+21)
+	CALL	__lsub
+	LD	(IX+-26),HL	; spill
+	LD	IY,(IX+-29)
+	LD	HL,(IX+-26)	; unspill
+	LD	(IY+14),HL
+	LD	(IY+17),E
+;  161	            *factor *= factors->children[i]->children[0]->value.numeric.numerator;
+	LD	HL,(IX+-20)
+	LD	IY,(HL)
+	LD	HL,(IY+14)
+	LD	E,(IY+17)
+	LD	IY,(IX+6)
+	LD	BC,(IY)
+	LD	A,(IY+3)
+	CALL	__lmulu
+	LD	(IY),HL
+	LD	(IY+3),E
+;  162	            int_power(&temp_result, factors->children[i]->children[0]->value.numeric.numerator, degree);
+	LD	C,(IX+21)
+	LD	B,0
+	PUSH	BC
+	LD	BC,(IX+18)
+	PUSH	BC
+	LD	BC,(IX+-4)
+	LD	IY,(IX+-7)
+	LD	HL,(IY+11)
+	ADD	HL,BC
+	LD	IY,(HL)
+	LD	HL,(IY+11)
+	LD	IY,(HL)
+	LD	BC,(IY+14)
+	LD	A,(IY+17)
+	LD	H,0
+	LD	L,A
+	PUSH	HL
+	PUSH	BC
+	PEA	IX+-17
+	CALL	_int_power
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+;  163	            *remainder /= temp_result;
+	LD	IY,(IX+9)
+	LD	HL,(IY)
+	LD	E,(IY+3)
+	LD	BC,(IX+-17)
+	LD	A,(IX+-14)
+	CALL	__ldivu
+	LD	(IY),HL
+	LD	(IY+3),E
+;  164	        }
+L_57:
+	LD	IY,(IX+-7)
+	LD	BC,(IY+11)
+	LD	(IX+-10),BC
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	(IX+-4),HL
+	LD	BC,(IX+-10)
+	ADD	HL,BC
+	LD	IY,(HL)
+	LD	IY,(IY+11)
+	LEA	HL,IY+3
+	LD	IY,(HL)
+	LEA	BC,IY+14
+	LD	(IX+-13),BC
+	LD	IY,(IX+-13)
+	LD	HL,(IY+0)
+	LD	E,(IY+3)
+	LD	BC,(IX+18)
+	LD	A,(IX+21)
+	CALL	__lcmpu
+	JR	NC,L_58
+	INC	(IX+-1)
+;  165	    }
+L_61:
+	LD	A,(IX+-1)
+	LD	IY,(IX+-7)
+	CP	A,(IY+10)
+	JR	C,L_57
+;  166	    
+;  167	    free_expression(factors, false);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+-7)
+	PUSH	BC
+	CALL	_free_expression
+	POP	BC
+	POP	BC
+;  168	    
+;  169	    return;
+;  170	    
+;  171	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _int_root ***************************
+;Name                         Addr/Register   Size   Type
+;_free_expression                    IMPORT  -----   function
+;_int_power                          IMPORT  -----   function
+;_prime_factors                      IMPORT  -----   function
+;temp_result                          IX-17      4   variable
+;G_2                                  IX-13      3   variable
+;G_0                                  IX-10      3   variable
+;factors                               IX-7      3   variable
+;G_1                                   IX-4      3   variable
+;i                                     IX-1      1   variable
+;degree                               IX+18      4   parameter
+;base                                 IX+12      4   parameter
+;remainder                             IX+9      3   parameter
+;factor                                IX+6      3   parameter
+
+
+; Stack Frame Size: 53 (bytes)
+;       Spill Code: -1 (instruction)
+
+
+	XREF _append_child:ROM
+	XREF _free_expression:ROM
+	XREF _new_literal:ROM
+	XREF _new_expression:ROM
+	XREF _uintmax_max_value:ROM
+	XREF _smart_alloc:ROM
+	XREF _sqrt:ROM
+	XREF _pow:ROM
+	XREF _memset:ROM
+	XREF __lcmpu:ROM
+	XREF __ladd:ROM
+	XREF __lsub:ROM
+	XREF __imulu:ROM
+	XREF __ldivu:ROM
+	XREF __lmulu:ROM
+	XREF __lremu:ROM
+	XREF __lshru:ROM
+	XREF __fadd:ROM
+	XREF __fmul:ROM
+	XREF __fcmp:ROM
+	XREF __ultof:ROM
+	XREF __frameset:ROM
+	XREF __lcmpzero:ROM
+	XREF __ladd_b:ROM
+	XDEF _int_root
+	XDEF _int_power
+	XDEF _multiplication
+	XDEF _addition
+	XDEF _binomial_coefficients
+	XDEF _prime_factors
+	XDEF _euclidean_gcd
+	XDEF _max
+	XDEF _min
+	END

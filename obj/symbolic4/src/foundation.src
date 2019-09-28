@@ -1,0 +1,993 @@
+; Zilog eZ80 ANSI C Compiler Release 3.4
+; -optsize -noreduceopt -nomodsect -peephole -globalopt
+; -localcse -const=ROM 
+	FILE	"SRC\SYMBOLIC4\SRC\FOUNDATION.C"
+	.assume ADL=1
+	SEGMENT BSS
+_current_error:
+	DS	26
+_allocated_pointers:
+	DS	3
+	SEGMENT DATA
+_smart_alloc_is_recording:
+	DB	1
+;    1	
+;    2	/*
+;    3	 
+;    4	 Copyright (c) 2019 Hannes Eberhard
+;    5	 
+;    6	 Permission is hereby granted, free of charge, to any person obtaining a copy
+;    7	 of this software and associated documentation files (the "Software"), to deal
+;    8	 in the Software without restriction, including without limitation the rights
+;    9	 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+;   10	 copies of the Software, and to permit persons to whom the Software is
+;   11	 furnished to do so, subject to the following conditions:
+;   12	 
+;   13	 The above copyright notice and this permission notice shall be included in all
+;   14	 copies or substantial portions of the Software.
+;   15	 
+;   16	 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+;   17	 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+;   18	 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+;   19	 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+;   20	 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+;   21	 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+;   22	 SOFTWARE.
+;   23	 
+;   24	 */
+;   25	
+;   26	#include "symbolic4.h"
+;   27	
+;   28	error current_error;
+;   29	void** allocated_pointers;
+;   30	bool smart_alloc_is_recording = true;
+	SEGMENT CODE
+;   31	
+;   32	/**
+;   33	 
+;   34	 @brief Allocates and keeps track of memory
+;   35	 
+;   36	 @details
+;   37	 The pointer to the allocated memory is stored in the
+;   38	 @c allocated_pointers array.
+;   39	 
+;   40	 @pre
+;   41	 - The @c allocated_pointers array must be initialized with @c NULL,
+;   42	 or else the loop won't work.
+;   43	 
+;   44	 @warning
+;   45	 - If the memory allocation fails, @c set_handle_unrecoverable_error() is
+;   46	 called.
+;   47	 
+;   48	 @param[in] length The length/count of the elements.
+;   49	 @param[in] size The size of one element (see @c sizeof()).
+;   50	 
+;   51	 @return
+;   52	 - A void-pointer to the allocated memory.
+;   53	 
+;   54	 @see
+;   55	 - smart_free()
+;   56	 - smart_free_all()
+;   57	 
+;   58	 */
+;   59	void* smart_alloc(uint8_t length, size_t size) {
+_smart_alloc:
+	LD	HL,-8
+	CALL	__frameset
+;   60	    uint16_t i;
+;   61	    void* pointer = calloc(length, size);
+	LD	BC,(IX+9)
+	PUSH	BC
+	LD	A,(IX+6)
+	UEXT	HL
+	LD	L,A
+	PUSH	HL
+	CALL	_calloc
+	POP	BC
+	POP	BC
+	LD	(IX+-5),HL
+;   62	    if (pointer == NULL) set_handle_unrecoverable_error(ERRD_SYSTEM, ERRI_MEMORY_ALLOCATION, "");
+	CALL	__icmpzero
+	JR	NZ,L_8
+	LD	BC,L__1
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	PUSH	BC
+	CALL	_set_handle_unrecoverable_error
+	POP	BC
+	POP	BC
+	POP	BC
+L_8:
+;   63	    if (smart_alloc_is_recording) {
+	LD	A,(_smart_alloc_is_recording)
+	OR	A,A
+	JR	Z,L_9
+;   64	        for (i = 0; allocated_pointers[i] != NULL && i < ALLOCATED_POINTERS_LENGTH - 1; i++);
+	LD	(IX+-2),0
+	LD	(IX+-1),0
+	JR	L_5
+L_3:
+	LD	HL,(IX+-2)
+	INC	HL
+	LD	(IX+-2),L
+	LD	(IX+-1),H
+L_5:
+	LD	BC,(IX+-2)
+	CALL	__stoiu
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,(_allocated_pointers)
+	ADD	HL,BC
+	LD	(IX+-8),HL
+	LD	HL,(HL)
+	CALL	__icmpzero
+	JR	Z,L_6
+	LD.LIS	BC,1999
+	LD	HL,(IX+-2)
+	OR	A,A
+	SBC.SIS	HL,BC
+	JR	C,L_3
+L_6:
+;   65	        allocated_pointers[i] = pointer;
+	LD	HL,(IX+-8)
+	LD	BC,(IX+-5)
+	LD	(HL),BC
+;   66	    }
+L_9:
+;   67	    return pointer;
+	LD	HL,(IX+-5)
+;   68	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _smart_alloc ***************************
+;Name                         Addr/Register   Size   Type
+;_allocated_pointers                 STATIC      3   variable
+;_smart_alloc_is_recording           STATIC      1   variable
+;_set_handle_unrecoverable_error      IMPORT  -----   function
+;_calloc                             IMPORT  -----   function
+;G_0                                   IX-8      3   variable
+;pointer                               IX-5      3   variable
+;i                                     IX-2      2   variable
+;size                                  IX+9      3   parameter
+;length                                IX+6      1   parameter
+
+
+; Stack Frame Size: 20 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	SEGMENT STRSECT
+L__1:
+	DB	0
+	SEGMENT CODE
+;   69	
+;   70	/**
+;   71	 
+;   72	 @brief Resizes a pointer
+;   73	 
+;   74	 @details
+;   75	 The resized pointer to the allocated memory is stored in the
+;   76	 @c allocated_pointers array.
+;   77	 
+;   78	 @param[in] source The pointer to be resized.
+;   79	 @param[in] length The new length/count of the elements.
+;   80	 @param[in] size The size of one element (see @c sizeof()).
+;   81	 
+;   82	 @see
+;   83	 - smart_alloc()
+;   84	 
+;   85	 */
+;   86	void* smart_realloc(void* source, uint8_t length, size_t size) {
+_smart_realloc:
+	LD	HL,-8
+	CALL	__frameset
+;   87	    uint16_t i;
+;   88	    void* pointer = realloc(source, length * size);
+	LD	A,(IX+9)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	LD	HL,(IX+12)
+	CALL	__imulu
+	PUSH	HL
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_realloc
+	POP	BC
+	POP	BC
+	LD	(IX+-5),HL
+;   89	    if (pointer == NULL) set_handle_unrecoverable_error(ERRD_SYSTEM, ERRI_MEMORY_ALLOCATION, "");
+	CALL	__icmpzero
+	JR	NZ,L_20
+	LD	BC,L__7
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	PUSH	BC
+	CALL	_set_handle_unrecoverable_error
+	POP	BC
+	POP	BC
+	POP	BC
+L_20:
+;   90	    if (pointer != source && smart_alloc_is_recording) {
+	LD	BC,(IX+6)
+	LD	HL,(IX+-5)
+	OR	A,A
+	SBC	HL,BC
+	JR	Z,L_21
+	LD	A,(_smart_alloc_is_recording)
+	OR	A,A
+	JR	Z,L_21
+;   91	        for (i = 0; allocated_pointers[i] != NULL && i < ALLOCATED_POINTERS_LENGTH; i++);
+	LD	(IX+-2),0
+	LD	(IX+-1),0
+	JR	L_17
+L_15:
+	LD	HL,(IX+-2)
+	INC	HL
+	LD	(IX+-2),L
+	LD	(IX+-1),H
+L_17:
+	LD	BC,(IX+-2)
+	CALL	__stoiu
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,(_allocated_pointers)
+	ADD	HL,BC
+	LD	(IX+-8),HL
+	LD	HL,(HL)
+	CALL	__icmpzero
+	JR	Z,L_18
+	LD.LIS	BC,2000
+	LD	HL,(IX+-2)
+	OR	A,A
+	SBC.SIS	HL,BC
+	JR	C,L_15
+L_18:
+;   92	        allocated_pointers[i] = pointer;
+	LD	HL,(IX+-8)
+	LD	BC,(IX+-5)
+	LD	(HL),BC
+;   93	    }
+L_21:
+;   94	    return pointer;
+	LD	HL,(IX+-5)
+;   95	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _smart_realloc ***************************
+;Name                         Addr/Register   Size   Type
+;_allocated_pointers                 STATIC      3   variable
+;_smart_alloc_is_recording           STATIC      1   variable
+;_set_handle_unrecoverable_error      IMPORT  -----   function
+;_realloc                            IMPORT  -----   function
+;G_1                                   IX-8      3   variable
+;pointer                               IX-5      3   variable
+;i                                     IX-2      2   variable
+;size                                 IX+12      3   parameter
+;length                                IX+9      1   parameter
+;source                                IX+6      3   parameter
+
+
+; Stack Frame Size: 23 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	SEGMENT STRSECT
+L__7:
+	DB	0
+	SEGMENT CODE
+;   96	
+;   97	/**
+;   98	 
+;   99	 @brief Frees a pointer
+;  100	 
+;  101	 @details
+;  102	 This function frees a pointer and sets its corresponding entry in the
+;  103	 @c allocated_pointers array to @c NULL.
+;  104	 
+;  105	 @param[in] pointer The pointer to be freed.
+;  106	 
+;  107	 @see
+;  108	 - smart_alloc()
+;  109	 - smart_free_all()
+;  110	 
+;  111	 */
+;  112	void smart_free(void* pointer) {
+_smart_free:
+	LD	HL,-5
+	CALL	__frameset
+;  113	    uint16_t i;
+;  114	    if (pointer == NULL) return;
+	LD	HL,(IX+6)
+	CALL	__icmpzero
+	JR	Z,L_31
+;  115	    for (i = 0; allocated_pointers[i] != pointer && i < ALLOCATED_POINTERS_LENGTH; i++);
+	LD	(IX+-2),0
+	LD	(IX+-1),0
+	JR	L_28
+L_26:
+	LD	HL,(IX+-2)
+	INC	HL
+	LD	(IX+-2),L
+	LD	(IX+-1),H
+L_28:
+	LD	BC,(IX+-2)
+	CALL	__stoiu
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	(IX+-5),HL
+	LD	BC,(_allocated_pointers)
+	ADD	HL,BC
+	OR	A,A
+	LD	HL,(HL)
+	LD	BC,(IX+6)
+	SBC	HL,BC
+	JR	Z,L_30
+	LD.LIS	BC,2000
+	LD	HL,(IX+-2)
+	OR	A,A
+	SBC.SIS	HL,BC
+	JR	C,L_26
+L_30:
+;  116	    free(pointer);
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_free
+	POP	BC
+;  117	    allocated_pointers[i] = NULL;
+	LD	BC,(IX+-5)
+	LD	HL,(_allocated_pointers)
+	ADD	HL,BC
+	LD	BC,0
+	LD	(HL),BC
+;  118	    return;
+;  119	}
+L_31:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _smart_free ***************************
+;Name                         Addr/Register   Size   Type
+;_free                               IMPORT  -----   function
+;_allocated_pointers                 STATIC      3   variable
+;G_2                                   IX-5      3   variable
+;i                                     IX-2      2   variable
+;pointer                               IX+6      3   parameter
+
+
+; Stack Frame Size: 14 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  120	
+;  121	/**
+;  122	 
+;  123	 @brief Frees all pointers
+;  124	 
+;  125	 @details
+;  126	 This function frees all pointers allocated with @c smart_alloc() by
+;  127	 iteratively calling @c smart_free().
+;  128	 
+;  129	 @see
+;  130	 - smart_alloc()
+;  131	 - smart_free()
+;  132	 
+;  133	 */
+;  134	void smart_free_all(void) {
+_smart_free_all:
+	LD	HL,-5
+	CALL	__frameset
+;  135	    uint16_t i;
+;  136	    for (i = 0; i < ALLOCATED_POINTERS_LENGTH; i++) {
+	LD	(IX+-2),0
+	LD	(IX+-1),0
+	JR	L_36
+L_34:
+;  137	        if (allocated_pointers[i] != NULL) smart_free(allocated_pointers[i]);
+	LD	BC,(IX+-2)
+	CALL	__stoiu
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,(_allocated_pointers)
+	ADD	HL,BC
+	LD	(IX+-5),HL
+	LD	HL,(HL)
+	CALL	__icmpzero
+	JR	Z,L_35
+	LD	HL,(IX+-5)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_smart_free
+	POP	BC
+;  138	    }
+L_35:
+	LD	HL,(IX+-2)
+	INC	HL
+	LD	(IX+-2),L
+	LD	(IX+-1),H
+L_36:
+	LD.LIS	BC,2000
+	LD	HL,(IX+-2)
+	OR	A,A
+	SBC.SIS	HL,BC
+	JR	C,L_34
+;  139	    return;
+;  140	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _smart_free_all ***************************
+;Name                         Addr/Register   Size   Type
+;_smart_free                         IMPORT  -----   function
+;_allocated_pointers                 STATIC      3   variable
+;G_3                                   IX-5      3   variable
+;i                                     IX-2      2   variable
+
+
+; Stack Frame Size: 11 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  141	
+;  142	/**
+;  143	 
+;  144	 @brief Sets @c current_error to the arguments provided
+;  145	 
+;  146	 @param[in] domain
+;  147	 @param[in] identifier
+;  148	 @param[in] body
+;  149	 
+;  150	 @return
+;  151	 - Returns always @c RETS_ERROR
+;  152	 
+;  153	 */
+;  154	uint8_t set_error(error_domain domain, error_identifier identifier, const char* body) {
+_set_error:
+	CALL	__frameset0
+;  155	    current_error.domain = domain;
+	LD	BC,(IX+6)
+	LD	(_current_error),BC
+;  156	    current_error.identifier = identifier;
+	LD	BC,(IX+9)
+	LD	(_current_error+3),BC
+;  157	    strcpy(current_error.body, body);
+	LD	BC,(IX+12)
+	PUSH	BC
+	LD	BC,_current_error+6
+	PUSH	BC
+	CALL	_strcpy
+	POP	BC
+	POP	BC
+;  158	    return RETS_ERROR;
+	LD	A,1
+;  159	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _set_error ***************************
+;Name                         Addr/Register   Size   Type
+;_strcpy                             IMPORT  -----   function
+;_current_error                      STATIC     26   variable
+;body                                 IX+12      3   parameter
+;identifier                            IX+9      3   parameter
+;domain                                IX+6      3   parameter
+
+
+; Stack Frame Size: 15 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  160	
+;  161	/**
+;  162	 
+;  163	 @brief Handles severe and unrecoverable errors
+;  164	 
+;  165	 @details
+;  166	 This function serves as the last resort when the program encounters
+;  167	 exceptionally severe errors, such as a failed memory allocation,
+;  168	 from which it can't recover itself.
+;  169	 The
+;  170	 @code
+;  171	 while (true);
+;  172	 @endcode
+;  173	 loop may be replaced with system-specific error handling.
+;  174	 
+;  175	 @warning
+;  176	 - This function should only be called if everything else has failed.
+;  177	 
+;  178	 @param[in] domain The error domain.
+;  179	 @param[in] identifier The error identifier.
+;  180	 @param[in] body The error body.
+;  181	 
+;  182	 */
+;  183	void set_handle_unrecoverable_error(error_domain domain, error_identifier identifier, const char* body) {
+_set_handle_unrecoverable_error:
+	CALL	__frameset0
+;  184	    current_error.domain = domain;
+	LD	BC,(IX+6)
+	LD	(_current_error),BC
+;  185	    current_error.identifier = identifier;
+	LD	BC,(IX+9)
+	LD	(_current_error+3),BC
+;  186	    strcpy(current_error.body, body);
+	LD	BC,(IX+12)
+	PUSH	BC
+	LD	BC,_current_error+6
+	PUSH	BC
+	CALL	_strcpy
+	POP	BC
+	POP	BC
+;  187	    while (true);
+L_41:
+	JR	L_41
+
+
+;**************************** _set_handle_unrecoverable_error ***************************
+;Name                         Addr/Register   Size   Type
+;_strcpy                             IMPORT  -----   function
+;_current_error                      STATIC     26   variable
+;body                                 IX+12      3   parameter
+;identifier                            IX+9      3   parameter
+;domain                                IX+6      3   parameter
+
+
+; Stack Frame Size: 15 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  188	    return;
+;  189	}
+;  190	
+;  191	double uintmax_max_value(void) {
+_uintmax_max_value:
+;  192	    return pow(2, sizeof(uintmax_t) * 8) - 1000;
+	LD	C,66
+	LD	B,0
+	PUSH	BC
+	LD	C,64
+	LD	DE,0
+	PUSH	DE
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	CALL	_pow
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	BC,HL
+	LD	HL,7995392
+	LD	A,E
+	LD	E,68
+	CALL	__fsub
+	LD	E,A
+	LD	HL,BC
+;  193	}
+	RET	
+
+
+;**************************** _uintmax_max_value ***************************
+;Name                         Addr/Register   Size   Type
+;_pow                                IMPORT  -----   function
+
+
+; Stack Frame Size: 6 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  194	
+;  195	/**
+;  196	 
+;  197	 @brief Converts a string to lowercase
+;  198	 
+;  199	 @details
+;  200	 This function copies the source string and converts that copy
+;  201	 character-wise to lowercase. The resulting string must be freed.
+;  202	 
+;  203	 @param[in] string The string to convert.
+;  204	 
+;  205	 @return
+;  206	 - The new string in lowercase letters.
+;  207	 
+;  208	 */
+;  209	char* string_to_lower(const char* string) {
+_string_to_lower:
+	LD	HL,-7
+	CALL	__frameset
+;  210	    uint8_t i;
+;  211	    char* result = smart_alloc(strlen(string) + 1, sizeof(char));
+	LD	BC,1
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_strlen
+	POP	BC
+	INC	HL
+	LD	C,L
+	LD	B,0
+	PUSH	BC
+	CALL	_smart_alloc
+	POP	BC
+	POP	BC
+	LD	(IX+-7),HL
+;  212	    strcpy(result, string);
+	LD	BC,(IX+6)
+	PUSH	BC
+	LD	BC,(IX+-7)
+	PUSH	BC
+	CALL	_strcpy
+	POP	BC
+	POP	BC
+;  213	    for (i = 0; result[i] != '\0'; i++) {
+	LD	(IX+-1),0
+	JR	L_48
+L_46:
+;  214	        result[i] = tolower(result[i]);
+	LD	HL,(IX+-4)
+	LD	A,(HL)
+	LD	B,A
+	SEXT	HL
+	LD	L,B
+	PUSH	HL
+	CALL	_tolower
+	POP	BC
+	LD	IY,(IX+-4)
+	LD	(IY),L
+	INC	(IX+-1)
+;  215	    }
+L_48:
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	LD	BC,(IX+-7)
+	ADD	HL,BC
+	LD	(IX+-4),HL
+	LD	A,(HL)
+	OR	A,A
+	JR	NZ,L_46
+;  216	    return result;
+	LD	HL,(IX+-7)
+;  217	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _string_to_lower ***************************
+;Name                         Addr/Register   Size   Type
+;_tolower                            IMPORT  -----   function
+;_strcpy                             IMPORT  -----   function
+;_strlen                             IMPORT  -----   function
+;_smart_alloc                        IMPORT  -----   function
+;result                                IX-7      3   variable
+;G_4                                   IX-4      3   variable
+;i                                     IX-1      1   variable
+;string                                IX+6      3   parameter
+
+
+; Stack Frame Size: 16 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  218	
+;  219	void itoa(char* buffer, uintmax_t source) {
+_itoa:
+	LD	HL,-9
+	CALL	__frameset
+;  220	    
+;  221	    uintmax_t i = 1;
+	LD	BC,1
+	LD	(IX+-4),BC
+	XOR	A,A
+	LD	(IX+-1),A
+;  222	    uint8_t buffer_position = 0;
+	LD	(IX+-5),0
+;  223	    
+;  224	    while (source >= 10 * i) {
+	JR	L_51
+L_52:
+;  225	        i *= 10;
+	LD	BC,(IX+-9)
+	LD	A,(IX+-6)
+	LD	(IX+-4),BC
+	LD	(IX+-1),A
+;  226	    }
+L_51:
+	LD	HL,(IX+-4)
+	LD	E,(IX+-1)
+	LD	BC,10
+	XOR	A,A
+	CALL	__lmulu
+	LD	BC,HL
+	LD	(IX+-9),BC
+	LD	(IX+-6),E
+	LD	HL,(IX+9)
+	LD	E,(IX+12)
+	LD	A,(IX+-6)
+	CALL	__lcmpu
+	JR	NC,L_52
+;  227	    
+;  228	    do {
+L_54:
+;  229	        buffer[buffer_position++] = (((source - source % i) / i) % 10) + '0';
+	LD	HL,(IX+9)
+	LD	E,(IX+12)
+	LD	BC,(IX+-4)
+	LD	A,(IX+-1)
+	CALL	__lremu
+	LD	A,E
+	LD	BC,HL
+	LD	HL,(IX+9)
+	LD	E,(IX+12)
+	CALL	__lsub
+	LD	BC,(IX+-4)
+	LD	A,(IX+-1)
+	CALL	__ldivu
+	LD	BC,10
+	XOR	A,A
+	CALL	__lremu
+	LD	A,48
+	CALL	__ladd_b
+	LD	BC,HL
+	LD	A,(IX+-5)
+	UEXT	HL
+	LD	L,A
+	LD	DE,(IX+6)
+	ADD	HL,DE
+	LD	(HL),C
+	INC	(IX+-5)
+;  230	    } while (i /= 10);
+	LD	HL,(IX+-4)
+	LD	E,(IX+-1)
+	LD	BC,10
+	XOR	A,A
+	CALL	__ldivu
+	LD	(IX+-4),HL
+	LD	(IX+-1),E
+	LD	HL,(IX+-4)
+	LD	E,(IX+-1)
+	CALL	__lcmpzero
+	JR	NZ,L_54
+;  231	    
+;  232	    buffer[buffer_position] = '\0';
+	LD	A,(IX+-5)
+	UEXT	HL
+	LD	L,A
+	LD	BC,(IX+6)
+	ADD	HL,BC
+	LD	(HL),0
+;  233	    
+;  234	    return;
+;  235	    
+;  236	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _itoa ***************************
+;Name                         Addr/Register   Size   Type
+;G_5                                   IX-9      4   variable
+;buffer_position                       IX-5      1   variable
+;i                                     IX-4      4   variable
+;source                                IX+9      4   parameter
+;buffer                                IX+6      3   parameter
+
+
+; Stack Frame Size: 24 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  237	
+;  238	void dtoa(char* buffer, uint8_t length, double source) {
+_dtoa:
+	LD	HL,-1
+	CALL	__frameset
+;  239	    
+;  240	    uint8_t buffer_position = 0;
+	LD	(IX+-1),0
+;  241	    
+;  242	    if (source < 0) {
+	LD	HL,(IX+12)
+	LD	E,(IX+15)
+	LD	BC,0
+	XOR	A,A
+	CALL	__fcmp
+	JP	P,L_61
+;  243	        buffer[buffer_position++] = '-';
+	LD	HL,(IX+6)
+	LD	(HL),45
+	LD	(IX+-1),1
+;  244	        source *= -1;
+	LD	BC,(IX+12)
+	LD	A,(IX+15)
+	LD	HL,8388608
+	LD	E,191
+	CALL	__fmul
+	LD	(IX+12),BC
+	LD	(IX+15),A
+;  245	    }
+L_61:
+;  246	    
+;  247	    itoa(buffer + buffer_position, source);
+	LD	BC,(IX+12)
+	LD	A,(IX+15)
+	CALL	__ftol
+	LD	DE,BC
+	LD	C,A
+	LD	B,0
+	PUSH	BC
+	PUSH	DE
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	LD	BC,(IX+6)
+	ADD	HL,BC
+	PUSH	HL
+	CALL	_itoa
+	POP	BC
+	POP	BC
+	POP	BC
+;  248	    buffer_position = strlen(buffer);
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_strlen
+	POP	BC
+	LD	(IX+-1),L
+;  249	    
+;  250	    buffer[buffer_position++] = '.';
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	LD	BC,(IX+6)
+	ADD	HL,BC
+	LD	(HL),46
+	INC	(IX+-1)
+;  251	    
+;  252	    for (buffer_position = strlen(buffer); buffer_position < length - 1 && source != 0; buffer_position++) {
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_strlen
+	POP	BC
+	LD	(IX+-1),L
+	JR	L_67
+L_65:
+;  253	        source = (source - (uint8_t) source) * 10;
+	LD	BC,(IX+12)
+	LD	A,(IX+15)
+	CALL	__ftol
+	UEXT	HL
+	LD	L,C
+	LD	A,H
+	LD	BC,HL
+	CALL	__ultof
+	LD	E,A
+	LD	A,(IX+15)
+	LD	HL,BC
+	LD	BC,(IX+12)
+	CALL	__fsub
+	LD	HL,2097152
+	LD	E,65
+	CALL	__fmul
+	LD	(IX+12),BC
+	LD	(IX+15),A
+;  254	        buffer[buffer_position] = (uint8_t) source + '0';
+	CALL	__ftol
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	LD	A,C
+	LD	BC,(IX+6)
+	ADD	HL,BC
+	ADD	A,48
+	LD	(HL),A
+	INC	(IX+-1)
+;  255	    }
+L_67:
+	LD	A,(IX+9)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	DEC	BC
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	SBC	HL,BC
+	JP	P,L_68
+	LD	HL,(IX+12)
+	LD	E,(IX+15)
+	LD	BC,0
+	XOR	A,A
+	CALL	__fcmp
+	JR	NZ,L_65
+L_68:
+;  256	    
+;  257	    buffer[length - 1] = '\0';
+	LD	A,(IX+9)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	LD	HL,(IX+6)
+	DEC	BC
+	ADD	HL,BC
+	LD	(HL),0
+;  258	    
+;  259	    return;
+;  260	    
+;  261	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _dtoa ***************************
+;Name                         Addr/Register   Size   Type
+;_strlen                             IMPORT  -----   function
+;_itoa                               IMPORT  -----   function
+;buffer_position                       IX-1      1   variable
+;source                               IX+12      4   parameter
+;length                                IX+9      1   parameter
+;buffer                                IX+6      3   parameter
+
+
+; Stack Frame Size: 19 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	XREF _pow:ROM
+	XREF _tolower:ROM
+	XREF _strlen:ROM
+	XREF _strcpy:ROM
+	XREF _free:ROM
+	XREF _realloc:ROM
+	XREF _calloc:ROM
+	XREF __lcmpu:ROM
+	XREF __lsub:ROM
+	XREF __imulu:ROM
+	XREF __ldivu:ROM
+	XREF __lmulu:ROM
+	XREF __lremu:ROM
+	XREF __fsub:ROM
+	XREF __fmul:ROM
+	XREF __fcmp:ROM
+	XREF __ftol:ROM
+	XREF __ultof:ROM
+	XREF __stoiu:ROM
+	XREF __frameset0:ROM
+	XREF __frameset:ROM
+	XREF __icmpzero:ROM
+	XREF __lcmpzero:ROM
+	XREF __ladd_b:ROM
+	XDEF _dtoa
+	XDEF _itoa
+	XDEF _string_to_lower
+	XDEF _uintmax_max_value
+	XDEF _set_handle_unrecoverable_error
+	XDEF _set_error
+	XDEF _smart_free_all
+	XDEF _smart_free
+	XDEF _smart_realloc
+	XDEF _smart_alloc
+	XDEF _smart_alloc_is_recording
+	XDEF _allocated_pointers
+	XDEF _current_error
+	END

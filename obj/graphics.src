@@ -1,0 +1,1085 @@
+; Zilog eZ80 ANSI C Compiler Release 3.4
+; -optsize -noreduceopt -nomodsect -peephole -globalopt
+; -localcse -const=ROM 
+	FILE	"SRC\GRAPHICS.C"
+	.assume ADL=1
+	SEGMENT DATA
+_dark_mode:
+	DB	1
+;    1	/*
+;    2	 
+;    3	 Copyright (c) 2019 Hannes Eberhard
+;    4	 
+;    5	 Permission is hereby granted, free of charge, to any person obtaining a copy
+;    6	 of this software and associated documentation files (the "Software"), to deal
+;    7	 in the Software without restriction, including without limitation the rights
+;    8	 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+;    9	 copies of the Software, and to permit persons to whom the Software is
+;   10	 furnished to do so, subject to the following conditions:
+;   11	 
+;   12	 The above copyright notice and this permission notice shall be included in all
+;   13	 copies or substantial portions of the Software.
+;   14	 
+;   15	 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+;   16	 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+;   17	 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+;   18	 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+;   19	 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+;   20	 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+;   21	 SOFTWARE.
+;   22	 
+;   23	 */
+;   24	
+;   25	#include "includes.h"
+;   26	
+;   27	bool dark_mode = true;
+	SEGMENT CODE
+;   28	
+;   29	void gfx_init(void) {
+_gfx_init:
+;   30	    
+;   31	    gfx_palette[GCOL_NULL] = gfx_RGBTo1555(0, 0, 0);
+	LD	HL,14877184
+	LD	(HL),0
+	INC	HL
+	LD	(HL),0
+;   32	    gfx_palette[GCOL_BLACK] = gfx_RGBTo1555(0, 0, 0);
+	LD	HL,14877198
+	LD	(HL),0
+	INC	HL
+	LD	(HL),0
+;   33	    gfx_palette[GCOL_WHITE] = gfx_RGBTo1555(255, 255, 255);
+	LD	HL,14877200
+	LD	(HL),255
+	INC	HL
+	LD	(HL),127
+;   34	    gfx_palette[GCOL_YELLOW] = gfx_RGBTo1555(255, 172, 38);
+	LD	HL,14877202
+	LD	(HL),164
+	INC	HL
+	LD	(HL),126
+;   35	    gfx_palette[GCOL_GREEN] = gfx_RGBTo1555(210, 239, 86);
+	LD	HL,14877204
+	LD	(HL),170
+	INC	HL
+	LD	(HL),107
+;   36	    gfx_palette[GCOL_BLUE] = gfx_RGBTo1555(77, 187, 255);
+	LD	HL,14877206
+	LD	(HL),255
+	INC	HL
+	LD	(HL),38
+;   37	    gfx_palette[GCOL_SYMBOLIC3] = gfx_RGBTo1555(255, 38, 88);
+	LD	HL,14877208
+	LD	(HL),139
+	INC	HL
+	LD	(HL),124
+;   38	    gfx_palette[GCOL_SYMBOLIC4] = gfx_RGBTo1555(40, 43, 64);
+	LD	HL,14877210
+	LD	(HL),168
+	INC	HL
+	LD	(HL),20
+;   39	    
+;   40	    if (dark_mode == false) {
+	LD	A,(_dark_mode)
+	OR	A,A
+	JR	NZ,L_1
+;   41	        gfx_palette[GCOL_BACKGROUND_PRIMARY] = gfx_RGBTo1555(255, 255, 255);
+	LD	HL,14877186
+	LD	(HL),255
+	INC	HL
+	LD	(HL),127
+;   42	        gfx_palette[GCOL_BACKGROUND_SECONDARY] = gfx_RGBTo1555(240, 240, 240);
+	LD	HL,14877188
+	LD	(HL),222
+	INC	HL
+	LD	(HL),123
+;   43	        gfx_palette[GCOL_TEXT_PRIMARY] = gfx_RGBTo1555(0, 0, 0);
+	LD	HL,14877190
+	LD	(HL),0
+	INC	HL
+	LD	(HL),0
+;   44	        gfx_palette[GCOL_TEXT_SECONDARY] = gfx_RGBTo1555(180, 180, 180);
+	LD	HL,14877192
+	LD	(HL),214
+	INC	HL
+	LD	(HL),90
+;   45	        gfx_palette[GCOL_BORDER] = gfx_RGBTo1555(0, 0, 0);
+	LD	HL,14877194
+	LD	(HL),0
+	INC	HL
+	LD	(HL),0
+;   46	        gfx_palette[GCOL_HEADER] = gfx_RGBTo1555(255, 38, 88);
+	LD	HL,14877196
+	LD	(HL),139
+	INC	HL
+	LD	(HL),124
+;   47	        gfx_palette[100 + GCOL_BACKGROUND_PRIMARY] = gfx_RGBTo1555(45, 45, 45);
+	LD	HL,14877386
+	LD	(HL),165
+	INC	HL
+	LD	(HL),20
+;   48	        gfx_palette[100 + GCOL_BACKGROUND_SECONDARY] = gfx_RGBTo1555(0, 0, 0);
+	LD	HL,14877388
+	LD	(HL),0
+	INC	HL
+	LD	(HL),0
+;   49	        gfx_palette[100 + GCOL_TEXT_PRIMARY] = gfx_RGBTo1555(245, 245, 245);
+	LD	HL,14877390
+	LD	(HL),222
+	INC	HL
+	LD	(HL),123
+;   50	        gfx_palette[100 + GCOL_TEXT_SECONDARY] = gfx_RGBTo1555(155, 155, 155);
+	LD	HL,14877392
+	LD	(HL),115
+	INC	HL
+	LD	(HL),78
+;   51	        gfx_palette[100 + GCOL_BORDER] = gfx_RGBTo1555(70, 70, 70);
+	LD	HL,14877394
+	LD	(HL),8
+	INC	HL
+	LD	(HL),33
+;   52	        gfx_palette[100 + GCOL_HEADER] = gfx_RGBTo1555(0, 0, 0);
+	LD	HL,14877396
+	LD	(HL),0
+	INC	HL
+	LD	(HL),0
+;   53	    } else {
+	JR	L_2
+L_1:
+;   54	        gfx_palette[GCOL_BACKGROUND_PRIMARY] = gfx_RGBTo1555(45, 45, 45);
+	LD	HL,14877186
+	LD	(HL),165
+	INC	HL
+	LD	(HL),20
+;   55	        gfx_palette[GCOL_BACKGROUND_SECONDARY] = gfx_RGBTo1555(0, 0, 0);
+	LD	HL,14877188
+	LD	(HL),0
+	INC	HL
+	LD	(HL),0
+;   56	        gfx_palette[GCOL_TEXT_PRIMARY] = gfx_RGBTo1555(245, 245, 245);
+	LD	HL,14877190
+	LD	(HL),222
+	INC	HL
+	LD	(HL),123
+;   57	        gfx_palette[GCOL_TEXT_SECONDARY] = gfx_RGBTo1555(155, 155, 155);
+	LD	HL,14877192
+	LD	(HL),115
+	INC	HL
+	LD	(HL),78
+;   58	        gfx_palette[GCOL_BORDER] = gfx_RGBTo1555(70, 70, 70);
+	LD	HL,14877194
+	LD	(HL),8
+	INC	HL
+	LD	(HL),33
+;   59	        gfx_palette[GCOL_HEADER] = gfx_RGBTo1555(0, 0, 0);
+	LD	HL,14877196
+	LD	(HL),0
+	INC	HL
+	LD	(HL),0
+;   60	        gfx_palette[100 + GCOL_BACKGROUND_PRIMARY] = gfx_RGBTo1555(255, 255, 255);
+	LD	HL,14877386
+	LD	(HL),255
+	INC	HL
+	LD	(HL),127
+;   61	        gfx_palette[100 + GCOL_BACKGROUND_SECONDARY] = gfx_RGBTo1555(240, 240, 240);
+	LD	HL,14877388
+	LD	(HL),222
+	INC	HL
+	LD	(HL),123
+;   62	        gfx_palette[100 + GCOL_TEXT_PRIMARY] = gfx_RGBTo1555(0, 0, 0);
+	LD	HL,14877390
+	LD	(HL),0
+	INC	HL
+	LD	(HL),0
+;   63	        gfx_palette[100 + GCOL_TEXT_SECONDARY] = gfx_RGBTo1555(180, 180, 180);
+	LD	HL,14877392
+	LD	(HL),214
+	INC	HL
+	LD	(HL),90
+;   64	        gfx_palette[100 + GCOL_BORDER] = gfx_RGBTo1555(0, 0, 0);
+	LD	HL,14877394
+	LD	(HL),0
+	INC	HL
+	LD	(HL),0
+;   65	        gfx_palette[100 + GCOL_HEADER] = gfx_RGBTo1555(255, 38, 88);
+	LD	HL,14877396
+	LD	(HL),139
+	INC	HL
+	LD	(HL),124
+;   66	    }
+L_2:
+;   67	    
+;   68	    gfx_SetColor(GCOL_BACKGROUND_PRIMARY);
+	LD	BC,1
+	PUSH	BC
+	CALL	_gfx_SetColor
+	POP	BC
+;   69	    
+;   70	    gfx_SetTextConfig(gfx_text_clip);
+	LD	BC,1
+	PUSH	BC
+	CALL	_gfx_SetTextConfig
+	POP	BC
+;   71	    gfx_SetTextFGColor(GCOL_TEXT_PRIMARY);
+	LD	BC,3
+	PUSH	BC
+	CALL	_gfx_SetTextFGColor
+	POP	BC
+;   72	    gfx_SetTextXY(MARGIN, MARGIN);
+	LD	BC,10
+	PUSH	BC
+	PUSH	BC
+	CALL	_gfx_SetTextXY
+	POP	BC
+	POP	BC
+;   73	    
+;   74	    gfx_FillScreen(GCOL_BACKGROUND_PRIMARY);
+	LD	BC,1
+	PUSH	BC
+	CALL	_gfx_FillScreen
+	POP	BC
+;   75	    
+;   76	}
+	RET	
+
+
+;**************************** _gfx_init ***************************
+;Name                         Addr/Register   Size   Type
+;_gfx_FillScreen                     IMPORT  -----   function
+;_gfx_SetTextXY                      IMPORT  -----   function
+;_gfx_SetTextFGColor                 IMPORT  -----   function
+;_gfx_SetTextConfig                  IMPORT  -----   function
+;_gfx_SetColor                       IMPORT  -----   function
+;_dark_mode                          STATIC      1   variable
+
+
+; Stack Frame Size: 6 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;   77	
+;   78	void gfx_print(const char* string, uint16_t x, uint16_t y) {
+_gfx_print:
+	LD	HL,-3
+	CALL	__frameset
+;   79	    gfx_SetTextXY(x, y);
+	LD	BC,(IX+12)
+	CALL	__stoiu
+	PUSH	HL
+	LD	BC,(IX+9)
+	CALL	__stoiu
+	PUSH	HL
+	CALL	_gfx_SetTextXY
+	POP	BC
+	POP	BC
+;   80	    gfx_PrintString(string);
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_gfx_PrintString
+	POP	BC
+;   81	    gfx_SetTextXY(gfx_GetTextX() + gfx_GetStringWidth(string), y);
+	LD	BC,(IX+12)
+	CALL	__stoiu
+	PUSH	HL
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_gfx_GetStringWidth
+	POP	BC
+	LD	BC,HL
+	LD	(IX+-3),BC
+	CALL	_gfx_GetTextX
+	LD	BC,(IX+-3)
+	ADD	HL,BC
+	PUSH	HL
+	CALL	_gfx_SetTextXY
+	POP	BC
+	POP	BC
+;   82	    return;
+;   83	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _gfx_print ***************************
+;Name                         Addr/Register   Size   Type
+;_gfx_GetTextX                       IMPORT  -----   function
+;_gfx_GetStringWidth                 IMPORT  -----   function
+;_gfx_PrintString                    IMPORT  -----   function
+;_gfx_SetTextXY                      IMPORT  -----   function
+;y                                    IX+12      2   parameter
+;x                                     IX+9      2   parameter
+;string                                IX+6      3   parameter
+
+
+; Stack Frame Size: 18 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;   84	
+;   85	void gfx_print_justified(const char* string, justification x_justification, uint16_t x_offset, justification y_justification, uint16_t y_offset) {
+_gfx_print_justified:
+	LD	HL,-4
+	CALL	__frameset
+;   86	    
+;   87	    uint16_t x;
+;   88	    uint16_t y;
+;   89	    
+;   90	    switch (x_justification) {
+	LD	HL,(IX+9)
+	CALL	__case8
+L__3:
+	DW	4
+	DB	0
+	DW24	L_8	
+
+	DB	1
+	DW24	L_5	
+
+	DB	3
+	DW24	L_7	
+
+	DB	5
+	DW24	L_6	
+
+	DW24	L_9	
+
+;   91	        case JUST_CENTER:
+L_5:
+;   92	            x = (LCD_WIDTH - gfx_GetStringWidth(string)) / 2; break;
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_gfx_GetStringWidth
+	POP	BC
+	LD	BC,HL
+	LD	HL,320
+	OR	A,A
+	SBC	HL,BC
+	LD	A,1
+	CALL	__ishru_b
+	LD	(IX+-2),L
+	LD	(IX+-1),H
+	JR	L_10
+;   93	        case JUST_LEFT:
+L_6:
+;   94	            x = MARGIN; break;
+	LD	(IX+-2),10
+	LD	(IX+-1),0
+	JR	L_10
+;   95	        case JUST_RIGHT:
+L_7:
+;   96	            x = LCD_WIDTH - MARGIN - gfx_GetStringWidth(string); break;
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_gfx_GetStringWidth
+	POP	BC
+	LD	BC,HL
+	LD.LIS	HL,310
+	OR	A,A
+	SBC.SIS	HL,BC
+	LD	(IX+-2),L
+	LD	(IX+-1),H
+	JR	L_10
+;   97	        case JUST_NULL:
+L_8:
+;   98	            x = 0;
+	LD	(IX+-2),0
+	LD	(IX+-1),0
+;   99	        default:
+L_9:
+;  100	            x = gfx_GetTextX() - x_offset; break;
+	CALL	_gfx_GetTextX
+	LD	BC,(IX+12)
+	LD	DE,HL
+	CALL	__stoiu
+	LD	BC,HL
+	LD	HL,DE
+	OR	A,A
+	SBC	HL,BC
+	LD	(IX+-2),L
+	LD	(IX+-1),H
+;  101	    }
+L_10:
+;  102	    
+;  103	    x += x_offset;
+	LD	BC,(IX+12)
+	LD	HL,(IX+-2)
+	ADD.SIS	HL,BC
+	LD	(IX+-2),L
+	LD	(IX+-1),H
+;  104	    
+;  105	    switch (y_justification) {
+	LD	HL,(IX+15)
+	CALL	__case8
+L__4:
+	DW	4
+	DB	0
+	DW24	L_14	
+
+	DB	1
+	DW24	L_11	
+
+	DB	2
+	DW24	L_12	
+
+	DB	4
+	DW24	L_13	
+
+	DW24	L_15	
+
+;  106	        case JUST_CENTER:
+L_11:
+;  107	            y = (LCD_HEIGHT - FONT_HEIGHT) / 2; break;
+	LD	(IX+-4),116
+	LD	(IX+-3),0
+	JR	L_16
+;  108	        case JUST_TOP:
+L_12:
+;  109	            y = MARGIN; break;
+	LD	(IX+-4),10
+	LD	(IX+-3),0
+	JR	L_16
+;  110	        case JUST_BOTTOM:
+L_13:
+;  111	            y = LCD_HEIGHT - MARGIN - FONT_HEIGHT; break;
+	LD	(IX+-4),222
+	LD	(IX+-3),0
+	JR	L_16
+;  112	        case JUST_NULL:
+L_14:
+;  113	            y = 0;
+	LD	(IX+-4),0
+	LD	(IX+-3),0
+;  114	        default:
+L_15:
+;  115	            y = gfx_GetTextY() - y_offset; break;
+	CALL	_gfx_GetTextY
+	LD	BC,(IX+18)
+	LD	DE,HL
+	CALL	__stoiu
+	LD	BC,HL
+	LD	HL,DE
+	OR	A,A
+	SBC	HL,BC
+	LD	(IX+-4),L
+	LD	(IX+-3),H
+;  116	    }
+L_16:
+;  117	    
+;  118	    y += y_offset;
+	LD	BC,(IX+18)
+	LD	HL,(IX+-4)
+	ADD.SIS	HL,BC
+	LD	(IX+-4),L
+	LD	(IX+-3),H
+;  119	    
+;  120	    gfx_SetTextXY(x, y);
+	LD	BC,(IX+-4)
+	CALL	__stoiu
+	PUSH	HL
+	LD	BC,(IX+-2)
+	CALL	__stoiu
+	PUSH	HL
+	CALL	_gfx_SetTextXY
+	POP	BC
+	POP	BC
+;  121	    gfx_PrintString(string);
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_gfx_PrintString
+	POP	BC
+;  122	    
+;  123	    return;
+;  124	    
+;  125	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _gfx_print_justified ***************************
+;Name                         Addr/Register   Size   Type
+;_gfx_PrintString                    IMPORT  -----   function
+;_gfx_SetTextXY                      IMPORT  -----   function
+;_gfx_GetTextY                       IMPORT  -----   function
+;_gfx_GetTextX                       IMPORT  -----   function
+;_gfx_GetStringWidth                 IMPORT  -----   function
+;y                                     IX-4      2   variable
+;x                                     IX-2      2   variable
+;y_offset                             IX+18      2   parameter
+;y_justification                      IX+15      3   parameter
+;x_offset                             IX+12      2   parameter
+;x_justification                       IX+9      3   parameter
+;string                                IX+6      3   parameter
+
+
+; Stack Frame Size: 25 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  126	
+;  127	void gfx_print_line(const char* string, justification x_justification) {
+_gfx_print_line:
+	CALL	__frameset0
+;  128	    gfx_print_justified(string, x_justification, 0, JUST_NULL, 0);
+	LD	BC,0
+	PUSH	BC
+	PUSH	BC
+	PUSH	BC
+	LD	BC,(IX+9)
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_gfx_print_justified
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+;  129	    gfx_SetTextXY(MARGIN, gfx_GetTextY() + LINE_HEIGHT + FONT_HEIGHT);
+	CALL	_gfx_GetTextY
+	LD	IY,HL
+	LEA	BC,IY+13
+	PUSH	BC
+	LD	BC,10
+	PUSH	BC
+	CALL	_gfx_SetTextXY
+	POP	BC
+	POP	BC
+;  130	    return;
+;  131	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _gfx_print_line ***************************
+;Name                         Addr/Register   Size   Type
+;_gfx_GetTextY                       IMPORT  -----   function
+;_gfx_SetTextXY                      IMPORT  -----   function
+;_gfx_print_justified                IMPORT  -----   function
+;x_justification                       IX+9      3   parameter
+;string                                IX+6      3   parameter
+
+
+; Stack Frame Size: 12 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  132	
+;  133	void gfx_print_box(const char* string, uint16_t width, uint8_t line_height) {
+_gfx_print_box:
+	LD	HL,-68
+	CALL	__frameset
+;  134	    
+;  135	    int i;
+;  136	    int x = gfx_GetTextX();
+	CALL	_gfx_GetTextX
+	LD	(IX+-19),HL
+;  137	    int y = gfx_GetTextY();
+	CALL	_gfx_GetTextY
+	LD	(IX+-28),HL
+;  138	    int relative_x = 0;
+	LD	BC,0
+	LD	(IX+-7),BC
+;  139	    int relative_y = 0;
+	LD	(IX+-13),BC
+;  140	    int word_width = 0;
+	LD	(IX+-16),BC
+;  141	    char word_buffer[40];
+;  142	    uint8_t word_buffer_position;
+;  143	    
+;  144	    if (width == 0) width = LCD_WIDTH - x - MARGIN;
+	LD	HL,(IX+9)
+	CALL	__scmpzero
+	JR	NZ,L_37
+	LD	IY,(IX+-19)
+	LEA	BC,IY+10
+	LD.LIS	HL,320
+	OR	A,A
+	SBC.SIS	HL,BC
+	LD	(IX+9),L
+	LD	(IX+10),H
+L_37:
+;  145	    
+;  146	    for (i = 0; string[i] != '\0'; i++) {
+	LD	BC,0
+	LD	(IX+-3),BC
+	JR	L_36
+L_34:
+;  147	        
+;  148	        word_buffer_position = 0;
+	LD	(IX+-4),0
+;  149	        
+;  150	        if (string[i] == '\\') {
+	LD	HL,(IX+-22)
+	LD	A,(HL)
+	LD	B,A
+	SEXT	HL
+	LD	L,B
+	OR	A,A
+	LD	BC,92
+	SBC	HL,BC
+	JR	NZ,L_28
+;  151	            relative_x = width;
+	LD	BC,(IX+9)
+	CALL	__stoiu
+	LD	(IX+-7),HL
+;  152	            i++;
+	LD	BC,(IX+-3)
+	INC	BC
+	LD	(IX+-3),BC
+;  153	        }
+;  154	        
+;  155	        for ( ; string[i] != ' ' && string[i] != '\0'; i++) {
+	JR	L_28
+L_26:
+;  156	            word_buffer[word_buffer_position] = string[i];
+	LD	A,(IX+-4)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	LEA	HL,IX+-68
+	LD	IY,(IX+-10)
+	LD	A,(IY)
+	ADD	HL,BC
+	LD	(HL),A
+;  157	            word_buffer_position++;
+	INC	(IX+-4)
+	LD	BC,(IX+-3)
+	INC	BC
+	LD	(IX+-3),BC
+;  158	        }
+L_28:
+	LD	BC,(IX+-3)
+	LD	HL,(IX+6)
+	ADD	HL,BC
+	LD	(IX+-10),HL
+	LD	(IX+-25),HL
+	LD	HL,(IX+-10)
+	LD	A,(HL)
+	LD	B,A
+	SEXT	HL
+	LD	L,B
+	OR	A,A
+	LD	BC,32
+	SBC	HL,BC
+	JR	Z,L_30
+	LD	BC,(IX+-10)
+	LD	(IX+-25),BC
+	LD	HL,(IX+-10)
+	LD	A,(HL)
+	OR	A,A
+	JR	NZ,L_26
+L_30:
+;  159	        
+;  160	        word_buffer[word_buffer_position] = ' ';
+	LD	A,(IX+-4)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	LEA	HL,IX+-68
+	ADD	HL,BC
+	LD	(HL),32
+;  161	        word_buffer[word_buffer_position + 1] = '\0';
+	LD	A,(IX+-4)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	LEA	HL,IX+-68
+;  162	        
+;  163	        word_width = gfx_GetStringWidth(word_buffer);
+	PEA	IX+-68
+	INC	BC
+	ADD	HL,BC
+	LD	(HL),0
+	CALL	_gfx_GetStringWidth
+	POP	BC
+	LD	(IX+-16),HL
+;  164	        
+;  165	        if (word_width > width - relative_x) {
+	LD	BC,(IX+9)
+	CALL	__stoiu
+	OR	A,A
+	LD	BC,(IX+-7)
+	SBC	HL,BC
+	OR	A,A
+	LD	BC,(IX+-16)
+	SBC	HL,BC
+	JP	P,L_32
+;  166	            relative_x = 0;
+	LD	BC,0
+	LD	(IX+-7),BC
+;  167	            relative_y += FONT_HEIGHT + line_height;
+	LD	A,(IX+12)
+	UEXT	HL
+	LD	BC,(IX+-13)
+	LD	L,A
+	LD	IY,HL
+	LEA	HL,IY+8
+	ADD	HL,BC
+	LD	(IX+-13),HL
+;  168	        }
+L_32:
+;  169	        
+;  170	        gfx_print(word_buffer, relative_x + x, relative_y + y);
+	LD	BC,(IX+-28)
+	LD	HL,(IX+-13)
+	ADD.SIS	HL,BC
+	PUSH	HL
+	LD	BC,(IX+-19)
+	LD	HL,(IX+-7)
+	ADD.SIS	HL,BC
+	PUSH	HL
+	PEA	IX+-68
+	CALL	_gfx_print
+	POP	BC
+	POP	BC
+	POP	BC
+;  171	        relative_x += word_width;
+	LD	BC,(IX+-16)
+	LD	HL,(IX+-7)
+	ADD	HL,BC
+	LD	(IX+-7),HL
+;  172	        
+;  173	        if (string[i] == '\0') break;
+	LD	HL,(IX+-25)
+	LD	A,(HL)
+	OR	A,A
+	JR	Z,L_38
+	LD	BC,(IX+-3)
+	INC	BC
+	LD	(IX+-3),BC
+;  174	        
+;  175	    }
+L_36:
+	LD	BC,(IX+-3)
+	LD	HL,(IX+6)
+	ADD	HL,BC
+	LD	(IX+-22),HL
+	LD	A,(HL)
+	OR	A,A
+	JR	NZ,L_34
+L_38:
+;  176	    
+;  177	    gfx_SetTextXY(relative_x + x, relative_y + y);
+	LD	BC,(IX+-28)
+	LD	HL,(IX+-13)
+	ADD	HL,BC
+	PUSH	HL
+	LD	BC,(IX+-19)
+	LD	HL,(IX+-7)
+	ADD	HL,BC
+	PUSH	HL
+	CALL	_gfx_SetTextXY
+	POP	BC
+	POP	BC
+;  178	    
+;  179	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _gfx_print_box ***************************
+;Name                         Addr/Register   Size   Type
+;_gfx_SetTextXY                      IMPORT  -----   function
+;_gfx_print                          IMPORT  -----   function
+;_gfx_GetStringWidth                 IMPORT  -----   function
+;_gfx_GetTextY                       IMPORT  -----   function
+;_gfx_GetTextX                       IMPORT  -----   function
+;word_buffer                          IX-68     40   variable
+;y                                    IX-28      3   variable
+;G_3                                  IX-25      3   variable
+;G_0                                  IX-22      3   variable
+;x                                    IX-19      3   variable
+;word_width                           IX-16      3   variable
+;relative_y                           IX-13      3   variable
+;G_2                                  IX-10      3   variable
+;relative_x                            IX-7      3   variable
+;word_buffer_position                  IX-4      1   variable
+;i                                     IX-3      3   variable
+;line_height                          IX+12      1   parameter
+;width                                 IX+9      2   parameter
+;string                                IX+6      3   parameter
+
+
+; Stack Frame Size: 83 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  180	
+;  181	void print_character_wise(const char* string) {
+_print_character_wise:
+	LD	HL,-8
+	CALL	__frameset
+;  182	    
+;  183	    uint16_t i;
+;  184	    
+;  185	    for (i = 0; string[i] != '\0'; i++) {
+	LD	(IX+-5),0
+	LD	(IX+-4),0
+	JR	L_45
+L_43:
+;  186	        if (gfx_GetTextX() + gfx_GetCharWidth(string[i]) < LCD_WIDTH - MARGIN) {
+	LD	HL,(IX+-3)
+	LD	C,(HL)
+	LD	B,0
+	PUSH	BC
+	CALL	_gfx_GetCharWidth
+	POP	BC
+	LD	BC,HL
+	LD	(IX+-8),BC
+	CALL	_gfx_GetTextX
+	LD	BC,(IX+-8)
+	ADD	HL,BC
+	OR	A,A
+	LD	BC,310
+	SBC	HL,BC
+	JR	NC,L_42
+;  187	            gfx_PrintChar(string[i]);
+	LD	HL,(IX+-3)
+	LD	C,(HL)
+	LD	B,0
+	PUSH	BC
+	CALL	_gfx_PrintChar
+	POP	BC
+;  188	        } else {
+	JR	L_44
+L_42:
+;  189	            gfx_SetTextXY(MARGIN, gfx_GetTextY() + FONT_HEIGHT + LINE_HEIGHT);
+	CALL	_gfx_GetTextY
+	LD	IY,HL
+	LEA	BC,IY+13
+	PUSH	BC
+	LD	BC,10
+	PUSH	BC
+	CALL	_gfx_SetTextXY
+	POP	BC
+	POP	BC
+;  190	            gfx_PrintChar(string[i]);
+	LD	HL,(IX+-3)
+	LD	C,(HL)
+	LD	B,0
+	PUSH	BC
+	CALL	_gfx_PrintChar
+	POP	BC
+;  191	        }
+;  192	    }
+L_44:
+	LD	HL,(IX+-5)
+	INC	HL
+	LD	(IX+-5),L
+	LD	(IX+-4),H
+L_45:
+	LD	BC,(IX+-5)
+	CALL	__stoiu
+	LD	BC,(IX+6)
+	ADD	HL,BC
+	LD	(IX+-3),HL
+	LD	A,(HL)
+	OR	A,A
+	JR	NZ,L_43
+;  193	    
+;  194	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _print_character_wise ***************************
+;Name                         Addr/Register   Size   Type
+;_gfx_GetTextY                       IMPORT  -----   function
+;_gfx_SetTextXY                      IMPORT  -----   function
+;_gfx_PrintChar                      IMPORT  -----   function
+;_gfx_GetTextX                       IMPORT  -----   function
+;_gfx_GetCharWidth                   IMPORT  -----   function
+;i                                     IX-5      2   variable
+;G_4                                   IX-3      3   variable
+;string                                IX+6      3   parameter
+
+
+; Stack Frame Size: 17 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  195	
+;  196	void draw_header(const char* left, const char* center, const char* right) {
+_draw_header:
+	LD	HL,-4
+	CALL	__frameset
+;  197	    
+;  198	    int8_t y_offset = (dark_mode) ? -5 : -3;
+	LD	A,(_dark_mode)
+	OR	A,A
+	JR	Z,L_49
+	LD	BC,16777211
+	LD	(IX+-4),BC
+	JR	L_50
+L_49:
+	LD	BC,16777213
+	LD	(IX+-4),BC
+L_50:
+	LD	A,(IX+-4)
+	LD	(IX+-1),A
+;  199	    
+;  200	    gfx_SetColor(GCOL_HEADER);
+	LD	BC,6
+	PUSH	BC
+	CALL	_gfx_SetColor
+	POP	BC
+;  201	    gfx_FillRectangle(0, 0, LCD_WIDTH, HEADER_HEIGHT);
+	LD	BC,20
+	PUSH	BC
+	LD	BC,320
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	PUSH	BC
+	CALL	_gfx_FillRectangle
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+;  202	    
+;  203	    gfx_SetTextFGColor(GCOL_WHITE);
+	LD	BC,8
+	PUSH	BC
+	CALL	_gfx_SetTextFGColor
+	POP	BC
+;  204	    
+;  205	    if (left != NULL) {
+	LD	HL,(IX+6)
+	CALL	__icmpzero
+	JR	Z,L_53
+;  206	        gfx_print_justified(left, JUST_LEFT, 0, JUST_TOP, y_offset);
+	LD	A,(IX+-1)
+	LD	B,A
+	SEXT	HL
+	LD	L,B
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,5
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_gfx_print_justified
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+;  207	    }
+L_53:
+;  208	    
+;  209	    if (center != NULL) {
+	LD	HL,(IX+9)
+	CALL	__icmpzero
+	JR	Z,L_55
+;  210	        gfx_print_justified(center, JUST_CENTER, 0, JUST_TOP, y_offset);
+	LD	A,(IX+-1)
+	LD	B,A
+	SEXT	HL
+	LD	L,B
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,(IX+9)
+	PUSH	BC
+	CALL	_gfx_print_justified
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+;  211	    }
+L_55:
+;  212	    
+;  213	    if (right != NULL) {
+	LD	HL,(IX+12)
+	CALL	__icmpzero
+	JR	Z,L_56
+;  214	        gfx_print_justified(right, JUST_RIGHT, 0, JUST_TOP, y_offset);
+	LD	A,(IX+-1)
+	LD	B,A
+	SEXT	HL
+	LD	L,B
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,3
+	PUSH	BC
+	LD	BC,(IX+12)
+	PUSH	BC
+	CALL	_gfx_print_justified
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+;  215	    }
+L_56:
+;  216	    
+;  217	    return;
+;  218	    
+;  219	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _draw_header ***************************
+;Name                         Addr/Register   Size   Type
+;_gfx_print_justified                IMPORT  -----   function
+;_gfx_SetTextFGColor                 IMPORT  -----   function
+;_gfx_FillRectangle                  IMPORT  -----   function
+;_gfx_SetColor                       IMPORT  -----   function
+;_dark_mode                          STATIC      1   variable
+;temp47                                IX-4      3   variable
+;y_offset                              IX-1      1   variable
+;right                                IX+12      3   parameter
+;center                                IX+9      3   parameter
+;left                                  IX+6      3   parameter
+
+
+; Stack Frame Size: 19 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	XREF _gfx_GetCharWidth:ROM
+	XREF _gfx_GetStringWidth:ROM
+	XREF _gfx_SetTextFGColor:ROM
+	XREF _gfx_SetTextConfig:ROM
+	XREF _gfx_SetTextXY:ROM
+	XREF _gfx_GetTextY:ROM
+	XREF _gfx_GetTextX:ROM
+	XREF _gfx_PrintString:ROM
+	XREF _gfx_PrintChar:ROM
+	XREF _gfx_FillRectangle:ROM
+	XREF _gfx_FillScreen:ROM
+	XREF _gfx_SetColor:ROM
+	XREF __stoiu:ROM
+	XREF __frameset0:ROM
+	XREF __frameset:ROM
+	XREF __scmpzero:ROM
+	XREF __icmpzero:ROM
+	XREF __case8:ROM
+	XREF __ishru_b:ROM
+	XDEF _draw_header
+	XDEF _print_character_wise
+	XDEF _gfx_print_box
+	XDEF _gfx_print_line
+	XDEF _gfx_print_justified
+	XDEF _gfx_print
+	XDEF _gfx_init
+	XDEF _dark_mode
+	END

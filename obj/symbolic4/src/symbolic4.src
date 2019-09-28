@@ -1,0 +1,3037 @@
+; Zilog eZ80 ANSI C Compiler Release 3.4
+; -optsize -noreduceopt -nomodsect -peephole -globalopt
+; -localcse -const=ROM 
+	FILE	"SRC\SYMBOLIC4\SRC\SYMBOLIC4.C"
+	.assume ADL=1
+	SEGMENT DATA
+_use_abbrevations:
+	DB	1
+_use_spaces:
+	DB	1
+	SEGMENT STRSECT
+L__0:
+	DB	"XYZABCDUVWSTPQRJKLMNOFGHEIxyzabcduvwstpqrjklmnofghei"
+	DB	0
+	SEGMENT DATA
+_default_priorities:
+	DW24	L__0
+;    1	
+;    2	/*
+;    3	 
+;    4	 Copyright (c) 2019 Hannes Eberhard
+;    5	 
+;    6	 Permission is hereby granted, free of charge, to any person obtaining a copy
+;    7	 of this software and associated documentation files (the "Software"), to deal
+;    8	 in the Software without restriction, including without limitation the rights
+;    9	 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+;   10	 copies of the Software, and to permit persons to whom the Software is
+;   11	 furnished to do so, subject to the following conditions:
+;   12	 
+;   13	 The above copyright notice and this permission notice shall be included in all
+;   14	 copies or substantial portions of the Software.
+;   15	 
+;   16	 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+;   17	 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+;   18	 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+;   19	 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+;   20	 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+;   21	 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+;   22	 SOFTWARE.
+;   23	 
+;   24	 */
+;   25	
+;   26	#include "symbolic4.h"
+;   27	
+;   28	bool use_abbrevations = true;
+;   29	bool use_spaces = true;
+;   30	char* default_priorities = "XYZABCDUVWSTPQRJKLMNOFGHEIxyzabcduvwstpqrjklmnofghei";
+	SEGMENT CODE
+;   31	
+;   32	uint8_t process_equation(expression* source);
+;   33	uint8_t process_solve(expression* source);
+;   34	uint8_t process_value(expression* source);
+;   35	uint8_t process_factors(expression* source);
+;   36	uint8_t process_derivative(expression* source);
+;   37	uint8_t process_integral(expression* source);
+;   38	uint8_t process_stationary_points(expression* source);
+;   39	uint8_t process_tangent(expression* source);
+;   40	uint8_t process_normal(expression* source);
+;   41	uint8_t process_angle(expression* source);
+;   42	uint8_t process_vector_magnitude(expression* source);
+;   43	uint8_t process_vector_normalized(expression* source);
+;   44	uint8_t process_vector_angle(expression* source);
+;   45	uint8_t process_vector_dot_product(expression* source);
+;   46	uint8_t process_vector_cross_product(expression* source);
+;   47	uint8_t process_vector_triple_product(expression* source);
+;   48	void process_approximate(expression* source);
+;   49	
+;   50	uint8_t symbolic4(char* buffer, const char* query) {
+_symbolic4:
+	LD	HL,-6
+	CALL	__frameset
+;   51	    
+;   52	    expression* root;
+;   53	    
+;   54	    allocated_pointers = calloc(ALLOCATED_POINTERS_LENGTH, sizeof(void*));
+	LD	BC,3
+	PUSH	BC
+	LD	BC,2000
+	PUSH	BC
+	CALL	_calloc
+	POP	BC
+	POP	BC
+;   55	    memset(allocated_pointers, 0, ALLOCATED_POINTERS_LENGTH);
+	LD	BC,2000
+	PUSH	BC
+	LD	(_allocated_pointers),HL
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(_allocated_pointers)
+	PUSH	BC
+	CALL	_memset
+	POP	BC
+	POP	BC
+	POP	BC
+;   56	    buffer[0] = '\0';
+	LD	HL,(IX+6)
+;   57	    
+;   58	    root = new_expression(EXPT_STRUCTURE, EXPI_LIST, 0);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,40
+	PUSH	BC
+	LD	BC,4
+	PUSH	BC
+	LD	(HL),0
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	(IX+-3),HL
+;   59	
+;   60	    ERROR_CHECK(tokenize(root, query));
+	LD	BC,(IX+9)
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_tokenize
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_2
+	LD	A,1
+	JR	L_13
+L_2:
+;   61	    ERROR_CHECK(validate(root));
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_validate
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_3
+	LD	A,1
+	JR	L_13
+L_3:
+;   62	    parse(root);
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_parse
+	POP	BC
+;   63	
+;   64	    if (root->identifier == EXPI_PARSE) {
+	LD	IY,(IX+-3)
+	LD	HL,(IY+3)
+	LD	BC,46
+	OR	A,A
+	SBC	HL,BC
+	JR	NZ,L_11
+;   65	        expression_to_string(buffer, root->children[0], (root->child_count == 2) ? (uint8_t) root->children[1]->value.numeric.numerator : ETSF_INFIX);
+	LD	IY,(IX+-3)
+	LD	A,(IY+10)
+	CP	A,2
+	JR	NZ,L_6
+	LD	IY,(IX+-3)
+	LD	IY,(IY+11)
+	LEA	HL,IY+3
+	LD	IY,(HL)
+	LD	A,(IY+14)
+	UEXT	HL
+	LD	L,A
+	LD	(IX+-6),HL
+	JR	L_7
+L_6:
+	LD	BC,1
+	LD	(IX+-6),BC
+L_7:
+	LD	BC,(IX+-6)
+	PUSH	BC
+	LD	IY,(IX+-3)
+	LD	HL,(IY+11)
+	LD	BC,(HL)
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_expression_to_string
+	POP	BC
+	POP	BC
+	POP	BC
+;   66	    } else {
+	JR	L_12
+L_11:
+;   67	        ERROR_CHECK(process(root, true));
+	LD	BC,1
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_process
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_9
+	LD	A,1
+	JR	L_13
+L_9:
+;   68	        expression_to_string(buffer, root, ETSF_INFIX);
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_expression_to_string
+	POP	BC
+	POP	BC
+	POP	BC
+;   69	    }
+L_12:
+;   70	
+;   71	    free_expression(root, false);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_free_expression
+	POP	BC
+	POP	BC
+;   72	    smart_free_all();
+	CALL	_smart_free_all
+;   73	    free(allocated_pointers);
+	LD	BC,(_allocated_pointers)
+	PUSH	BC
+	CALL	_free
+	POP	BC
+;   74	    
+;   75	    return RETS_SUCCESS;
+	LD	A,2
+;   76	    
+;   77	}
+L_13:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _symbolic4 ***************************
+;Name                         Addr/Register   Size   Type
+;_free                               IMPORT  -----   function
+;_smart_free_all                     IMPORT  -----   function
+;_free_expression                    IMPORT  -----   function
+;_process                            IMPORT  -----   function
+;_expression_to_string               IMPORT  -----   function
+;_parse                              IMPORT  -----   function
+;_validate                           IMPORT  -----   function
+;_tokenize                           IMPORT  -----   function
+;_new_expression                     IMPORT  -----   function
+;_memset                             IMPORT  -----   function
+;_allocated_pointers                 IMPORT      3   variable
+;_calloc                             IMPORT  -----   function
+;temp4                                 IX-6      3   variable
+;root                                  IX-3      3   variable
+;query                                 IX+9      3   parameter
+;buffer                                IX+6      3   parameter
+
+
+; Stack Frame Size: 18 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;   78	
+;   79	uint8_t process(expression* source, bool recursive) {
+_process:
+	LD	HL,-8
+	CALL	__frameset
+;   80	    
+;   81	    uint8_t i;
+;   82	    
+;   83	    for (i = 0; i < source->child_count && recursive; i++) {
+	LD	(IX+-1),0
+	JR	L_21
+L_19:
+;   84	        if (source->children[i] == NULL) continue;
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	LD	DE,HL
+	ADD	HL,HL
+	LD	IY,(IX+6)
+	LD	BC,(IY+11)
+	ADD	HL,DE
+	ADD	HL,BC
+	LD	(IX+-8),HL
+	LD	HL,(HL)
+	CALL	__icmpzero
+	JR	Z,L_20
+;   85	        ERROR_CHECK(process(source->children[i], true));
+	LD	BC,1
+	PUSH	BC
+	LD	HL,(IX+-8)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_process
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_20
+	LD	A,1
+	JR	L_79
+;   86	    }
+L_20:
+	INC	(IX+-1)
+L_21:
+	LD	IY,(IX+6)
+	LD	A,(IY+10)
+	LD	(IX+-2),A
+	LD	A,(IX+-1)
+	CP	A,(IX+-2)
+	JR	NC,L_25
+	LD	A,(IX+9)
+	OR	A,A
+	JR	NZ,L_19
+L_25:
+;   87	    
+;   88	    if ((source->type == EXPT_FUNCTION || source->identifier == EXPT_STRUCTURE) && source->child_count == 0) {
+	LD	IY,(IX+6)
+	LD	HL,(IY+0)
+	LD	BC,3
+	OR	A,A
+	SBC	HL,BC
+	JR	Z,L_23
+	LD	IY,(IX+6)
+	LD	HL,(IY+3)
+	LD	BC,4
+	OR	A,A
+	SBC	HL,BC
+	JR	NZ,L_77
+L_23:
+	LD	A,(IX+-2)
+	OR	A,A
+	JR	NZ,L_77
+;   89	        return set_error(ERRD_SYNTAX, ERRI_ARGUMENTS, get_expression_string(source->identifier));
+	LD	IY,(IX+6)
+	LD	BC,(IY+3)
+	PUSH	BC
+	CALL	_get_expression_string
+	POP	BC
+	PUSH	HL
+	LD	BC,8
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_set_error
+	POP	BC
+	POP	BC
+	POP	BC
+	JR	L_79
+;   90	    }
+L_77:
+;   91	    
+;   92	    switch (source->identifier) {
+	LD	IY,(IX+6)
+	LD	HL,(IY+3)
+	CALL	__case8
+L__14:
+	DW	16
+	DB	4
+	DW24	L_26	
+
+	DB	20
+	DW24	L_29	
+
+	DB	21
+	DW24	L_32	
+
+	DB	22
+	DW24	L_35	
+
+	DB	23
+	DW24	L_36	
+
+	DB	24
+	DW24	L_39	
+
+	DB	28
+	DW24	L_42	
+
+	DB	29
+	DW24	L_45	
+
+	DB	30
+	DW24	L_48	
+
+	DB	31
+	DW24	L_51	
+
+	DB	32
+	DW24	L_54	
+
+	DB	33
+	DW24	L_57	
+
+	DB	34
+	DW24	L_60	
+
+	DB	35
+	DW24	L_63	
+
+	DB	36
+	DW24	L_66	
+
+	DB	37
+	DW24	L_69	
+
+	DW24	L_70	
+
+;   93	        case EXPI_EQUATION: ERROR_CHECK(process_equation(source)); break;
+L_26:
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_process_equation
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_78
+	LD	A,1
+	JR	L_79
+;   94	        case EXPI_SOLVE: ERROR_CHECK(process_solve(source)); break;
+L_29:
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_process_solve
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_78
+	LD	A,1
+	JR	L_79
+;   95	        case EXPI_FACTORS: ERROR_CHECK(process_factors(source)); break;
+L_32:
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_process_factors
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_78
+	LD	A,1
+	JR	L_79
+;   96	        case EXPI_VALUE: process_value(source); break;
+L_35:
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_process_value
+	POP	BC
+	JR	L_78
+;   97	        case EXPI_DERIVATIVE: ERROR_CHECK(process_derivative(source)); break;
+L_36:
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_process_derivative
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_78
+	LD	A,1
+	JR	L_79
+;   98	        case EXPI_INTEGRAL: ERROR_CHECK(process_integral(source)); break;
+L_39:
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_process_integral
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_78
+	LD	A,1
+	JR	L_79
+;   99	        case EXPI_TANGENT: ERROR_CHECK(process_tangent(source)); break;
+L_42:
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_process_tangent
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_78
+	LD	A,1
+	JR	L_79
+;  100	        case EXPI_NORMAL: ERROR_CHECK(process_normal(source)); break;
+L_45:
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_process_normal
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_78
+	LD	A,1
+	JR	L_79
+;  101	        case EXPI_ANGLE: ERROR_CHECK(process_angle(source)); break;
+L_48:
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_process_angle
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_78
+	LD	A,1
+	JR	L_79
+;  102	        case EXPI_V_MAG: ERROR_CHECK(process_vector_magnitude(source)); break;
+L_51:
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_process_vector_magnitude
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_78
+	LD	A,1
+	JR	L_79
+;  103	        case EXPI_V_NORMALIZED: ERROR_CHECK(process_vector_normalized(source)); break;
+L_54:
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_process_vector_normalized
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_78
+	LD	A,1
+	JR	L_79
+;  104	        case EXPI_V_ANGLE: ERROR_CHECK(process_vector_angle(source)); break;
+L_57:
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_process_vector_angle
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_78
+	LD	A,1
+	JR	L_79
+;  105	        case EXPI_V_DOT_PRODUCT: ERROR_CHECK(process_vector_dot_product(source)); break;
+L_60:
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_process_vector_dot_product
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_78
+	LD	A,1
+	JR	L_79
+;  106	        case EXPI_V_CROSS_PRODUCT: ERROR_CHECK(process_vector_cross_product(source)); break;
+L_63:
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_process_vector_cross_product
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_78
+	LD	A,1
+	JR	L_79
+;  107	        case EXPI_V_TRIPLE_PRODUCT: ERROR_CHECK(process_vector_triple_product(source)); break;
+L_66:
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_process_vector_triple_product
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_78
+	LD	A,1
+	JR	L_79
+;  108	        case EXPI_APPROXIMATE: process_approximate(source); break;
+L_69:
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_process_approximate
+	POP	BC
+	JR	L_78
+;  109	        default: ERROR_CHECK(simplify(source, !recursive)); break;
+L_70:
+	LD	A,(IX+9)
+	OR	A,A
+	JR	NZ,L_72
+	LD	BC,1
+	LD	(IX+-5),BC
+	JR	L_73
+L_72:
+	LD	BC,0
+	LD	(IX+-5),BC
+L_73:
+	LD	C,(IX+-5)
+	LD	B,0
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_simplify
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_78
+	LD	A,1
+	JR	L_79
+;  110	    }
+L_78:
+;  111	    
+;  112	    return RETS_SUCCESS;
+	LD	A,2
+;  113	    
+;  114	}
+L_79:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _process ***************************
+;Name                         Addr/Register   Size   Type
+;_simplify                           IMPORT  -----   function
+;_process_approximate                IMPORT  -----   function
+;_process_vector_triple_product      IMPORT  -----   function
+;_process_vector_cross_product       IMPORT  -----   function
+;_process_vector_dot_product         IMPORT  -----   function
+;_process_vector_angle               IMPORT  -----   function
+;_process_vector_normalized          IMPORT  -----   function
+;_process_vector_magnitude           IMPORT  -----   function
+;_process_angle                      IMPORT  -----   function
+;_process_normal                     IMPORT  -----   function
+;_process_tangent                    IMPORT  -----   function
+;_process_integral                   IMPORT  -----   function
+;_process_derivative                 IMPORT  -----   function
+;_process_value                      IMPORT  -----   function
+;_process_factors                    IMPORT  -----   function
+;_process_solve                      IMPORT  -----   function
+;_process_equation                   IMPORT  -----   function
+;_get_expression_string              IMPORT  -----   function
+;_set_error                          IMPORT  -----   function
+;G_0                                   IX-8      3   variable
+;temp74                                IX-5      3   variable
+;G_1                                   IX-2      1   variable
+;i                                     IX-1      1   variable
+;recursive                             IX+9      1   parameter
+;source                                IX+6      3   parameter
+
+
+; Stack Frame Size: 20 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  115	
+;  116	uint8_t process_equation(expression* source) {
+_process_equation:
+	CALL	__frameset0
+;  117	    if (source->child_count != 2) return set_error(ERRD_SYNTAX, ERRI_ARGUMENTS, "");
+	LD	IY,(IX+6)
+	LD	A,(IY+10)
+	CP	A,2
+	JR	Z,L_82
+	LD	BC,L__33
+	PUSH	BC
+	LD	BC,8
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_set_error
+	POP	BC
+	POP	BC
+	POP	BC
+	JR	L_84
+L_82:
+;  118	    ERROR_CHECK(solve(source, NULL));
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_solve
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_83
+	LD	A,1
+	JR	L_84
+L_83:
+;  119	    return RETS_SUCCESS;
+	LD	A,2
+;  120	}
+L_84:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _process_equation ***************************
+;Name                         Addr/Register   Size   Type
+;_solve                              IMPORT  -----   function
+;_set_error                          IMPORT  -----   function
+;source                                IX+6      3   parameter
+
+
+; Stack Frame Size: 9 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	SEGMENT STRSECT
+L__33:
+	DB	0
+	SEGMENT CODE
+;  121	
+;  122	uint8_t process_solve(expression* source) {
+_process_solve:
+	LD	HL,-4
+	CALL	__frameset
+;  123	    
+;  124	    if (source->children[0]->identifier != EXPI_EQUATION) return set_error(ERRD_SYNTAX, ERRI_ARGUMENTS, "");
+	LD	IY,(IX+6)
+	LD	BC,(IY+11)
+	LD	(IX+-3),BC
+	LD	HL,BC
+	LD	IY,(HL)
+	LD	HL,(IY+3)
+	LD	BC,4
+	OR	A,A
+	SBC	HL,BC
+	JR	Z,L_93
+	LD	BC,L__37
+	PUSH	BC
+	LD	BC,8
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_set_error
+	POP	BC
+	POP	BC
+	POP	BC
+	JR	L_95
+L_93:
+;  125	    
+;  126	    if (source->child_count == 1) {
+	LD	IY,(IX+6)
+	LD	A,(IY+10)
+	LD	(IX+-4),A
+	CP	A,1
+	JR	NZ,L_92
+;  127	        ERROR_CHECK(solve(source->children[0], NULL));
+	LD	BC,0
+	PUSH	BC
+	LD	HL,(IX+-3)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_solve
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_94
+	LD	A,1
+	JR	L_95
+;  128	    } else if (source->child_count == 2 && source->children[1]->identifier == EXPI_SYMBOL) {
+L_92:
+	LD	A,(IX+-4)
+	CP	A,2
+	JR	NZ,L_90
+	LD	IY,(IX+-3)
+	LEA	HL,IY+3
+	LD	IY,(HL)
+	LD	HL,(IY+3)
+	LD	BC,2
+	OR	A,A
+	SBC	HL,BC
+	JR	NZ,L_90
+;  129	        ERROR_CHECK(solve(source->children[0], source->children[1]));
+	LD	IY,(IX+-3)
+	LEA	HL,IY+3
+	LD	BC,(HL)
+	PUSH	BC
+	LD	HL,(IX+-3)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_solve
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_94
+	LD	A,1
+	JR	L_95
+;  130	    } else {
+L_90:
+;  131	        return set_error(ERRD_SYNTAX, ERRI_ARGUMENTS, "");
+	LD	BC,L__43
+	PUSH	BC
+	LD	BC,8
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_set_error
+	POP	BC
+	POP	BC
+	POP	BC
+	JR	L_95
+;  132	    }
+L_94:
+;  133	    
+;  134	    replace_expression(source, copy_expression(source->children[0]));
+	LD	IY,(IX+6)
+	LD	HL,(IY+11)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_replace_expression
+	POP	BC
+	POP	BC
+;  135	    
+;  136	    return RETS_SUCCESS;
+	LD	A,2
+;  137	    
+;  138	}
+L_95:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _process_solve ***************************
+;Name                         Addr/Register   Size   Type
+;_copy_expression                    IMPORT  -----   function
+;_replace_expression                 IMPORT  -----   function
+;_solve                              IMPORT  -----   function
+;_set_error                          IMPORT  -----   function
+;G_3                                   IX-4      1   variable
+;G_2                                   IX-3      3   variable
+;source                                IX+6      3   parameter
+
+
+; Stack Frame Size: 13 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	SEGMENT STRSECT
+L__37:
+	DB	0
+L__43:
+	DB	0
+	SEGMENT CODE
+;  139	
+;  140	uint8_t process_factors(expression* source) {
+_process_factors:
+	LD	HL,-9
+	CALL	__frameset
+;  141	    
+;  142	    expression* result;
+;  143	    
+;  144	    if (source->child_count != 1) return set_error(ERRD_SYNTAX, ERRI_ARGUMENTS, "");
+	LD	IY,(IX+6)
+	LD	A,(IY+10)
+	CP	A,1
+	JR	Z,L_102
+	LD	BC,L__46
+	PUSH	BC
+	LD	BC,8
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_set_error
+	POP	BC
+	POP	BC
+	POP	BC
+	JR	L_104
+L_102:
+;  145	    
+;  146	    if (source->children[0]->identifier == EXPI_LITERAL) {
+	LD	IY,(IX+6)
+	LD	BC,(IY+11)
+	LD	(IX+-3),BC
+	LD	HL,BC
+	LD	IY,(HL)
+	LD	HL,(IY+3)
+	LD	BC,1
+	OR	A,A
+	SBC	HL,BC
+	JR	NZ,L_101
+;  147	        if (source->children[0]->sign == 1 && source->children[0]->value.numeric.denominator == 1) {
+	LD	HL,(IX+-3)
+	LD	IY,(HL)
+	LD	A,(IY+6)
+	CP	A,1
+	JR	NZ,L_99
+	LD	HL,(IX+-3)
+	LD	IY,(HL)
+	LEA	BC,IY+14
+	LD	(IX+-6),BC
+	LD	IY,(IX+-6)
+	LD	HL,(IY+4)
+	LD	E,(IY+7)
+	LD	BC,1
+	XOR	A,A
+	CALL	__lcmpu
+	JR	NZ,L_99
+;  148	            result = prime_factors(source->children[0]->value.numeric.numerator);
+	LD	IY,(IX+-6)
+	LD	BC,(IY+0)
+	LD	A,(IY+3)
+	LD	H,0
+	LD	L,A
+	PUSH	HL
+	PUSH	BC
+	CALL	_prime_factors
+	POP	BC
+	POP	BC
+	LD	(IX+-9),HL
+;  149	        } else {
+	JR	L_103
+L_99:
+;  150	            return RETS_UNCHANGED;
+	LD	A,4
+	JR	L_104
+;  151	        }
+;  152	    } else {
+L_101:
+;  153	        result = 0;
+	LD	BC,0
+	LD	(IX+-9),BC
+;  154	    }
+L_103:
+;  155	    
+;  156	    replace_expression(source, result);
+	LD	BC,(IX+-9)
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_replace_expression
+	POP	BC
+	POP	BC
+;  157	    
+;  158	    return RETS_SUCCESS;
+	LD	A,2
+;  159	    
+;  160	}
+L_104:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _process_factors ***************************
+;Name                         Addr/Register   Size   Type
+;_replace_expression                 IMPORT  -----   function
+;_prime_factors                      IMPORT  -----   function
+;_set_error                          IMPORT  -----   function
+;result                                IX-9      3   variable
+;G_8                                   IX-6      3   variable
+;G_6                                   IX-3      3   variable
+;source                                IX+6      3   parameter
+
+
+; Stack Frame Size: 18 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	SEGMENT STRSECT
+L__46:
+	DB	0
+	SEGMENT CODE
+;  161	
+;  162	uint8_t process_value(expression* source) {
+_process_value:
+	LD	HL,-22
+	CALL	__frameset
+;  163	    
+;  164	    uint8_t i;
+;  165	    expression* symbol;
+;  166	    
+;  167	    if (source->child_count < 2) {
+	LD	IY,(IX+6)
+	LD	A,(IY+10)
+	CP	A,2
+	JR	NC,L_114
+;  168	        return set_error(ERRD_SYNTAX, ERRI_ARGUMENTS, "");
+	LD	BC,L__52
+	PUSH	BC
+	LD	BC,8
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_set_error
+	POP	BC
+	POP	BC
+	POP	BC
+	JR	L_116
+;  169	    } else if (source->children[1]->identifier != EXPI_EQUATION) {
+L_114:
+	LD	IY,(IX+6)
+	LD	BC,(IY+11)
+	LD	(IX+-10),BC
+	LD	IY,(IX+-10)
+	LEA	HL,IY+3
+	LD	IY,(HL)
+	LD	HL,(IY+3)
+	LD	BC,4
+	OR	A,A
+	SBC	HL,BC
+	JR	Z,L_112
+;  170	        symbol = guess_symbol(source->children[0], "", 0);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,L__54
+	PUSH	BC
+	LD	HL,(IX+-10)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_guess_symbol
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	(IX+-13),HL
+;  171	        replace_occurences(source->children[0], symbol, source->children[1]);
+	LD	IY,(IX+6)
+	LD	BC,(IY+11)
+	LD	(IX+-16),BC
+	LD	IY,(IX+-16)
+	LEA	HL,IY+3
+	LD	BC,(HL)
+	PUSH	BC
+	LD	BC,(IX+-13)
+	PUSH	BC
+	LD	HL,(IX+-16)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_replace_occurences
+	POP	BC
+	POP	BC
+	POP	BC
+;  172	        free_expression(symbol, false);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+-13)
+	PUSH	BC
+	CALL	_free_expression
+	POP	BC
+	POP	BC
+;  173	    } else {
+	JR	L_115
+L_112:
+;  174	        for (i = 1; i < source->child_count; i++) {
+	LD	(IX+-1),1
+	JR	L_110
+L_108:
+;  175	            if (source->children[i]->identifier == EXPI_EQUATION) {
+	LD	IY,(IX+6)
+	LD	BC,(IY+11)
+	LD	(IX+-4),BC
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	(IX+-7),HL
+	LD	BC,(IX+-4)
+	ADD	HL,BC
+	OR	A,A
+	LD	IY,(HL)
+	LD	HL,(IY+3)
+	LD	BC,4
+	SBC	HL,BC
+	JR	NZ,L_107
+;  176	                replace_occurences(source->children[0], source->children[i]->children[0], source->children[i]->children[1]);
+	LD	BC,(IX+-7)
+	LD	HL,(IX+-4)
+	ADD	HL,BC
+	LD	(IX+-22),HL
+	LD	IY,(HL)
+	LD	BC,(IY+11)
+	LD	(IX+-19),BC
+	LD	IY,(IX+-19)
+	LEA	HL,IY+3
+	LD	BC,(HL)
+	PUSH	BC
+	LD	HL,(IX+-19)
+	LD	BC,(HL)
+	PUSH	BC
+	LD	HL,(IX+-4)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_replace_occurences
+	POP	BC
+	POP	BC
+	POP	BC
+;  177	            } else {
+	JR	L_109
+L_107:
+;  178	                return set_error(ERRD_SYNTAX, ERRI_ARGUMENTS, "");
+	LD	BC,L__56
+	PUSH	BC
+	LD	BC,8
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_set_error
+	POP	BC
+	POP	BC
+	POP	BC
+	JR	L_116
+;  179	            }
+;  180	        }
+L_109:
+	INC	(IX+-1)
+L_110:
+	LD	A,(IX+-1)
+	LD	IY,(IX+6)
+	CP	A,(IY+10)
+	JR	C,L_108
+;  181	    }
+L_115:
+;  182	    
+;  183	    replace_expression(source, copy_expression(source->children[0]));
+	LD	IY,(IX+6)
+	LD	HL,(IY+11)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_replace_expression
+	POP	BC
+	POP	BC
+;  184	    simplify(source, true);
+	LD	BC,1
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_simplify
+	POP	BC
+	POP	BC
+;  185	    
+;  186	    return RETS_SUCCESS;
+	LD	A,2
+;  187	    
+;  188	}
+L_116:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _process_value ***************************
+;Name                         Addr/Register   Size   Type
+;_simplify                           IMPORT  -----   function
+;_copy_expression                    IMPORT  -----   function
+;_replace_expression                 IMPORT  -----   function
+;_free_expression                    IMPORT  -----   function
+;_replace_occurences                 IMPORT  -----   function
+;_guess_symbol                       IMPORT  -----   function
+;_set_error                          IMPORT  -----   function
+;symbol                               IX-13      3   variable
+;G_9                                  IX-10      3   variable
+;G_11                                  IX-7      3   variable
+;G_10                                  IX-4      3   variable
+;i                                     IX-1      1   variable
+;source                                IX+6      3   parameter
+
+
+; Stack Frame Size: 31 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	SEGMENT STRSECT
+L__52:
+	DB	0
+L__54:
+	DB	0
+L__56:
+	DB	0
+	SEGMENT CODE
+;  189	
+;  190	uint8_t process_derivative(expression* source) {
+_process_derivative:
+	LD	HL,-7
+	CALL	__frameset
+;  191	    
+;  192	    expression* result;
+;  193	    
+;  194	    if (source->child_count == 1) {
+	LD	IY,(IX+6)
+	LD	A,(IY+10)
+	LD	(IX+-1),A
+	CP	A,1
+	JR	NZ,L_123
+;  195	        ERROR_CHECK(derivative(&result, source->children[0], NULL, true));
+	LD	BC,1
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	IY,(IX+6)
+	LD	HL,(IY+11)
+	LD	BC,(HL)
+	PUSH	BC
+	PEA	IX+-7
+	CALL	_derivative
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_124
+	LD	A,1
+	JR	L_125
+;  196	    } else if (source->child_count == 2 && source->children[1]->identifier == EXPI_SYMBOL) {
+L_123:
+	LD	A,(IX+-1)
+	CP	A,2
+	JR	NZ,L_121
+	LD	IY,(IX+6)
+	LD	BC,(IY+11)
+	LD	(IX+-4),BC
+	LD	IY,(IX+-4)
+	LEA	HL,IY+3
+	LD	IY,(HL)
+	LD	HL,(IY+3)
+	LD	BC,2
+	OR	A,A
+	SBC	HL,BC
+	JR	NZ,L_121
+;  197	        ERROR_CHECK(derivative(&result, source->children[0], source->children[1], true));
+	LD	BC,1
+	PUSH	BC
+	LD	IY,(IX+-4)
+	LEA	HL,IY+3
+	LD	BC,(HL)
+	PUSH	BC
+	LD	HL,(IX+-4)
+	LD	BC,(HL)
+	PUSH	BC
+	PEA	IX+-7
+	CALL	_derivative
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_124
+	LD	A,1
+	JR	L_125
+;  198	    } else {
+L_121:
+;  199	        return set_error(ERRD_SYNTAX, ERRI_ARGUMENTS, get_expression_string(EXPI_DERIVATIVE));
+	LD	BC,23
+	PUSH	BC
+	CALL	_get_expression_string
+	POP	BC
+	PUSH	HL
+	LD	BC,8
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_set_error
+	POP	BC
+	POP	BC
+	POP	BC
+	JR	L_125
+;  200	    }
+L_124:
+;  201	    
+;  202	    replace_expression(source, result);
+	LD	BC,(IX+-7)
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_replace_expression
+	POP	BC
+	POP	BC
+;  203	    
+;  204	    return RETS_SUCCESS;
+	LD	A,2
+;  205	    
+;  206	}
+L_125:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _process_derivative ***************************
+;Name                         Addr/Register   Size   Type
+;_replace_expression                 IMPORT  -----   function
+;_get_expression_string              IMPORT  -----   function
+;_set_error                          IMPORT  -----   function
+;_derivative                         IMPORT  -----   function
+;result                                IX-7      3   variable
+;G_13                                  IX-4      3   variable
+;G_12                                  IX-1      1   variable
+;source                                IX+6      3   parameter
+
+
+; Stack Frame Size: 16 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  207	
+;  208	uint8_t process_integral(expression* source) {
+_process_integral:
+	LD	HL,-10
+	CALL	__frameset
+;  209	    
+;  210	    expression* result;
+;  211	    
+;  212	    if (source->child_count == 1) {
+	LD	IY,(IX+6)
+	LD	A,(IY+10)
+	LD	(IX+-1),A
+	CP	A,1
+	JR	NZ,L_135
+;  213	        ERROR_CHECK(antiderivative(&result, source->children[0], NULL, true));
+	LD	BC,1
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	IY,(IX+6)
+	LD	HL,(IY+11)
+	LD	BC,(HL)
+	PUSH	BC
+	PEA	IX+-7
+	CALL	_antiderivative
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_136
+	LD	A,1
+	JR	L_137
+;  214	    } else if (source->child_count == 2 && source->children[1]->identifier == EXPI_SYMBOL) {
+L_135:
+	LD	A,(IX+-1)
+	CP	A,2
+	JR	NZ,L_133
+	LD	IY,(IX+6)
+	LD	BC,(IY+11)
+	LD	(IX+-4),BC
+	LD	IY,(IX+-4)
+	LEA	HL,IY+3
+	LD	IY,(HL)
+	LD	HL,(IY+3)
+	LD	BC,2
+	OR	A,A
+	SBC	HL,BC
+	JR	NZ,L_133
+;  215	        ERROR_CHECK(antiderivative(&result, source->children[0], source->children[1], true));
+	LD	BC,1
+	PUSH	BC
+	LD	IY,(IX+-4)
+	LEA	HL,IY+3
+	LD	BC,(HL)
+	PUSH	BC
+	LD	HL,(IX+-4)
+	LD	BC,(HL)
+	PUSH	BC
+	PEA	IX+-7
+	CALL	_antiderivative
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_136
+	LD	A,1
+	JR	L_137
+;  216	    } else if (source->child_count == 3) {
+L_133:
+	LD	A,(IX+-1)
+	CP	A,3
+	JR	NZ,L_131
+;  217	        ERROR_CHECK(definite_integral(&result, source->children[0], NULL, source->children[1], source->children[2]));
+	LD	IY,(IX+6)
+	LD	BC,(IY+11)
+	LD	(IX+-10),BC
+	LD	IY,(IX+-10)
+	LEA	HL,IY+6
+	LD	BC,(HL)
+	PUSH	BC
+	LEA	HL,IY+3
+	LD	BC,(HL)
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	HL,(IX+-10)
+	LD	BC,(HL)
+	PUSH	BC
+	PEA	IX+-7
+	CALL	_definite_integral
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_136
+	LD	A,1
+	JR	L_137
+;  218	    }  else {
+L_131:
+;  219	        return set_error(ERRD_SYNTAX, ERRI_ARGUMENTS, get_expression_string(EXPI_DERIVATIVE));
+	LD	BC,23
+	PUSH	BC
+	CALL	_get_expression_string
+	POP	BC
+	PUSH	HL
+	LD	BC,8
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_set_error
+	POP	BC
+	POP	BC
+	POP	BC
+	JR	L_137
+;  220	    }
+L_136:
+;  221	    
+;  222	    replace_expression(source, result);
+	LD	BC,(IX+-7)
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_replace_expression
+	POP	BC
+	POP	BC
+;  223	    
+;  224	    return RETS_SUCCESS;
+	LD	A,2
+;  225	    
+;  226	}
+L_137:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _process_integral ***************************
+;Name                         Addr/Register   Size   Type
+;_replace_expression                 IMPORT  -----   function
+;_get_expression_string              IMPORT  -----   function
+;_set_error                          IMPORT  -----   function
+;_definite_integral                  IMPORT  -----   function
+;_antiderivative                     IMPORT  -----   function
+;result                                IX-7      3   variable
+;G_15                                  IX-4      3   variable
+;G_14                                  IX-1      1   variable
+;source                                IX+6      3   parameter
+
+
+; Stack Frame Size: 19 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  227	
+;  228	uint8_t process_stationary_points(expression* source) {
+_process_stationary_points:
+	LD	HL,-4
+	CALL	__frameset
+;  229	    
+;  230	    expression* result = copy_expression(source->children[0]);
+	LD	IY,(IX+6)
+	LD	HL,(IY+11)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	LD	(IX+-4),HL
+;  231	    
+;  232	    if (source->child_count == 1) {
+	LD	IY,(IX+6)
+	LD	A,(IY+10)
+	LD	(IX+-1),A
+	CP	A,1
+	JR	NZ,L_141
+;  233	        stationary_points(result, NULL);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+-4)
+	PUSH	BC
+	CALL	_stationary_points
+	POP	BC
+	POP	BC
+;  234	    } else if (source->child_count == 2) {
+	JR	L_142
+L_141:
+	LD	A,(IX+-1)
+	CP	A,2
+	JR	NZ,L_139
+;  235	        stationary_points(result, source->children[1]);
+	LD	IY,(IX+6)
+	LD	IY,(IY+11)
+	LEA	HL,IY+3
+	LD	BC,(HL)
+	PUSH	BC
+	LD	BC,(IX+-4)
+	PUSH	BC
+	CALL	_stationary_points
+	POP	BC
+	POP	BC
+;  236	    } else {
+	JR	L_142
+L_139:
+;  237	        return set_error(ERRD_SYNTAX, ERRI_ARGUMENTS, get_expression_string(EXPI_DERIVATIVE));
+	LD	BC,23
+	PUSH	BC
+	CALL	_get_expression_string
+	POP	BC
+	PUSH	HL
+	LD	BC,8
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_set_error
+	POP	BC
+	POP	BC
+	POP	BC
+	JR	L_143
+;  238	    }
+L_142:
+;  239	    
+;  240	    replace_expression(source, result);
+	LD	BC,(IX+-4)
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_replace_expression
+	POP	BC
+	POP	BC
+;  241	    
+;  242	    return RETS_SUCCESS;
+	LD	A,2
+;  243	    
+;  244	}
+L_143:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _process_stationary_points ***************************
+;Name                         Addr/Register   Size   Type
+;_replace_expression                 IMPORT  -----   function
+;_get_expression_string              IMPORT  -----   function
+;_set_error                          IMPORT  -----   function
+;_stationary_points                  IMPORT  -----   function
+;_copy_expression                    IMPORT  -----   function
+;result                                IX-4      3   variable
+;G_17                                  IX-1      1   variable
+;source                                IX+6      3   parameter
+
+
+; Stack Frame Size: 13 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  245	
+;  246	uint8_t process_tangent(expression* source) {
+_process_tangent:
+	LD	HL,-13
+	CALL	__frameset
+;  247	    
+;  248	    expression* variable;
+;  249	    expression* result;
+;  250	    
+;  251	    if (source->child_count == 2) {
+	LD	IY,(IX+6)
+	LD	A,(IY+10)
+	LD	(IX+-1),A
+	CP	A,2
+	JR	NZ,L_149
+;  252	        variable = guess_symbol(source, "", 0);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,L__77
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_guess_symbol
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	(IX+-7),HL
+;  253	        ERROR_CHECK(function_tangent(&result, source->children[0], variable, source->children[1], true));
+	LD	IY,(IX+6)
+	LD	BC,(IY+11)
+	LD	(IX+-10),BC
+	LD	BC,1
+	PUSH	BC
+	LD	IY,(IX+-10)
+	LEA	HL,IY+3
+	LD	BC,(HL)
+	PUSH	BC
+	LD	BC,(IX+-7)
+	PUSH	BC
+	LD	HL,(IX+-10)
+	LD	BC,(HL)
+	PUSH	BC
+	PEA	IX+-4
+	CALL	_function_tangent
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_150
+	LD	A,1
+	JR	L_151
+;  254	    } else if (source->child_count == 3) {
+L_149:
+	LD	A,(IX+-1)
+	CP	A,3
+	JR	NZ,L_147
+;  255	        ERROR_CHECK(function_tangent(&result, source->children[0], source->children[1], source->children[2], true));
+	LD	IY,(IX+6)
+	LD	BC,(IY+11)
+	LD	(IX+-13),BC
+	LD	BC,1
+	PUSH	BC
+	LD	IY,(IX+-13)
+	LEA	HL,IY+6
+	LD	BC,(HL)
+	PUSH	BC
+	LEA	HL,IY+3
+	LD	BC,(HL)
+	PUSH	BC
+	LD	HL,(IX+-13)
+	LD	BC,(HL)
+	PUSH	BC
+	PEA	IX+-4
+	CALL	_function_tangent
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_150
+	LD	A,1
+	JR	L_151
+;  256	    } else {
+L_147:
+;  257	        return set_error(ERRD_SYNTAX, ERRI_ARGUMENTS, get_expression_string(EXPI_TANGENT));
+	LD	BC,28
+	PUSH	BC
+	CALL	_get_expression_string
+	POP	BC
+	PUSH	HL
+	LD	BC,8
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_set_error
+	POP	BC
+	POP	BC
+	POP	BC
+	JR	L_151
+;  258	    }
+L_150:
+;  259	    
+;  260	    replace_expression(source, result);
+	LD	BC,(IX+-4)
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_replace_expression
+	POP	BC
+	POP	BC
+;  261	    
+;  262	    return RETS_SUCCESS;
+	LD	A,2
+;  263	    
+;  264	}
+L_151:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _process_tangent ***************************
+;Name                         Addr/Register   Size   Type
+;_replace_expression                 IMPORT  -----   function
+;_get_expression_string              IMPORT  -----   function
+;_set_error                          IMPORT  -----   function
+;_function_tangent                   IMPORT  -----   function
+;_guess_symbol                       IMPORT  -----   function
+;variable                              IX-7      3   variable
+;result                                IX-4      3   variable
+;G_18                                  IX-1      1   variable
+;source                                IX+6      3   parameter
+
+
+; Stack Frame Size: 22 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	SEGMENT STRSECT
+L__77:
+	DB	0
+	SEGMENT CODE
+;  265	
+;  266	uint8_t process_normal(expression* source) {
+_process_normal:
+	LD	HL,-13
+	CALL	__frameset
+;  267	    
+;  268	    expression* variable;
+;  269	    expression* result;
+;  270	    
+;  271	    if (source->child_count == 2) {
+	LD	IY,(IX+6)
+	LD	A,(IY+10)
+	LD	(IX+-1),A
+	CP	A,2
+	JR	NZ,L_157
+;  272	        variable = guess_symbol(source, "", 0);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,L__83
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_guess_symbol
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	(IX+-7),HL
+;  273	        ERROR_CHECK(function_normal(&result, source->children[0], variable, source->children[1], true));
+	LD	IY,(IX+6)
+	LD	BC,(IY+11)
+	LD	(IX+-10),BC
+	LD	BC,1
+	PUSH	BC
+	LD	IY,(IX+-10)
+	LEA	HL,IY+3
+	LD	BC,(HL)
+	PUSH	BC
+	LD	BC,(IX+-7)
+	PUSH	BC
+	LD	HL,(IX+-10)
+	LD	BC,(HL)
+	PUSH	BC
+	PEA	IX+-4
+	CALL	_function_normal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_158
+	LD	A,1
+	JR	L_159
+;  274	    } else if (source->child_count == 3) {
+L_157:
+	LD	A,(IX+-1)
+	CP	A,3
+	JR	NZ,L_155
+;  275	        ERROR_CHECK(function_normal(&result, source->children[0], source->children[1], source->children[2], true));
+	LD	IY,(IX+6)
+	LD	BC,(IY+11)
+	LD	(IX+-13),BC
+	LD	BC,1
+	PUSH	BC
+	LD	IY,(IX+-13)
+	LEA	HL,IY+6
+	LD	BC,(HL)
+	PUSH	BC
+	LEA	HL,IY+3
+	LD	BC,(HL)
+	PUSH	BC
+	LD	HL,(IX+-13)
+	LD	BC,(HL)
+	PUSH	BC
+	PEA	IX+-4
+	CALL	_function_normal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_158
+	LD	A,1
+	JR	L_159
+;  276	    } else {
+L_155:
+;  277	        return set_error(ERRD_SYNTAX, ERRI_ARGUMENTS, get_expression_string(EXPI_TANGENT));
+	LD	BC,28
+	PUSH	BC
+	CALL	_get_expression_string
+	POP	BC
+	PUSH	HL
+	LD	BC,8
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_set_error
+	POP	BC
+	POP	BC
+	POP	BC
+	JR	L_159
+;  278	    }
+L_158:
+;  279	    
+;  280	    replace_expression(source, result);
+	LD	BC,(IX+-4)
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_replace_expression
+	POP	BC
+	POP	BC
+;  281	    
+;  282	    return RETS_SUCCESS;
+	LD	A,2
+;  283	    
+;  284	}
+L_159:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _process_normal ***************************
+;Name                         Addr/Register   Size   Type
+;_replace_expression                 IMPORT  -----   function
+;_get_expression_string              IMPORT  -----   function
+;_set_error                          IMPORT  -----   function
+;_function_normal                    IMPORT  -----   function
+;_guess_symbol                       IMPORT  -----   function
+;variable                              IX-7      3   variable
+;result                                IX-4      3   variable
+;G_19                                  IX-1      1   variable
+;source                                IX+6      3   parameter
+
+
+; Stack Frame Size: 22 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	SEGMENT STRSECT
+L__83:
+	DB	0
+	SEGMENT CODE
+;  285	
+;  286	uint8_t process_angle(expression* source) {
+_process_angle:
+	LD	HL,-6
+	CALL	__frameset
+;  287	    
+;  288	    expression* result;
+;  289	    
+;  290	    if (source->child_count != 2) return set_error(ERRD_SYNTAX, ERRI_ARGUMENTS, get_expression_string(EXPI_TANGENT));
+	LD	IY,(IX+6)
+	LD	A,(IY+10)
+	CP	A,2
+	JR	Z,L_162
+	LD	BC,28
+	PUSH	BC
+	CALL	_get_expression_string
+	POP	BC
+	PUSH	HL
+	LD	BC,8
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_set_error
+	POP	BC
+	POP	BC
+	POP	BC
+	JR	L_164
+L_162:
+;  291	    ERROR_CHECK(function_intersection_angle(&result, source->children[0], source->children[1]));
+	LD	IY,(IX+6)
+	LD	BC,(IY+11)
+	LD	(IX+-6),BC
+	LD	IY,(IX+-6)
+	LEA	HL,IY+3
+	LD	BC,(HL)
+	PUSH	BC
+	LD	HL,(IX+-6)
+	LD	BC,(HL)
+	PUSH	BC
+	PEA	IX+-3
+	CALL	_function_intersection_angle
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_163
+	LD	A,1
+	JR	L_164
+L_163:
+;  292	    
+;  293	    replace_expression(source, result);
+	LD	BC,(IX+-3)
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_replace_expression
+	POP	BC
+	POP	BC
+;  294	    
+;  295	    return RETS_SUCCESS;
+	LD	A,2
+;  296	    
+;  297	}
+L_164:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _process_angle ***************************
+;Name                         Addr/Register   Size   Type
+;_replace_expression                 IMPORT  -----   function
+;_function_intersection_angle        IMPORT  -----   function
+;_get_expression_string              IMPORT  -----   function
+;_set_error                          IMPORT  -----   function
+;result                                IX-3      3   variable
+;source                                IX+6      3   parameter
+
+
+; Stack Frame Size: 15 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  298	
+;  299	uint8_t process_vector_magnitude(expression* source) {
+_process_vector_magnitude:
+	LD	HL,-6
+	CALL	__frameset
+;  300	    
+;  301	    expression* result;
+;  302	    
+;  303	    if (source->child_count == 1 && source->children[0]->identifier == EXPI_LIST) {
+	LD	IY,(IX+6)
+	LD	A,(IY+10)
+	CP	A,1
+	JR	NZ,L_169
+	LD	IY,(IX+6)
+	LD	BC,(IY+11)
+	LD	(IX+-3),BC
+	LD	HL,BC
+	LD	IY,(HL)
+	LD	HL,(IY+3)
+	LD	BC,40
+	OR	A,A
+	SBC	HL,BC
+	JR	NZ,L_169
+;  304	        ERROR_CHECK(vector_magnitude(&result, source->children[0], true));
+	LD	BC,1
+	PUSH	BC
+	LD	HL,(IX+-3)
+	LD	BC,(HL)
+	PUSH	BC
+	PEA	IX+-6
+	CALL	_vector_magnitude
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_170
+	LD	A,1
+	JR	L_171
+;  305	    } else {
+L_169:
+;  306	        ERROR_CHECK(vector_magnitude(&result, source, true));
+	LD	BC,1
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	PEA	IX+-6
+	CALL	_vector_magnitude
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_170
+	LD	A,1
+	JR	L_171
+;  307	    }
+L_170:
+;  308	    
+;  309	    replace_expression(source, result);
+	LD	BC,(IX+-6)
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_replace_expression
+	POP	BC
+	POP	BC
+;  310	    
+;  311	    return RETS_SUCCESS;
+	LD	A,2
+;  312	    
+;  313	}
+L_171:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _process_vector_magnitude ***************************
+;Name                         Addr/Register   Size   Type
+;_replace_expression                 IMPORT  -----   function
+;_vector_magnitude                   IMPORT  -----   function
+;result                                IX-6      3   variable
+;G_20                                  IX-3      3   variable
+;source                                IX+6      3   parameter
+
+
+; Stack Frame Size: 15 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  314	
+;  315	uint8_t process_vector_normalized(expression* source) {
+_process_vector_normalized:
+	LD	HL,-13
+	CALL	__frameset
+;  316	    
+;  317	    expression* result;
+;  318	    expression* magnitude;
+;  319	    
+;  320	    if (source->children[0]->identifier == EXPI_LIST) {
+	LD	IY,(IX+6)
+	LD	BC,(IY+11)
+	LD	(IX+-13),BC
+	LD	HL,BC
+	LD	IY,(HL)
+	LD	HL,(IY+3)
+	LD	BC,40
+	OR	A,A
+	SBC	HL,BC
+	JR	NZ,L_182
+;  321	        if (source->child_count == 1) {
+	LD	IY,(IX+6)
+	LD	A,(IY+10)
+	LD	(IX+-4),A
+	CP	A,1
+	JR	NZ,L_177
+;  322	            magnitude = new_literal(1, 1, 1);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	(IX+-3),HL
+;  323	        } else if (source->child_count == 2) {
+	JR	L_179
+L_177:
+	LD	A,(IX+-4)
+	CP	A,2
+	JR	NZ,L_175
+;  324	            if (source->children[1]->identifier == EXPI_LIST) {
+	LD	IY,(IX+-13)
+	LEA	BC,IY+3
+	LD	(IX+-7),BC
+	LD	HL,BC
+	LD	IY,(HL)
+	LD	HL,(IY+3)
+	LD	BC,40
+	OR	A,A
+	SBC	HL,BC
+	JR	NZ,L_173
+;  325	                vector_magnitude(&magnitude, source->children[1], true);
+	LD	BC,1
+	PUSH	BC
+	LD	HL,(IX+-7)
+	LD	BC,(HL)
+	PUSH	BC
+	PEA	IX+-3
+	CALL	_vector_magnitude
+	POP	BC
+	POP	BC
+	POP	BC
+;  326	            } else {
+	JR	L_179
+L_173:
+;  327	                magnitude = copy_expression(source->children[1]);
+	LD	HL,(IX+-7)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	LD	(IX+-3),HL
+;  328	            }
+;  329	        } else {
+	JR	L_179
+L_175:
+;  330	            return set_error(ERRD_SYNTAX, ERRI_ARGUMENTS, get_expression_string(EXPI_V_NORMALIZED));
+	LD	BC,32
+	PUSH	BC
+	CALL	_get_expression_string
+	POP	BC
+	PUSH	HL
+	LD	BC,8
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_set_error
+	POP	BC
+	POP	BC
+	POP	BC
+	JR	L_184
+;  331	        }
+L_179:
+;  332	        ERROR_CHECK(vector_normalized(&result, source->children[0], magnitude, true));
+	LD	BC,1
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	LD	IY,(IX+6)
+	LD	HL,(IY+11)
+	LD	BC,(HL)
+	PUSH	BC
+	PEA	IX+-10
+	CALL	_vector_normalized
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_183
+	LD	A,1
+	JR	L_184
+;  333	    } else {
+L_182:
+;  334	        magnitude = new_literal(1, 1, 1);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	(IX+-3),HL
+;  335	        ERROR_CHECK(vector_normalized(&result, source, magnitude, true));
+	LD	BC,1
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	PEA	IX+-10
+	CALL	_vector_normalized
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_183
+	LD	A,1
+	JR	L_184
+;  336	    }
+L_183:
+;  337	    
+;  338	    replace_expression(source, result);
+	LD	BC,(IX+-10)
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_replace_expression
+	POP	BC
+	POP	BC
+;  339	    
+;  340	    return RETS_SUCCESS;
+	LD	A,2
+;  341	    
+;  342	}
+L_184:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _process_vector_normalized ***************************
+;Name                         Addr/Register   Size   Type
+;_replace_expression                 IMPORT  -----   function
+;_vector_normalized                  IMPORT  -----   function
+;_get_expression_string              IMPORT  -----   function
+;_set_error                          IMPORT  -----   function
+;_copy_expression                    IMPORT  -----   function
+;_vector_magnitude                   IMPORT  -----   function
+;_new_literal                        IMPORT  -----   function
+;G_22                                 IX-13      3   variable
+;result                               IX-10      3   variable
+;G_23                                  IX-7      3   variable
+;G_21                                  IX-4      1   variable
+;magnitude                             IX-3      3   variable
+;source                                IX+6      3   parameter
+
+
+; Stack Frame Size: 22 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  343	
+;  344	uint8_t process_vector_angle(expression* source) {
+_process_vector_angle:
+	LD	HL,-6
+	CALL	__frameset
+;  345	    
+;  346	    expression* result;
+;  347	    
+;  348	    if (source->child_count == 2 && source->children[0]->identifier == EXPI_LIST && source->children[1]->identifier == EXPI_LIST) {
+	LD	IY,(IX+6)
+	LD	A,(IY+10)
+	CP	A,2
+	JR	NZ,L_191
+	LD	IY,(IX+6)
+	LD	BC,(IY+11)
+	LD	(IX+-3),BC
+	LD	HL,BC
+	LD	IY,(HL)
+	LD	HL,(IY+3)
+	LD	BC,40
+	OR	A,A
+	SBC	HL,BC
+	JR	NZ,L_191
+	LD	IY,(IX+-3)
+	LEA	HL,IY+3
+	LD	IY,(HL)
+	LD	HL,(IY+3)
+	OR	A,A
+	SBC	HL,BC
+	JR	NZ,L_191
+;  349	        if (source->children[0]->child_count == source->children[1]->child_count) {
+	LD	IY,(IX+-3)
+	LEA	HL,IY+3
+	LD	IY,(HL)
+	LD	HL,(IX+-3)
+	LD	BC,(HL)
+	LD	A,(IY+10)
+	LD	IY,BC
+	CP	A,(IY+10)
+	JR	NZ,L_189
+;  350	            ERROR_CHECK(vector_angle(&result, source->children[0], source->children[1], true));
+	LD	BC,1
+	PUSH	BC
+	LD	IY,(IX+-3)
+	LEA	HL,IY+3
+	LD	BC,(HL)
+	PUSH	BC
+	LD	HL,(IX+-3)
+	LD	BC,(HL)
+	PUSH	BC
+	PEA	IX+-6
+	CALL	_vector_angle
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_192
+	LD	A,1
+	JR	L_193
+;  351	        } else {
+L_189:
+;  352	            return set_error(ERRD_VECTOR, ERRI_VECTOR_DIMENSIONS, "");
+	LD	BC,L__108
+	PUSH	BC
+	LD	BC,9
+	PUSH	BC
+	LD	BC,12
+	PUSH	BC
+	CALL	_set_error
+	POP	BC
+	POP	BC
+	POP	BC
+	JR	L_193
+;  353	        }
+;  354	    } else {
+L_191:
+;  355	        return set_error(ERRD_SYNTAX, ERRI_ARGUMENTS, get_expression_string(EXPI_V_NORMALIZED));
+	LD	BC,32
+	PUSH	BC
+	CALL	_get_expression_string
+	POP	BC
+	PUSH	HL
+	LD	BC,8
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_set_error
+	POP	BC
+	POP	BC
+	POP	BC
+	JR	L_193
+;  356	    }
+L_192:
+;  357	    
+;  358	    replace_expression(source, result);
+	LD	BC,(IX+-6)
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_replace_expression
+	POP	BC
+	POP	BC
+;  359	    
+;  360	    return RETS_SUCCESS;
+	LD	A,2
+;  361	    
+;  362	}
+L_193:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _process_vector_angle ***************************
+;Name                         Addr/Register   Size   Type
+;_replace_expression                 IMPORT  -----   function
+;_get_expression_string              IMPORT  -----   function
+;_set_error                          IMPORT  -----   function
+;_vector_angle                       IMPORT  -----   function
+;result                                IX-6      3   variable
+;G_25                                  IX-3      3   variable
+;source                                IX+6      3   parameter
+
+
+; Stack Frame Size: 15 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	SEGMENT STRSECT
+L__108:
+	DB	0
+	SEGMENT CODE
+;  363	
+;  364	uint8_t process_vector_dot_product(expression* source) {
+_process_vector_dot_product:
+	LD	HL,-6
+	CALL	__frameset
+;  365	    
+;  366	    expression* result;
+;  367	    
+;  368	    if (source->child_count == 2 && source->children[0]->identifier == EXPI_LIST && source->children[1]->identifier == EXPI_LIST) {
+	LD	IY,(IX+6)
+	LD	A,(IY+10)
+	CP	A,2
+	JR	NZ,L_200
+	LD	IY,(IX+6)
+	LD	BC,(IY+11)
+	LD	(IX+-3),BC
+	LD	HL,BC
+	LD	IY,(HL)
+	LD	HL,(IY+3)
+	LD	BC,40
+	OR	A,A
+	SBC	HL,BC
+	JR	NZ,L_200
+	LD	IY,(IX+-3)
+	LEA	HL,IY+3
+	LD	IY,(HL)
+	LD	HL,(IY+3)
+	OR	A,A
+	SBC	HL,BC
+	JR	NZ,L_200
+;  369	        if (source->children[0]->child_count == source->children[1]->child_count) {
+	LD	IY,(IX+-3)
+	LEA	HL,IY+3
+	LD	IY,(HL)
+	LD	HL,(IX+-3)
+	LD	BC,(HL)
+	LD	A,(IY+10)
+	LD	IY,BC
+	CP	A,(IY+10)
+	JR	NZ,L_198
+;  370	            ERROR_CHECK(vector_dot_product(&result, source->children[0], source->children[1], true));
+	LD	BC,1
+	PUSH	BC
+	LD	IY,(IX+-3)
+	LEA	HL,IY+3
+	LD	BC,(HL)
+	PUSH	BC
+	LD	HL,(IX+-3)
+	LD	BC,(HL)
+	PUSH	BC
+	PEA	IX+-6
+	CALL	_vector_dot_product
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_201
+	LD	A,1
+	JR	L_202
+;  371	        } else {
+L_198:
+;  372	            return set_error(ERRD_VECTOR, ERRI_VECTOR_DIMENSIONS, "");
+	LD	BC,L__115
+	PUSH	BC
+	LD	BC,9
+	PUSH	BC
+	LD	BC,12
+	PUSH	BC
+	CALL	_set_error
+	POP	BC
+	POP	BC
+	POP	BC
+	JR	L_202
+;  373	        }
+;  374	    } else {
+L_200:
+;  375	        return set_error(ERRD_SYNTAX, ERRI_ARGUMENTS, get_expression_string(EXPI_V_NORMALIZED));
+	LD	BC,32
+	PUSH	BC
+	CALL	_get_expression_string
+	POP	BC
+	PUSH	HL
+	LD	BC,8
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_set_error
+	POP	BC
+	POP	BC
+	POP	BC
+	JR	L_202
+;  376	    }
+L_201:
+;  377	    
+;  378	    replace_expression(source, result);
+	LD	BC,(IX+-6)
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_replace_expression
+	POP	BC
+	POP	BC
+;  379	    
+;  380	    return RETS_SUCCESS;
+	LD	A,2
+;  381	    
+;  382	}
+L_202:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _process_vector_dot_product ***************************
+;Name                         Addr/Register   Size   Type
+;_replace_expression                 IMPORT  -----   function
+;_get_expression_string              IMPORT  -----   function
+;_set_error                          IMPORT  -----   function
+;_vector_dot_product                 IMPORT  -----   function
+;result                                IX-6      3   variable
+;G_28                                  IX-3      3   variable
+;source                                IX+6      3   parameter
+
+
+; Stack Frame Size: 15 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	SEGMENT STRSECT
+L__115:
+	DB	0
+	SEGMENT CODE
+;  383	
+;  384	uint8_t process_vector_cross_product(expression* source) {
+_process_vector_cross_product:
+	LD	HL,-9
+	CALL	__frameset
+;  385	    
+;  386	    expression* result;
+;  387	    
+;  388	    if (source->child_count == 2 && source->children[0]->identifier == EXPI_LIST && source->children[1]->identifier == EXPI_LIST) {
+	LD	IY,(IX+6)
+	LD	A,(IY+10)
+	CP	A,2
+	JR	NZ,L_210
+	LD	IY,(IX+6)
+	LD	BC,(IY+11)
+	LD	(IX+-3),BC
+	LD	HL,BC
+	LD	IY,(HL)
+	LD	HL,(IY+3)
+	LD	BC,40
+	OR	A,A
+	SBC	HL,BC
+	JR	NZ,L_210
+	LD	IY,(IX+-3)
+	LEA	BC,IY+3
+	LD	(IX+-6),BC
+	LD	HL,BC
+	LD	IY,(HL)
+	LD	HL,(IY+3)
+	LD	BC,40
+	OR	A,A
+	SBC	HL,BC
+	JR	NZ,L_210
+;  389	        if (source->children[0]->child_count == 3 && source->children[1]->child_count == 3) {
+	LD	HL,(IX+-3)
+	LD	IY,(HL)
+	LD	A,(IY+10)
+	CP	A,3
+	JR	NZ,L_208
+	LD	HL,(IX+-6)
+	LD	IY,(HL)
+	LD	A,(IY+10)
+	CP	A,3
+	JR	NZ,L_208
+;  390	            ERROR_CHECK(vector_cross_product(&result, source->children[0], source->children[1], true));
+	LD	BC,1
+	PUSH	BC
+	LD	IY,(IX+-3)
+	LEA	HL,IY+3
+	LD	BC,(HL)
+	PUSH	BC
+	LD	HL,(IX+-3)
+	LD	BC,(HL)
+	PUSH	BC
+	PEA	IX+-9
+	CALL	_vector_cross_product
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_211
+	LD	A,1
+	JR	L_212
+;  391	        } else {
+L_208:
+;  392	            return set_error(ERRD_VECTOR, ERRI_VECTOR_DIMENSIONS, "");
+	LD	BC,L__123
+	PUSH	BC
+	LD	BC,9
+	PUSH	BC
+	LD	BC,12
+	PUSH	BC
+	CALL	_set_error
+	POP	BC
+	POP	BC
+	POP	BC
+	JR	L_212
+;  393	        }
+;  394	    } else {
+L_210:
+;  395	        return set_error(ERRD_SYNTAX, ERRI_ARGUMENTS, get_expression_string(EXPI_V_NORMALIZED));
+	LD	BC,32
+	PUSH	BC
+	CALL	_get_expression_string
+	POP	BC
+	PUSH	HL
+	LD	BC,8
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_set_error
+	POP	BC
+	POP	BC
+	POP	BC
+	JR	L_212
+;  396	    }
+L_211:
+;  397	    
+;  398	    replace_expression(source, result);
+	LD	BC,(IX+-9)
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_replace_expression
+	POP	BC
+	POP	BC
+;  399	    
+;  400	    return RETS_SUCCESS;
+	LD	A,2
+;  401	    
+;  402	}
+L_212:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _process_vector_cross_product ***************************
+;Name                         Addr/Register   Size   Type
+;_replace_expression                 IMPORT  -----   function
+;_get_expression_string              IMPORT  -----   function
+;_set_error                          IMPORT  -----   function
+;_vector_cross_product               IMPORT  -----   function
+;result                                IX-9      3   variable
+;G_33                                  IX-6      3   variable
+;G_31                                  IX-3      3   variable
+;source                                IX+6      3   parameter
+
+
+; Stack Frame Size: 18 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	SEGMENT STRSECT
+L__123:
+	DB	0
+	SEGMENT CODE
+;  403	
+;  404	uint8_t process_vector_triple_product(expression* source) {
+_process_vector_triple_product:
+	LD	HL,-12
+	CALL	__frameset
+;  405	    
+;  406	    expression* result;
+;  407	    
+;  408	    if (source->child_count == 3 && source->children[0]->identifier == EXPI_LIST && source->children[1]->identifier == EXPI_LIST && source->children[2]->identifier == EXPI_LIST) {
+	LD	IY,(IX+6)
+	LD	A,(IY+10)
+	CP	A,3
+	JR	NZ,L_222
+	LD	IY,(IX+6)
+	LD	BC,(IY+11)
+	LD	(IX+-3),BC
+	LD	HL,BC
+	LD	IY,(HL)
+	LD	HL,(IY+3)
+	LD	BC,40
+	OR	A,A
+	SBC	HL,BC
+	JR	NZ,L_222
+	LD	IY,(IX+-3)
+	LEA	BC,IY+3
+	LD	(IX+-6),BC
+	LD	HL,BC
+	LD	IY,(HL)
+	LD	HL,(IY+3)
+	LD	BC,40
+	OR	A,A
+	SBC	HL,BC
+	JR	NZ,L_222
+	LD	IY,(IX+-3)
+	LEA	BC,IY+6
+	LD	(IX+-9),BC
+	LD	HL,BC
+	LD	IY,(HL)
+	LD	HL,(IY+3)
+	LD	BC,40
+	OR	A,A
+	SBC	HL,BC
+	JR	NZ,L_222
+;  409	        if (source->children[0]->child_count == 3 && source->children[1]->child_count == 3 && source->children[2]->child_count == 3) {
+	LD	HL,(IX+-3)
+	LD	IY,(HL)
+	LD	A,(IY+10)
+	CP	A,3
+	JR	NZ,L_220
+	LD	HL,(IX+-6)
+	LD	IY,(HL)
+	LD	A,(IY+10)
+	CP	A,3
+	JR	NZ,L_220
+	LD	HL,(IX+-9)
+	LD	IY,(HL)
+	LD	A,(IY+10)
+	CP	A,3
+	JR	NZ,L_220
+;  410	            ERROR_CHECK(vector_triple_product(&result, source->children[0], source->children[1], source->children[2], true));
+	LD	BC,1
+	PUSH	BC
+	LD	IY,(IX+-3)
+	LEA	HL,IY+6
+	LD	BC,(HL)
+	PUSH	BC
+	LEA	HL,IY+3
+	LD	BC,(HL)
+	PUSH	BC
+	LD	HL,(IX+-3)
+	LD	BC,(HL)
+	PUSH	BC
+	PEA	IX+-12
+	CALL	_vector_triple_product
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_223
+	LD	A,1
+	JR	L_224
+;  411	        } else {
+L_220:
+;  412	            return set_error(ERRD_VECTOR, ERRI_VECTOR_DIMENSIONS, "");
+	LD	BC,L__133
+	PUSH	BC
+	LD	BC,9
+	PUSH	BC
+	LD	BC,12
+	PUSH	BC
+	CALL	_set_error
+	POP	BC
+	POP	BC
+	POP	BC
+	JR	L_224
+;  413	        }
+;  414	    } else {
+L_222:
+;  415	        return set_error(ERRD_SYNTAX, ERRI_ARGUMENTS, get_expression_string(EXPI_V_NORMALIZED));
+	LD	BC,32
+	PUSH	BC
+	CALL	_get_expression_string
+	POP	BC
+	PUSH	HL
+	LD	BC,8
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_set_error
+	POP	BC
+	POP	BC
+	POP	BC
+	JR	L_224
+;  416	    }
+L_223:
+;  417	    
+;  418	    replace_expression(source, result);
+	LD	BC,(IX+-12)
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_replace_expression
+	POP	BC
+	POP	BC
+;  419	    
+;  420	    return RETS_SUCCESS;
+	LD	A,2
+;  421	    
+;  422	}
+L_224:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _process_vector_triple_product ***************************
+;Name                         Addr/Register   Size   Type
+;_replace_expression                 IMPORT  -----   function
+;_get_expression_string              IMPORT  -----   function
+;_set_error                          IMPORT  -----   function
+;_vector_triple_product              IMPORT  -----   function
+;result                               IX-12      3   variable
+;G_39                                  IX-9      3   variable
+;G_38                                  IX-6      3   variable
+;G_35                                  IX-3      3   variable
+;source                                IX+6      3   parameter
+
+
+; Stack Frame Size: 21 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	SEGMENT STRSECT
+L__133:
+	DB	0
+	SEGMENT CODE
+;  423	
+;  424	void process_approximate(expression* source) {
+_process_approximate:
+	CALL	__frameset0
+;  425	    
+;  426	    approximate(source);
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_approximate
+	POP	BC
+;  427	    literal_to_double_symbol(source);
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_literal_to_double_symbol
+	POP	BC
+;  428	    
+;  429	    replace_expression(source, copy_expression(source->children[0]));
+	LD	IY,(IX+6)
+	LD	HL,(IY+11)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_replace_expression
+	POP	BC
+	POP	BC
+;  430	    
+;  431	    return;
+;  432	    
+;  433	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _process_approximate ***************************
+;Name                         Addr/Register   Size   Type
+;_copy_expression                    IMPORT  -----   function
+;_replace_expression                 IMPORT  -----   function
+;_literal_to_double_symbol           IMPORT  -----   function
+;_approximate                        IMPORT  -----   function
+;source                                IX+6      3   parameter
+
+
+; Stack Frame Size: 9 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	XREF _vector_triple_product:ROM
+	XREF _vector_cross_product:ROM
+	XREF _vector_dot_product:ROM
+	XREF _vector_angle:ROM
+	XREF _vector_normalized:ROM
+	XREF _vector_magnitude:ROM
+	XREF _definite_integral:ROM
+	XREF _antiderivative:ROM
+	XREF _function_intersection_angle:ROM
+	XREF _function_normal:ROM
+	XREF _function_tangent:ROM
+	XREF _stationary_points:ROM
+	XREF _derivative:ROM
+	XREF _solve:ROM
+	XREF _approximate:ROM
+	XREF _simplify:ROM
+	XREF _parse:ROM
+	XREF _validate:ROM
+	XREF _tokenize:ROM
+	XREF _prime_factors:ROM
+	XREF _expression_to_string:ROM
+	XREF _get_expression_string:ROM
+	XREF _literal_to_double_symbol:ROM
+	XREF _guess_symbol:ROM
+	XREF _replace_occurences:ROM
+	XREF _free_expression:ROM
+	XREF _replace_expression:ROM
+	XREF _copy_expression:ROM
+	XREF _new_literal:ROM
+	XREF _new_expression:ROM
+	XREF _set_error:ROM
+	XREF _smart_free_all:ROM
+	XREF _allocated_pointers:ROM
+	XREF _memset:ROM
+	XREF _free:ROM
+	XREF _calloc:ROM
+	XREF __lcmpu:ROM
+	XREF __frameset0:ROM
+	XREF __frameset:ROM
+	XREF __icmpzero:ROM
+	XREF __case8:ROM
+	XDEF _process_approximate
+	XDEF _process_vector_triple_product
+	XDEF _process_vector_cross_product
+	XDEF _process_vector_dot_product
+	XDEF _process_vector_angle
+	XDEF _process_vector_normalized
+	XDEF _process_vector_magnitude
+	XDEF _process_angle
+	XDEF _process_normal
+	XDEF _process_tangent
+	XDEF _process_stationary_points
+	XDEF _process_integral
+	XDEF _process_derivative
+	XDEF _process_value
+	XDEF _process_factors
+	XDEF _process_solve
+	XDEF _process_equation
+	XDEF _process
+	XDEF _symbolic4
+	XDEF _default_priorities
+	XDEF _use_spaces
+	XDEF _use_abbrevations
+	END

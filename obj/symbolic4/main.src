@@ -1,0 +1,172 @@
+; Zilog eZ80 ANSI C Compiler Release 3.4
+; -optsize -noreduceopt -nomodsect -peephole -globalopt
+; -localcse -const=ROM 
+	FILE	"SRC\SYMBOLIC4\MAIN.C"
+	.assume ADL=1
+	SEGMENT CODE
+;    1	
+;    2	#include "src/symbolic4.h"
+;    3	
+;    4	int main(int argc, const char * argv[]) {
+_main:
+	LD	HL,-503
+	CALL	__frameset
+;    5	    
+;    6	    char buffer[500];
+;    7	    char* query = "1";
+	LD	BC,L__0
+	LD	(IX+-3),BC
+;    8	    
+;    9	    if (argc == 2) {
+	LD	HL,(IX+6)
+	LD	BC,2
+	OR	A,A
+	SBC	HL,BC
+	JR	NZ,L_5
+;   10	        
+;   11	        if (symbolic4(buffer, (char*) argv[1]) == RETS_SUCCESS) {
+	LD	IY,(IX+9)
+	LEA	HL,IY+3
+	LD	BC,(HL)
+	PUSH	BC
+	LD	HL,IX
+	LD	BC,-503
+	ADD	HL,BC
+	LD	BC,HL
+	PUSH	BC
+	CALL	_symbolic4
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,2
+	SBC	HL,BC
+	JR	NZ,L_1
+;   12	            printf("%s", buffer);
+	LD	HL,IX
+	LD	BC,-503
+	ADD	HL,BC
+	LD	BC,HL
+	PUSH	BC
+	LD	BC,L__3
+	PUSH	BC
+	CALL	_printf
+	POP	BC
+	POP	BC
+	OR	A,A
+;   13	            return 0;
+	SBC	HL,HL
+	JR	L_7
+;   14	        } else {
+L_1:
+;   15	            printf("ERROR");
+	LD	BC,L__4
+	PUSH	BC
+	CALL	_printf
+	POP	BC
+;   16	            return 1;
+	LD	HL,1
+	JR	L_7
+;   17	        }
+;   18	    }
+L_5:
+;   19	    
+;   20	    if (symbolic4(buffer, query) == RETS_SUCCESS) {
+	LD	BC,(IX+-3)
+	PUSH	BC
+	LD	HL,IX
+	LD	BC,-503
+	ADD	HL,BC
+	LD	BC,HL
+	PUSH	BC
+	CALL	_symbolic4
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,2
+	SBC	HL,BC
+	JR	NZ,L_4
+;   21	        printf("\n------------------------------------------\n%s\n------------------------------------------\n", buffer);
+	LD	HL,IX
+	LD	BC,-503
+	ADD	HL,BC
+	LD	BC,HL
+	PUSH	BC
+	LD	BC,L__6
+	PUSH	BC
+	CALL	_printf
+	POP	BC
+	POP	BC
+;   22	    } else {
+	JR	L_6
+L_4:
+;   23	        printf("\n------------------------------------------\nERROR\n------------------------------------------\n");
+	LD	BC,L__7
+	PUSH	BC
+	CALL	_printf
+	POP	BC
+;   24	    }
+L_6:
+	OR	A,A
+;   25	    
+;   26	    return 0;
+	SBC	HL,HL
+;   27	    
+;   28	}
+L_7:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _main ***************************
+;Name                         Addr/Register   Size   Type
+;_printf                             IMPORT  -----   function
+;_printf                             IMPORT  -----   function
+;_printf                             IMPORT  -----   function
+;_printf                             IMPORT  -----   function
+;_symbolic4                          IMPORT  -----   function
+;buffer                              IX-503    500   variable
+;query                                 IX-3      3   variable
+;argv                                  IX+9      3   parameter
+;argc                                  IX+6      3   parameter
+
+
+; Stack Frame Size: 515 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	SEGMENT STRSECT
+L__0:
+	DB	"1"
+	DB	0
+L__3:
+	DB	"%s"
+	DB	0
+L__4:
+	DB	"ERROR"
+	DB	0
+L__6:
+	DB	10
+	DB	"------------------------------------------"
+	DB	10
+	DB	"%s"
+	DB	10
+	DB	"------------------------------------------"
+	DB	10,0
+L__7:
+	DB	10
+	DB	"------------------------------------------"
+	DB	10
+	DB	"ERROR"
+	DB	10
+	DB	"------------------------------------------"
+	DB	10,0
+	XREF _printf:ROM
+	XREF _symbolic4:ROM
+	XREF __frameset:ROM
+	XDEF _main
+	END

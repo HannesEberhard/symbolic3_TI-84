@@ -1,0 +1,3742 @@
+; Zilog eZ80 ANSI C Compiler Release 3.4
+; -optsize -noreduceopt -nomodsect -peephole -globalopt
+; -localcse -const=ROM 
+	FILE	"SRC\SYMBOLIC4\SRC\DERIVATIVE.C"
+	.assume ADL=1
+	SEGMENT CODE
+;    1	
+;    2	/*
+;    3	 
+;    4	 Copyright (c) 2019 Hannes Eberhard
+;    5	 
+;    6	 Permission is hereby granted, free of charge, to any person obtaining a copy
+;    7	 of this software and associated documentation files (the "Software"), to deal
+;    8	 in the Software without restriction, including without limitation the rights
+;    9	 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+;   10	 copies of the Software, and to permit persons to whom the Software is
+;   11	 furnished to do so, subject to the following conditions:
+;   12	 
+;   13	 The above copyright notice and this permission notice shall be included in all
+;   14	 copies or substantial portions of the Software.
+;   15	 
+;   16	 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+;   17	 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+;   18	 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+;   19	 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+;   20	 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+;   21	 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+;   22	 SOFTWARE.
+;   23	 
+;   24	 */
+;   25	
+;   26	#include "symbolic4.h"
+;   27	
+;   28	uint8_t addition_derivative(expression** result, const expression* source, const expression* variable);
+;   29	uint8_t multiplication_derivative(expression** result, const expression* source, const expression* variable);
+;   30	uint8_t exponentation_derivative(expression** result, const expression* source, const expression* variable);
+;   31	uint8_t ln_derivative(expression** result, const expression* source, const expression* variable);
+;   32	uint8_t log_derivative(expression** result, const expression* source, const expression* variable);
+;   33	uint8_t trigonometric_derivative(expression** result, const expression* source, const expression* variable);
+;   34	
+;   35	uint8_t addition_derivative(expression** result, const expression* source, const expression* variable) {
+_addition_derivative:
+	LD	HL,-7
+	CALL	__frameset
+;   36	    
+;   37	    uint8_t i;
+;   38	    expression* temp_result;
+;   39	    
+;   40	    *result = new_expression(EXPT_OPERATION, EXPI_ADDITION, 0);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,5
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	IY,(IX+6)
+	LD	(IY),HL
+;   41	    
+;   42	    for (i = 0; i < source->child_count; i++) {
+	LD	(IX+-1),0
+	JR	L_7
+L_5:
+;   43	        if (source->children[i] == NULL) continue;
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	LD	IY,(IX+9)
+	LD	DE,(IY+11)
+	ADD	HL,BC
+	ADD	HL,DE
+	LD	(IX+-4),HL
+	LD	HL,(HL)
+	CALL	__icmpzero
+	JR	Z,L_6
+;   44	        ERROR_CHECK(derivative(&temp_result, source->children[i], copy_expression(variable), true));
+	LD	BC,1
+	PUSH	BC
+	LD	BC,(IX+12)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	HL,(IX+-4)
+	LD	BC,(HL)
+	PUSH	BC
+	PEA	IX+-7
+	CALL	_derivative
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_4
+	LD	A,1
+	JR	L_9
+L_4:
+;   45	        append_child(*result, temp_result);
+	LD	BC,(IX+-7)
+	PUSH	BC
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_append_child
+	POP	BC
+	POP	BC
+;   46	    }
+L_6:
+	INC	(IX+-1)
+L_7:
+	LD	A,(IX+-1)
+	LD	IY,(IX+9)
+	CP	A,(IY+10)
+	JR	C,L_5
+;   47	    
+;   48	    return RETS_SUCCESS;
+	LD	A,2
+;   49	    
+;   50	}
+L_9:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _addition_derivative ***************************
+;Name                         Addr/Register   Size   Type
+;_append_child                       IMPORT  -----   function
+;_copy_expression                    IMPORT  -----   function
+;_derivative                         IMPORT  -----   function
+;_new_expression                     IMPORT  -----   function
+;temp_result                           IX-7      3   variable
+;G_0                                   IX-4      3   variable
+;i                                     IX-1      1   variable
+;variable                             IX+12      3   parameter
+;source                                IX+9      3   parameter
+;result                                IX+6      3   parameter
+
+
+; Stack Frame Size: 22 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;   51	
+;   52	uint8_t multiplication_derivative(expression** result, const expression* source, const expression* variable) {
+_multiplication_derivative:
+	LD	HL,-11
+	CALL	__frameset
+;   53	    
+;   54	    uint8_t i, j;
+;   55	    expression* temp_result;
+;   56	    
+;   57	    *result = new_expression(EXPT_OPERATION, EXPI_ADDITION, 0);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,5
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	IY,(IX+6)
+	LD	(IY),HL
+;   58	    
+;   59	    for (i = 0; i < source->child_count; i++) {
+	LD	(IX+-2),0
+	JR	L_25
+L_23:
+;   60	        if (source->children[i] == NULL) continue;
+	LD	A,(IX+-2)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	(IX+-8),HL
+	LD	IY,(IX+9)
+	LD	BC,(IY+11)
+	ADD	HL,BC
+	LD	HL,(HL)
+	CALL	__icmpzero
+	JR	Z,L_24
+;   61	        append_child(*result, new_expression(EXPT_OPERATION, EXPI_MULTIPLICATION, 0));
+	LD	BC,0
+	PUSH	BC
+	LD	BC,7
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_append_child
+	POP	BC
+	POP	BC
+;   62	        for (j = 0; j < source->child_count; j++) {
+	LD	(IX+-1),0
+	JR	L_22
+L_20:
+;   63	            if (source->children[i] == NULL) continue;
+	LD	IY,(IX+9)
+	LD	BC,(IY+11)
+	LD	(IX+-5),BC
+	LD	BC,(IX+-8)
+	LD	HL,(IX+-5)
+	ADD	HL,BC
+	LD	HL,(HL)
+	CALL	__icmpzero
+	JR	Z,L_21
+;   64	            if (i == j) {
+	LD	A,(IX+-2)
+	CP	A,(IX+-1)
+	JR	NZ,L_18
+;   65	                ERROR_CHECK(derivative(&temp_result, copy_expression(source->children[j]), copy_expression(variable), false));
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+12)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,(IX+-5)
+	ADD	HL,BC
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	PEA	IX+-11
+	CALL	_derivative
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_16
+	LD	A,1
+	JR	L_27
+L_16:
+;   66	                append_child((*result)->children[(*result)->child_count - 1], temp_result);
+	LD	BC,(IX+-11)
+	PUSH	BC
+	LD	HL,(IX+6)
+	LD	IY,(HL)
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	LD	A,(IY+10)
+	LD	IY,BC
+	LD	DE,(IY+11)
+	UEXT	HL
+	LD	L,A
+	DEC	HL
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	ADD	HL,DE
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_append_child
+	POP	BC
+	POP	BC
+;   67	            } else {
+	JR	L_21
+L_18:
+;   68	                append_child((*result)->children[(*result)->child_count - 1], copy_expression(source->children[j]));
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,(IX+-5)
+	ADD	HL,BC
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	HL,(IX+6)
+	LD	IY,(HL)
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	LD	A,(IY+10)
+	LD	IY,BC
+	LD	DE,(IY+11)
+	UEXT	HL
+	LD	L,A
+	DEC	HL
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	ADD	HL,DE
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_append_child
+	POP	BC
+	POP	BC
+;   69	            }
+;   70	        }
+L_21:
+	INC	(IX+-1)
+L_22:
+	LD	A,(IX+-1)
+	LD	IY,(IX+9)
+	CP	A,(IY+10)
+	JR	C,L_20
+;   71	    }
+L_24:
+	INC	(IX+-2)
+L_25:
+	LD	A,(IX+-2)
+	LD	IY,(IX+9)
+	CP	A,(IY+10)
+	JR	C,L_23
+;   72	    
+;   73	    return RETS_SUCCESS;
+	LD	A,2
+;   74	    
+;   75	}
+L_27:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _multiplication_derivative ***************************
+;Name                         Addr/Register   Size   Type
+;_copy_expression                    IMPORT  -----   function
+;_derivative                         IMPORT  -----   function
+;_append_child                       IMPORT  -----   function
+;_new_expression                     IMPORT  -----   function
+;temp_result                          IX-11      3   variable
+;G_1                                   IX-8      3   variable
+;G_2                                   IX-5      3   variable
+;i                                     IX-2      1   variable
+;j                                     IX-1      1   variable
+;variable                             IX+12      3   parameter
+;source                                IX+9      3   parameter
+;result                                IX+6      3   parameter
+
+
+; Stack Frame Size: 26 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;   76	
+;   77	uint8_t exponentation_derivative(expression** result, const expression* source, const expression* variable) {
+_exponentation_derivative:
+	LD	HL,-3
+	CALL	__frameset
+;   78	    
+;   79	    expression* temp_result;
+;   80	    
+;   81	    *result = new_expression(EXPT_OPERATION, EXPI_MULTIPLICATION, 0);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,7
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	IY,(IX+6)
+;   82	    
+;   83	    if (count_occurrences(source->children[1], copy_expression(variable), false) > 0) {
+	LD	BC,0
+	PUSH	BC
+	LD	(IY),HL
+	LD	BC,(IX+12)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	IY,(IX+9)
+	LD	IY,(IY+11)
+	LEA	HL,IY+3
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_count_occurrences
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	OR	A,A
+	SBC	HL,HL
+	OR	A,A
+	SBC	HL,BC
+	CALL	__setflag
+	JP	P,L_40
+;   84	        
+;   85	        ERROR_CHECK(derivative(&temp_result, copy_expression(source->children[1]), copy_expression(variable), false));
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+12)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	IY,(IX+9)
+	LD	IY,(IY+11)
+	LEA	HL,IY+3
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	PEA	IX+-3
+	CALL	_derivative
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_29
+	LD	A,1
+	JR	L_42
+L_29:
+;   86	        append_child(*result, copy_expression(source));
+	LD	BC,(IX+9)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_append_child
+	POP	BC
+	POP	BC
+;   87	        
+;   88	        if (count_occurrences(source->children[0], copy_expression(variable), false) > 0) {
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+12)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	IY,(IX+9)
+	LD	HL,(IY+11)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_count_occurrences
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	OR	A,A
+	SBC	HL,HL
+	OR	A,A
+	SBC	HL,BC
+	CALL	__setflag
+	JP	P,L_33
+;   89	            append_child(*result, new_expression(EXPT_OPERATION, EXPI_ADDITION, 2,
+;   90	                                                 new_expression(EXPT_OPERATION, EXPI_MULTIPLICATION, 2,
+;   91	                                                                new_expression(EXPT_FUNCTION, EXPI_LN, 1, copy_expression(source->children[0])),
+;   92	                                                                temp_result),
+;   93	                                                 new_expression(EXPT_OPERATION, EXPI_DIVISION, 2,
+;   94	                                                                copy_expression(source->children[1]),
+;   95	                                                                copy_expression(source->children[0]))));
+	LD	IY,(IX+9)
+	LD	HL,(IY+11)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	IY,(IX+9)
+	LD	IY,(IY+11)
+	LEA	HL,IY+3
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,8
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+-3)
+	PUSH	BC
+	LD	IY,(IX+9)
+	LD	HL,(IY+11)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,1
+	PUSH	BC
+	LD	BC,11
+	PUSH	BC
+	LD	BC,3
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,7
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,5
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_append_child
+	POP	BC
+	POP	BC
+;   96	        } else if (expressions_are_identical(source->children[0], new_symbol(EXPI_SYMBOL, "e"), false)) {
+	JR	L_35
+L_33:
+	LD	BC,0
+	PUSH	BC
+	LD	BC,L__14
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_symbol
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	IY,(IX+9)
+	LD	HL,(IY+11)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_expressions_are_identical
+	POP	BC
+	POP	BC
+	POP	BC
+	OR	A,A
+	JR	NZ,L_35
+;   97	        } else {
+;   98	            append_child(*result, new_expression(EXPT_FUNCTION, EXPI_LN, 1, copy_expression(source->children[0])));
+	LD	IY,(IX+9)
+	LD	HL,(IY+11)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,1
+	PUSH	BC
+	LD	BC,11
+	PUSH	BC
+	LD	BC,3
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_append_child
+	POP	BC
+	POP	BC
+;   99	        }
+L_35:
+;  100	        
+;  101	        ERROR_CHECK(derivative(&temp_result, copy_expression(source->children[1]), copy_expression(variable), false));
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+12)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	IY,(IX+9)
+	LD	IY,(IY+11)
+	LEA	HL,IY+3
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	PEA	IX+-3
+	CALL	_derivative
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_36
+	LD	A,1
+	JR	L_42
+L_36:
+;  102	        append_child(*result, temp_result);
+	LD	BC,(IX+-3)
+	PUSH	BC
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_append_child
+	POP	BC
+	POP	BC
+;  103	        
+;  104	    } else {
+	JR	L_41
+L_40:
+;  105	        
+;  106	        ERROR_CHECK(derivative(&temp_result, copy_expression(source->children[0]), copy_expression(variable), false));
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+12)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	IY,(IX+9)
+	LD	HL,(IY+11)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	PEA	IX+-3
+	CALL	_derivative
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_38
+	LD	A,1
+	JR	L_42
+L_38:
+;  107	        
+;  108	        *result = new_expression(EXPT_OPERATION, EXPI_MULTIPLICATION, 3,
+;  109	                                 copy_expression(source->children[1]),
+;  110	                                 new_expression(EXPT_OPERATION, EXPI_EXPONENTATION, 2,
+;  111	                                                copy_expression(source->children[0]),
+;  112	                                                new_expression(EXPT_OPERATION, EXPI_ADDITION, 2,
+;  113	                                                               copy_expression(source->children[1]),
+;  114	                                                               new_literal(-1, 1, 1))),
+;  115	                                 temp_result);
+	LD	BC,(IX+-3)
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,16777215
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	IY,(IX+9)
+	LD	IY,(IY+11)
+	LEA	HL,IY+3
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,5
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	IY,(IX+9)
+	LD	HL,(IY+11)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,9
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	IY,(IX+9)
+	LD	IY,(IY+11)
+	LEA	HL,IY+3
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,3
+	PUSH	BC
+	LD	BC,7
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	IY,(IX+6)
+	LD	(IY),HL
+;  116	        
+;  117	    }
+L_41:
+;  118	    
+;  119	    
+;  120	    return RETS_SUCCESS;
+	LD	A,2
+;  121	    
+;  122	}
+L_42:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _exponentation_derivative ***************************
+;Name                         Addr/Register   Size   Type
+;_new_literal                        IMPORT  -----   function
+;_new_symbol                         IMPORT  -----   function
+;_expressions_are_identical          IMPORT  -----   function
+;_append_child                       IMPORT  -----   function
+;_derivative                         IMPORT  -----   function
+;_copy_expression                    IMPORT  -----   function
+;_count_occurrences                  IMPORT  -----   function
+;_new_expression                     IMPORT  -----   function
+;temp_result                           IX-3      3   variable
+;variable                             IX+12      3   parameter
+;source                                IX+9      3   parameter
+;result                                IX+6      3   parameter
+
+
+; Stack Frame Size: 18 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	SEGMENT STRSECT
+L__14:
+	DB	"e"
+	DB	0
+	SEGMENT CODE
+;  123	
+;  124	uint8_t ln_derivative(expression** result, const expression* source, const expression* variable) {
+_ln_derivative:
+	LD	HL,-3
+	CALL	__frameset
+;  125	    
+;  126	    expression* temp_result;
+;  127	    
+;  128	    ERROR_CHECK(derivative(&temp_result, copy_expression(source->children[0]), copy_expression(variable), false));
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+12)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	IY,(IX+9)
+	LD	HL,(IY+11)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	PEA	IX+-3
+	CALL	_derivative
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_44
+	LD	A,1
+	JR	L_45
+L_44:
+;  129	    *result = new_expression(EXPT_OPERATION, EXPI_DIVISION, 2,
+;  130	                             temp_result,
+;  131	                             copy_expression(source->children[0]));
+	LD	IY,(IX+9)
+	LD	HL,(IY+11)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+-3)
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	LD	BC,8
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	IY,(IX+6)
+	LD	(IY),HL
+;  132	    
+;  133	    return RETS_SUCCESS;
+	LD	A,2
+;  134	    
+;  135	}
+L_45:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _ln_derivative ***************************
+;Name                         Addr/Register   Size   Type
+;_new_expression                     IMPORT  -----   function
+;_copy_expression                    IMPORT  -----   function
+;_derivative                         IMPORT  -----   function
+;temp_result                           IX-3      3   variable
+;variable                             IX+12      3   parameter
+;source                                IX+9      3   parameter
+;result                                IX+6      3   parameter
+
+
+; Stack Frame Size: 18 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  136	
+;  137	uint8_t log_derivative(expression** result, const expression* source, const expression* variable) {
+_log_derivative:
+	LD	HL,-9
+	CALL	__frameset
+;  138	    
+;  139	    expression* temp_result;
+;  140	    expression* base = (source->child_count == 1) ? new_literal(1, 10, 1) : copy_expression(source->children[1]);
+	LD	IY,(IX+9)
+	LD	A,(IY+10)
+	CP	A,1
+	JR	NZ,L_48
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,10
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	(IX+-3),HL
+	JR	L_49
+L_48:
+	LD	IY,(IX+9)
+	LD	IY,(IY+11)
+	LEA	HL,IY+3
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	LD	(IX+-3),HL
+L_49:
+	LD	BC,(IX+-3)
+	LD	(IX+-9),BC
+;  141	    
+;  142	    ERROR_CHECK(derivative(&temp_result, copy_expression(source->children[0]), copy_expression(variable), false));
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+12)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	IY,(IX+9)
+	LD	HL,(IY+11)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	PEA	IX+-6
+	CALL	_derivative
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_51
+	LD	A,1
+	JR	L_52
+L_51:
+;  143	    *result = new_expression(EXPT_OPERATION, EXPI_DIVISION, 2,
+;  144	                             temp_result,
+;  145	                             new_expression(EXPT_OPERATION, EXPI_MULTIPLICATION, 2,
+;  146	                                            new_expression(EXPT_FUNCTION, EXPI_LN, 1, base),
+;  147	                                            copy_expression(source->children[0])));
+	LD	IY,(IX+9)
+	LD	HL,(IY+11)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+-9)
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,11
+	PUSH	BC
+	LD	BC,3
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,7
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+-6)
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	LD	BC,8
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	IY,(IX+6)
+	LD	(IY),HL
+;  148	    
+;  149	    return RETS_SUCCESS;
+	LD	A,2
+;  150	    
+;  151	}
+L_52:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _log_derivative ***************************
+;Name                         Addr/Register   Size   Type
+;_new_expression                     IMPORT  -----   function
+;_derivative                         IMPORT  -----   function
+;_copy_expression                    IMPORT  -----   function
+;_new_literal                        IMPORT  -----   function
+;base                                  IX-9      3   variable
+;temp_result                           IX-6      3   variable
+;temp46                                IX-3      3   variable
+;variable                             IX+12      3   parameter
+;source                                IX+9      3   parameter
+;result                                IX+6      3   parameter
+
+
+; Stack Frame Size: 24 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  152	
+;  153	uint8_t trigonometric_derivative(expression** result, const expression* source, const expression* variable) {
+_trigonometric_derivative:
+	LD	HL,-3
+	CALL	__frameset
+;  154	    
+;  155	    expression* temp_result;
+;  156	    
+;  157	    *result = new_expression(EXPT_OPERATION, EXPI_MULTIPLICATION, 0);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,7
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	IY,(IX+6)
+	LD	(IY),HL
+;  158	    
+;  159	    switch (source->identifier) {
+	LD	IY,(IX+9)
+	LD	HL,(IY+3)
+	CALL	__seqcase
+L__24:
+	DW	6
+	DW	13
+	DB	0
+	DW24	L_53	
+
+	DW24	L_54	
+
+	DW24	L_55	
+
+	DW24	L_56	
+
+	DW24	L_57	
+
+	DW24	L_58	
+
+	DW24	L_61	
+
+;  160	        case EXPI_SIN:
+L_53:
+;  161	            append_child(*result, new_expression(EXPT_FUNCTION, EXPI_COS, 1, copy_expression(source->children[0])));
+	LD	IY,(IX+9)
+	LD	HL,(IY+11)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,1
+	PUSH	BC
+	LD	BC,14
+	PUSH	BC
+	LD	BC,3
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_append_child
+	POP	BC
+	POP	BC
+;  162	            break;
+	JR	L_61
+;  163	        case EXPI_COS:
+L_54:
+;  164	            append_child(*result, new_literal(-1, 1, 1));
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,16777215
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_append_child
+	POP	BC
+	POP	BC
+;  165	            append_child(*result, new_expression(EXPT_FUNCTION, EXPI_SIN, 1, copy_expression(source->children[0])));
+	LD	IY,(IX+9)
+	LD	HL,(IY+11)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,1
+	PUSH	BC
+	LD	BC,13
+	PUSH	BC
+	LD	BC,3
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_append_child
+	POP	BC
+	POP	BC
+;  166	            break;
+	JR	L_61
+;  167	        case EXPI_TAN:
+L_55:
+;  168	            append_child(*result, new_expression(EXPT_OPERATION, EXPI_EXPONENTATION, 2,
+;  169	                                                 new_expression(EXPT_FUNCTION, EXPI_COS, 1, copy_expression(source->children[0])),
+;  170	                                                 new_literal(-1, 2, 1)));
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	LD	BC,16777215
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	IY,(IX+9)
+	LD	HL,(IY+11)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,1
+	PUSH	BC
+	LD	BC,14
+	PUSH	BC
+	LD	BC,3
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,9
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_append_child
+	POP	BC
+	POP	BC
+;  171	            break;
+	JR	L_61
+;  172	        case EXPI_ARCSIN:
+L_56:
+;  173	            append_child(*result, new_expression(EXPT_OPERATION, EXPI_EXPONENTATION, 2,
+;  174	                                                 new_expression(EXPT_OPERATION, EXPI_SUBTRACTION, 2,
+;  175	                                                                new_literal(1, 1, 1),
+;  176	                                                                new_expression(EXPT_OPERATION, EXPI_EXPONENTATION, 2,
+;  177	                                                                               copy_expression(source->children[0]),
+;  178	                                                                               new_literal(1, 2, 1))),
+;  179	                                                 new_literal(-1, 1, 2)));
+	LD	BC,0
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,16777215
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	IY,(IX+9)
+	LD	HL,(IY+11)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,9
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,6
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,9
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_append_child
+	POP	BC
+	POP	BC
+;  180	            break;
+	JR	L_61
+;  181	        case EXPI_ARCCOS:
+L_57:
+;  182	            append_child(*result, new_literal(-1, 1, 1));
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,16777215
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_append_child
+	POP	BC
+	POP	BC
+;  183	            append_child(*result, new_expression(EXPT_OPERATION, EXPI_EXPONENTATION, 2,
+;  184	                                                 new_expression(EXPT_OPERATION, EXPI_SUBTRACTION, 2,
+;  185	                                                                new_literal(1, 1, 1),
+;  186	                                                                new_expression(EXPT_OPERATION, EXPI_EXPONENTATION, 2,
+;  187	                                                                               copy_expression(source->children[0]),
+;  188	                                                                               new_literal(1, 2, 1))),
+;  189	                                                 new_literal(-1, 1, 2)));
+	LD	BC,0
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,16777215
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	IY,(IX+9)
+	LD	HL,(IY+11)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,9
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,6
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,9
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_append_child
+	POP	BC
+	POP	BC
+;  190	            break;
+	JR	L_61
+;  191	        case EXPI_ARCTAN:
+L_58:
+;  192	            append_child(*result, new_expression(EXPT_OPERATION, EXPI_DIVISION, 2,
+;  193	                                                 new_expression(EXPT_OPERATION, EXPI_ADDITION, 2,
+;  194	                                                                new_expression(EXPT_OPERATION, EXPI_EXPONENTATION, 2,
+;  195	                                                                               copy_expression(source->children[0]),
+;  196	                                                                               new_literal(1, 2, 1)),
+;  197	                                                                new_literal(1, 1, 1))));
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	IY,(IX+9)
+	LD	HL,(IY+11)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,9
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,5
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,8
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_append_child
+	POP	BC
+	POP	BC
+;  198	            break;
+;  199	        default: break;
+;  200	    }
+L_61:
+;  201	    
+;  202	    ERROR_CHECK(derivative(&temp_result, copy_expression(source->children[0]), copy_expression(variable), true));
+	LD	BC,1
+	PUSH	BC
+	LD	BC,(IX+12)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	IY,(IX+9)
+	LD	HL,(IY+11)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	PEA	IX+-3
+	CALL	_derivative
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_62
+	LD	A,1
+	JR	L_63
+L_62:
+;  203	    append_child(*result, temp_result);
+	LD	BC,(IX+-3)
+	PUSH	BC
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_append_child
+	POP	BC
+	POP	BC
+;  204	    
+;  205	    return RETS_SUCCESS;
+	LD	A,2
+;  206	    
+;  207	}
+L_63:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _trigonometric_derivative ***************************
+;Name                         Addr/Register   Size   Type
+;_derivative                         IMPORT  -----   function
+;_new_literal                        IMPORT  -----   function
+;_copy_expression                    IMPORT  -----   function
+;_append_child                       IMPORT  -----   function
+;_new_expression                     IMPORT  -----   function
+;temp_result                           IX-3      3   variable
+;variable                             IX+12      3   parameter
+;source                                IX+9      3   parameter
+;result                                IX+6      3   parameter
+
+
+; Stack Frame Size: 18 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  208	
+;  209	uint8_t derivative(expression** result, expression* source, expression* variable, bool persistent) {
+_derivative:
+	LD	HL,-6
+	CALL	__frameset
+;  210	    
+;  211	    if (variable == NULL) {
+	LD	HL,(IX+12)
+	CALL	__icmpzero
+	JR	NZ,L_66
+;  212	        variable = guess_symbol(source, "", 0);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,L__28
+	PUSH	BC
+	LD	BC,(IX+9)
+	PUSH	BC
+	CALL	_guess_symbol
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	(IX+12),HL
+;  213	    }
+L_66:
+;  214	    
+;  215	    if (count_occurrences(source, copy_expression(variable), false) == 0) {
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+12)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+9)
+	PUSH	BC
+	CALL	_count_occurrences
+	POP	BC
+	POP	BC
+	POP	BC
+	OR	A,A
+	JR	NZ,L_67
+;  216	        *result = new_literal(1, 0, 1);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	IY,(IX+6)
+	LD	(IY),HL
+;  217	        return RETS_SUCCESS;
+	LD	A,2
+	JR	L_91
+;  218	    }
+L_67:
+;  219	    
+;  220	    any_expression_to_expression(source);
+	LD	BC,(IX+9)
+	PUSH	BC
+	CALL	_any_expression_to_expression
+	POP	BC
+;  221	    
+;  222	    switch (source->identifier) {
+	LD	IY,(IX+9)
+	LD	BC,(IY+3)
+	LD	(IX+-6),BC
+	LD	HL,BC
+	CALL	__case8
+L__30:
+	DW	13
+	DB	2
+	DW24	L_68	
+
+	DB	5
+	DW24	L_73	
+
+	DB	7
+	DW24	L_74	
+
+	DB	9
+	DW24	L_75	
+
+	DB	10
+	DW24	L_84	
+
+	DB	11
+	DW24	L_76	
+
+	DB	12
+	DW24	L_77	
+
+	DB	13
+	DW24	L_78	
+
+	DB	14
+	DW24	L_79	
+
+	DB	15
+	DW24	L_80	
+
+	DB	16
+	DW24	L_81	
+
+	DB	17
+	DW24	L_82	
+
+	DB	18
+	DW24	L_83	
+
+	DW24	L_85	
+
+;  223	        case EXPI_SYMBOL: *result = (expressions_are_identical(source, copy_expression(variable), false)) ? new_literal(1, 1, 1) : new_literal(1, 0, 1); break;
+L_68:
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+12)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+9)
+	PUSH	BC
+	CALL	_expressions_are_identical
+	POP	BC
+	POP	BC
+	POP	BC
+	OR	A,A
+	JR	Z,L_71
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	(IX+-3),HL
+	JR	L_72
+L_71:
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	(IX+-3),HL
+L_72:
+	LD	HL,(IX+6)
+	LD	BC,(IX+-3)
+	LD	(HL),BC
+	JR	L_87
+;  224	        case EXPI_ADDITION: addition_derivative(result, source, variable); break;
+L_73:
+	LD	BC,(IX+12)
+	PUSH	BC
+	LD	BC,(IX+9)
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_addition_derivative
+	POP	BC
+	POP	BC
+	POP	BC
+	JR	L_87
+;  225	        case EXPI_MULTIPLICATION: multiplication_derivative(result, source, variable); break;
+L_74:
+	LD	BC,(IX+12)
+	PUSH	BC
+	LD	BC,(IX+9)
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_multiplication_derivative
+	POP	BC
+	POP	BC
+	POP	BC
+	JR	L_87
+;  226	        case EXPI_EXPONENTATION: exponentation_derivative(result, source, variable); break;
+L_75:
+	LD	BC,(IX+12)
+	PUSH	BC
+	LD	BC,(IX+9)
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_exponentation_derivative
+	POP	BC
+	POP	BC
+	POP	BC
+	JR	L_87
+;  227	        case EXPI_LN: ln_derivative(result, source, variable); break;
+L_76:
+	LD	BC,(IX+12)
+	PUSH	BC
+	LD	BC,(IX+9)
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_ln_derivative
+	POP	BC
+	POP	BC
+	POP	BC
+	JR	L_87
+;  228	        case EXPI_LOG: log_derivative(result, source, variable); break;
+L_77:
+	LD	BC,(IX+12)
+	PUSH	BC
+	LD	BC,(IX+9)
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_log_derivative
+	POP	BC
+	POP	BC
+	POP	BC
+	JR	L_87
+;  229	        case EXPI_SIN:
+L_78:
+;  230	        case EXPI_COS:
+L_79:
+;  231	        case EXPI_TAN:
+L_80:
+;  232	        case EXPI_ARCSIN:
+L_81:
+;  233	        case EXPI_ARCCOS:
+L_82:
+;  234	        case EXPI_ARCTAN: trigonometric_derivative(result, source, variable); break;
+L_83:
+	LD	BC,(IX+12)
+	PUSH	BC
+	LD	BC,(IX+9)
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_trigonometric_derivative
+	POP	BC
+	POP	BC
+	POP	BC
+	JR	L_87
+;  235	        case EXPI_ABS: return set_error(ERRD_MATH, ERRI_NON_DIFFERENTIABLE, "");
+L_84:
+	LD	BC,L__32
+	PUSH	BC
+	LD	BC,11
+	PUSH	BC
+	LD	BC,3
+	PUSH	BC
+	CALL	_set_error
+	POP	BC
+	POP	BC
+	POP	BC
+	JR	L_91
+;  236	        default: return set_error(ERRD_SYNTAX, ERRI_UNEXPECTED_EXPRESSION, get_expression_string(source->identifier));
+L_85:
+	LD	BC,(IX+-6)
+	PUSH	BC
+	CALL	_get_expression_string
+	POP	BC
+	PUSH	HL
+	LD	BC,3
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_set_error
+	POP	BC
+	POP	BC
+	POP	BC
+	JR	L_91
+;  237	    }
+L_87:
+;  238	    
+;  239	    ERROR_CHECK(simplify(*result, true));
+	LD	BC,1
+	PUSH	BC
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_simplify
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_89
+	LD	A,1
+	JR	L_91
+L_89:
+;  240	    
+;  241	    if (!persistent) {
+	LD	A,(IX+15)
+	OR	A,A
+	JR	NZ,L_90
+;  242	        free_expression(source, false);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+9)
+	PUSH	BC
+	CALL	_free_expression
+	POP	BC
+	POP	BC
+;  243	        free_expression(variable, false);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+12)
+	PUSH	BC
+	CALL	_free_expression
+	POP	BC
+	POP	BC
+;  244	    }
+L_90:
+;  245	    
+;  246	    return RETS_SUCCESS;
+	LD	A,2
+;  247	    
+;  248	}
+L_91:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _derivative ***************************
+;Name                         Addr/Register   Size   Type
+;_free_expression                    IMPORT  -----   function
+;_simplify                           IMPORT  -----   function
+;_get_expression_string              IMPORT  -----   function
+;_set_error                          IMPORT  -----   function
+;_trigonometric_derivative           IMPORT  -----   function
+;_log_derivative                     IMPORT  -----   function
+;_ln_derivative                      IMPORT  -----   function
+;_exponentation_derivative           IMPORT  -----   function
+;_multiplication_derivative          IMPORT  -----   function
+;_addition_derivative                IMPORT  -----   function
+;_expressions_are_identical          IMPORT  -----   function
+;_any_expression_to_expression       IMPORT  -----   function
+;_new_literal                        IMPORT  -----   function
+;_copy_expression                    IMPORT  -----   function
+;_count_occurrences                  IMPORT  -----   function
+;_guess_symbol                       IMPORT  -----   function
+;G_4                                   IX-6      3   variable
+;temp69                                IX-3      3   variable
+;persistent                           IX+15      1   parameter
+;variable                             IX+12      3   parameter
+;source                                IX+9      3   parameter
+;result                                IX+6      3   parameter
+
+
+; Stack Frame Size: 24 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	SEGMENT STRSECT
+L__28:
+	DB	0
+L__32:
+	DB	0
+	SEGMENT CODE
+;  249	
+;  250	uint8_t stationary_points(expression* source, expression* variable) {
+_stationary_points:
+	LD	HL,-19
+	CALL	__frameset
+;  251	    
+;  252	    uint8_t i;
+;  253	    expression* first_derivative;
+;  254	    expression* second_derivative;
+;  255	    expression* first_derivatives_roots;
+;  256	    expression* second_derivative_value;
+;  257	    expression* function_value;
+;  258	    expression* result;
+;  259	    
+;  260	    if (variable == NULL) {
+	LD	HL,(IX+9)
+	CALL	__icmpzero
+	JR	NZ,L_94
+;  261	        variable = guess_symbol(source, "", 0);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,L__37
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_guess_symbol
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	(IX+9),HL
+;  262	    }
+L_94:
+;  263	    
+;  264	    ERROR_CHECK(derivative(&first_derivative, source, variable, true));
+	LD	BC,1
+	PUSH	BC
+	LD	BC,(IX+9)
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	PEA	IX+-16
+	CALL	_derivative
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_96
+	LD	A,1
+	JR	L_112
+L_96:
+;  265	    ERROR_CHECK(derivative(&second_derivative, first_derivative, variable, true));
+	PUSH	BC
+	LD	BC,(IX+9)
+	PUSH	BC
+	LD	BC,(IX+-16)
+	PUSH	BC
+	PEA	IX+-19
+	CALL	_derivative
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_97
+	LD	A,1
+	JR	L_112
+L_97:
+;  266	    
+;  267	    first_derivatives_roots = new_expression(EXPT_OPERATION, EXPI_EQUATION, 2,
+;  268	                                             copy_expression(first_derivative),
+;  269	                                             new_literal(1, 0, 1));
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+-16)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,4
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	(IX+-4),HL
+;  270	    
+;  271	    switch (solve(first_derivatives_roots, variable)) {
+	LD	BC,(IX+9)
+	PUSH	BC
+	LD	BC,(IX+-4)
+	PUSH	BC
+	CALL	_solve
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	CALL	__case8
+L__40:
+	DW	2
+	DB	1
+	DW24	L_99	
+
+	DB	4
+	DW24	L_98	
+
+	DW24	L_100	
+
+;  272	        case RETS_UNCHANGED: return RETS_UNCHANGED;
+L_98:
+	LD	A,4
+	JR	L_112
+;  273	        case RETS_ERROR: return RETS_ERROR;
+L_99:
+	LD	A,1
+	JR	L_112
+;  274	    }
+L_100:
+;  275	    
+;  276	    embed_in_list_if_necessary(first_derivatives_roots);
+	LD	BC,(IX+-4)
+	PUSH	BC
+	CALL	_embed_in_list_if_necessary
+	POP	BC
+;  277	    
+;  278	    result = new_expression(EXPT_STRUCTURE, EXPI_LIST, 0);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,40
+	PUSH	BC
+	LD	BC,4
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	(IX+-7),HL
+;  279	    
+;  280	    for (i = 0; i < first_derivatives_roots->child_count; i++) {
+	LD	(IX+-1),0
+	JR	L_110
+L_108:
+;  281	        
+;  282	        function_value = copy_expression(source);
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	LD	(IX+-10),HL
+;  283	        replace_occurences(function_value, variable, first_derivatives_roots->children[i]->children[1]);
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	LD	IY,(IX+-4)
+	LD	DE,(IY+11)
+	ADD	HL,BC
+	ADD	HL,DE
+	LD	IY,(HL)
+	LD	IY,(IY+11)
+	LEA	HL,IY+3
+	LD	BC,(HL)
+	PUSH	BC
+	LD	BC,(IX+9)
+	PUSH	BC
+	LD	BC,(IX+-10)
+	PUSH	BC
+	CALL	_replace_occurences
+	POP	BC
+	POP	BC
+	POP	BC
+;  284	        
+;  285	        second_derivative_value = copy_expression(second_derivative);
+	LD	BC,(IX+-19)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	LD	(IX+-13),HL
+;  286	        replace_occurences(second_derivative_value, variable, first_derivatives_roots->children[i]->children[1]);
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	LD	IY,(IX+-4)
+	LD	DE,(IY+11)
+	ADD	HL,BC
+	ADD	HL,DE
+	LD	IY,(HL)
+	LD	IY,(IY+11)
+	LEA	HL,IY+3
+	LD	BC,(HL)
+	PUSH	BC
+	LD	BC,(IX+9)
+	PUSH	BC
+	LD	BC,(IX+-13)
+	PUSH	BC
+	CALL	_replace_occurences
+	POP	BC
+	POP	BC
+	POP	BC
+;  287	        
+;  288	        if (expressions_are_equivalent(second_derivative_value, new_literal(1, 0, 1), false)) {
+	LD	BC,0
+	PUSH	BC
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+-13)
+	PUSH	BC
+	CALL	_expressions_are_equivalent
+	POP	BC
+	POP	BC
+	POP	BC
+	OR	A,A
+	JR	Z,L_107
+;  289	            append_child(result, new_expression(EXPT_STRUCTURE, EXPI_LIST, 3,
+;  290	                                                copy_expression(first_derivatives_roots->children[i]->children[1]),
+;  291	                                                copy_expression(function_value),
+;  292	                                                new_literal(1, 0, 1)));
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+-10)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	LD	IY,(IX+-4)
+	LD	DE,(IY+11)
+	ADD	HL,BC
+	ADD	HL,DE
+	LD	IY,(HL)
+	LD	IY,(IY+11)
+	LEA	HL,IY+3
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,3
+	PUSH	BC
+	LD	BC,40
+	PUSH	BC
+	LD	BC,4
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+-7)
+	PUSH	BC
+	CALL	_append_child
+	POP	BC
+	POP	BC
+;  293	        } else if (expression_is_greater_than(second_derivative_value, new_literal(1, 0, 1), false)) {
+	JR	L_109
+L_107:
+	LD	BC,0
+	PUSH	BC
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+-13)
+	PUSH	BC
+	CALL	_expression_is_greater_than
+	POP	BC
+	POP	BC
+	POP	BC
+	OR	A,A
+	JR	Z,L_105
+;  294	            append_child(result, new_expression(EXPT_STRUCTURE, EXPI_LIST, 3,
+;  295	                                                copy_expression(first_derivatives_roots->children[i]->children[1]),
+;  296	                                                copy_expression(function_value),
+;  297	                                                new_literal(-1, 1, 1)));
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,16777215
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+-10)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	LD	IY,(IX+-4)
+	LD	DE,(IY+11)
+	ADD	HL,BC
+	ADD	HL,DE
+	LD	IY,(HL)
+	LD	IY,(IY+11)
+	LEA	HL,IY+3
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,3
+	PUSH	BC
+	LD	BC,40
+	PUSH	BC
+	LD	BC,4
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+-7)
+	PUSH	BC
+	CALL	_append_child
+	POP	BC
+	POP	BC
+;  298	        } else if (expression_is_smaller_than(second_derivative_value, new_literal(1, 0, 1), false)) {
+	JR	L_109
+L_105:
+	LD	BC,0
+	PUSH	BC
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+-13)
+	PUSH	BC
+	CALL	_expression_is_smaller_than
+	POP	BC
+	POP	BC
+	POP	BC
+	OR	A,A
+	JR	Z,L_103
+;  299	            append_child(result, new_expression(EXPT_STRUCTURE, EXPI_LIST, 3,
+;  300	                                                copy_expression(first_derivatives_roots->children[i]->children[1]),
+;  301	                                                copy_expression(function_value),
+;  302	                                                new_literal(1, 1, 1)));
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+-10)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	LD	IY,(IX+-4)
+	LD	DE,(IY+11)
+	ADD	HL,BC
+	ADD	HL,DE
+	LD	IY,(HL)
+	LD	IY,(IY+11)
+	LEA	HL,IY+3
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,3
+	PUSH	BC
+	LD	BC,40
+	PUSH	BC
+	LD	BC,4
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+-7)
+	PUSH	BC
+	CALL	_append_child
+	POP	BC
+	POP	BC
+;  303	        } else {
+	JR	L_109
+L_103:
+;  304	            append_child(result, new_expression(EXPT_STRUCTURE, EXPI_LIST, 2,
+;  305	                                                copy_expression(first_derivatives_roots->children[i]->children[1]),
+;  306	                                                copy_expression(function_value)));
+	LD	BC,(IX+-10)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	LD	IY,(IX+-4)
+	LD	DE,(IY+11)
+	ADD	HL,BC
+	ADD	HL,DE
+	LD	IY,(HL)
+	LD	IY,(IY+11)
+	LEA	HL,IY+3
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,40
+	PUSH	BC
+	LD	BC,4
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+-7)
+	PUSH	BC
+	CALL	_append_child
+	POP	BC
+	POP	BC
+;  307	        }
+;  308	        
+;  309	    }
+L_109:
+	INC	(IX+-1)
+L_110:
+	LD	A,(IX+-1)
+	LD	IY,(IX+-4)
+	CP	A,(IY+10)
+	JR	C,L_108
+;  310	    
+;  311	    
+;  312	    simplify(result, true);
+	LD	BC,1
+	PUSH	BC
+	LD	BC,(IX+-7)
+	PUSH	BC
+	CALL	_simplify
+	POP	BC
+	POP	BC
+;  313	    
+;  314	    replace_expression(source, result);
+	LD	BC,(IX+-7)
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_replace_expression
+	POP	BC
+	POP	BC
+;  315	    
+;  316	    return RETS_SUCCESS;
+	LD	A,2
+;  317	    
+;  318	}
+L_112:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _stationary_points ***************************
+;Name                         Addr/Register   Size   Type
+;_replace_expression                 IMPORT  -----   function
+;_simplify                           IMPORT  -----   function
+;_expression_is_smaller_than         IMPORT  -----   function
+;_expression_is_greater_than         IMPORT  -----   function
+;_append_child                       IMPORT  -----   function
+;_expressions_are_equivalent         IMPORT  -----   function
+;_replace_occurences                 IMPORT  -----   function
+;_embed_in_list_if_necessary         IMPORT  -----   function
+;_solve                              IMPORT  -----   function
+;_copy_expression                    IMPORT  -----   function
+;_new_literal                        IMPORT  -----   function
+;_new_expression                     IMPORT  -----   function
+;_derivative                         IMPORT  -----   function
+;_guess_symbol                       IMPORT  -----   function
+;second_derivative                    IX-19      3   variable
+;first_derivative                     IX-16      3   variable
+;second_derivative_value              IX-13      3   variable
+;function_value                       IX-10      3   variable
+;result                                IX-7      3   variable
+;first_derivatives_roots               IX-4      3   variable
+;i                                     IX-1      1   variable
+;variable                              IX+9      3   parameter
+;source                                IX+6      3   parameter
+
+
+; Stack Frame Size: 31 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	SEGMENT STRSECT
+L__37:
+	DB	0
+	SEGMENT CODE
+;  319	
+;  320	uint8_t function_tangent(expression** result, expression* source, expression* variable, expression* x_value, bool persistent) {
+_function_tangent:
+	LD	HL,-6
+	CALL	__frameset
+;  321	    
+;  322	    expression* y_value;
+;  323	    expression* slope;
+;  324	    
+;  325	    ERROR_CHECK(derivative(result, source, variable, true));
+	LD	BC,1
+	PUSH	BC
+	LD	BC,(IX+12)
+	PUSH	BC
+	LD	BC,(IX+9)
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_derivative
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_114
+	LD	A,1
+	JR	L_119
+L_114:
+;  326	    
+;  327	    y_value = copy_expression(source);
+	LD	BC,(IX+9)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	LD	(IX+-6),HL
+;  328	    replace_occurences(y_value, variable, x_value);
+	LD	BC,(IX+15)
+	PUSH	BC
+	LD	BC,(IX+12)
+	PUSH	BC
+	LD	BC,(IX+-6)
+	PUSH	BC
+	CALL	_replace_occurences
+	POP	BC
+	POP	BC
+	POP	BC
+;  329	    
+;  330	    slope = copy_expression(*result);
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	LD	(IX+-3),HL
+;  331	    replace_occurences(slope, variable, x_value);
+	LD	BC,(IX+15)
+	PUSH	BC
+	LD	BC,(IX+12)
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_replace_occurences
+	POP	BC
+	POP	BC
+	POP	BC
+;  332	    
+;  333	    *result = new_expression(EXPT_OPERATION, EXPI_ADDITION, 2,
+;  334	                             new_expression(EXPT_OPERATION, EXPI_MULTIPLICATION, 2,
+;  335	                                            copy_expression(slope),
+;  336	                                            copy_expression(variable)),
+;  337	                             new_expression(EXPT_OPERATION, EXPI_SUBTRACTION, 2,
+;  338	                                            copy_expression(y_value),
+;  339	                                            new_expression(EXPT_OPERATION, EXPI_MULTIPLICATION, 2,
+;  340	                                                           copy_expression(x_value),
+;  341	                                                           copy_expression(slope))));
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+15)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,7
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+-6)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,6
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+12)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,7
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,5
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	IY,(IX+6)
+;  342	    
+;  343	    free_expression(y_value, false);
+	LD	BC,0
+	PUSH	BC
+	LD	(IY),HL
+	LD	BC,(IX+-6)
+	PUSH	BC
+	CALL	_free_expression
+	POP	BC
+	POP	BC
+;  344	    free_expression(slope, false);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_free_expression
+	POP	BC
+	POP	BC
+;  345	    
+;  346	    if (!persistent) {
+	LD	A,(IX+18)
+	OR	A,A
+	JR	NZ,L_117
+;  347	        free_expression(source, false);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+9)
+	PUSH	BC
+	CALL	_free_expression
+	POP	BC
+	POP	BC
+;  348	        free_expression(variable, false);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+12)
+	PUSH	BC
+	CALL	_free_expression
+	POP	BC
+	POP	BC
+;  349	        free_expression(x_value, false);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+15)
+	PUSH	BC
+	CALL	_free_expression
+	POP	BC
+	POP	BC
+;  350	    }
+L_117:
+;  351	    
+;  352	    ERROR_CHECK(simplify(*result, true));
+	LD	BC,1
+	PUSH	BC
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_simplify
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_118
+	LD	A,1
+	JR	L_119
+L_118:
+;  353	    
+;  354	    return RETS_SUCCESS;
+	LD	A,2
+;  355	    
+;  356	}
+L_119:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _function_tangent ***************************
+;Name                         Addr/Register   Size   Type
+;_simplify                           IMPORT  -----   function
+;_free_expression                    IMPORT  -----   function
+;_new_expression                     IMPORT  -----   function
+;_replace_occurences                 IMPORT  -----   function
+;_copy_expression                    IMPORT  -----   function
+;_derivative                         IMPORT  -----   function
+;y_value                               IX-6      3   variable
+;slope                                 IX-3      3   variable
+;persistent                           IX+18      1   parameter
+;x_value                              IX+15      3   parameter
+;variable                             IX+12      3   parameter
+;source                                IX+9      3   parameter
+;result                                IX+6      3   parameter
+
+
+; Stack Frame Size: 27 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  357	
+;  358	uint8_t function_normal(expression** result, expression* source, expression* variable, expression* x_value, bool persistent) {
+_function_normal:
+	LD	HL,-6
+	CALL	__frameset
+;  359	    
+;  360	    expression* y_value;
+;  361	    expression* slope;
+;  362	    
+;  363	    ERROR_CHECK(derivative(result, source, variable, true));
+	LD	BC,1
+	PUSH	BC
+	LD	BC,(IX+12)
+	PUSH	BC
+	LD	BC,(IX+9)
+	PUSH	BC
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_derivative
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_121
+	LD	A,1
+	JR	L_126
+L_121:
+;  364	    
+;  365	    y_value = copy_expression(source);
+	LD	BC,(IX+9)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	LD	(IX+-6),HL
+;  366	    replace_occurences(y_value, variable, x_value);
+	LD	BC,(IX+15)
+	PUSH	BC
+	LD	BC,(IX+12)
+	PUSH	BC
+	LD	BC,(IX+-6)
+	PUSH	BC
+	CALL	_replace_occurences
+	POP	BC
+	POP	BC
+	POP	BC
+;  367	    
+;  368	    slope = new_expression(EXPT_OPERATION, EXPI_DIVISION, 2,
+;  369	                           new_literal(-1, 1, 1),
+;  370	                           copy_expression(*result));
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,16777215
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,8
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	(IX+-3),HL
+;  371	    replace_occurences(slope, variable, x_value);
+	LD	BC,(IX+15)
+	PUSH	BC
+	LD	BC,(IX+12)
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_replace_occurences
+	POP	BC
+	POP	BC
+	POP	BC
+;  372	    
+;  373	    *result = new_expression(EXPT_OPERATION, EXPI_ADDITION, 2,
+;  374	                             new_expression(EXPT_OPERATION, EXPI_MULTIPLICATION, 2,
+;  375	                                            copy_expression(slope),
+;  376	                                            copy_expression(variable)),
+;  377	                             new_expression(EXPT_OPERATION, EXPI_SUBTRACTION, 2,
+;  378	                                            copy_expression(y_value),
+;  379	                                            new_expression(EXPT_OPERATION, EXPI_MULTIPLICATION, 2,
+;  380	                                                           copy_expression(x_value),
+;  381	                                                           copy_expression(slope))));
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+15)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,7
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+-6)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,6
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+12)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,7
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,5
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	IY,(IX+6)
+;  382	    
+;  383	    free_expression(y_value, false);
+	LD	BC,0
+	PUSH	BC
+	LD	(IY),HL
+	LD	BC,(IX+-6)
+	PUSH	BC
+	CALL	_free_expression
+	POP	BC
+	POP	BC
+;  384	    free_expression(slope, false);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_free_expression
+	POP	BC
+	POP	BC
+;  385	    
+;  386	    if (!persistent) {
+	LD	A,(IX+18)
+	OR	A,A
+	JR	NZ,L_124
+;  387	        free_expression(source, false);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+9)
+	PUSH	BC
+	CALL	_free_expression
+	POP	BC
+	POP	BC
+;  388	        free_expression(variable, false);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+12)
+	PUSH	BC
+	CALL	_free_expression
+	POP	BC
+	POP	BC
+;  389	        free_expression(x_value, false);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+15)
+	PUSH	BC
+	CALL	_free_expression
+	POP	BC
+	POP	BC
+;  390	    }
+L_124:
+;  391	    
+;  392	    ERROR_CHECK(simplify(*result, true));
+	LD	BC,1
+	PUSH	BC
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_simplify
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,1
+	SBC	HL,BC
+	JR	NZ,L_125
+	LD	A,1
+	JR	L_126
+L_125:
+;  393	    
+;  394	    return RETS_SUCCESS;
+	LD	A,2
+;  395	    
+;  396	}
+L_126:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _function_normal ***************************
+;Name                         Addr/Register   Size   Type
+;_simplify                           IMPORT  -----   function
+;_free_expression                    IMPORT  -----   function
+;_new_literal                        IMPORT  -----   function
+;_new_expression                     IMPORT  -----   function
+;_replace_occurences                 IMPORT  -----   function
+;_copy_expression                    IMPORT  -----   function
+;_derivative                         IMPORT  -----   function
+;y_value                               IX-6      3   variable
+;slope                                 IX-3      3   variable
+;persistent                           IX+18      1   parameter
+;x_value                              IX+15      3   parameter
+;variable                             IX+12      3   parameter
+;source                                IX+9      3   parameter
+;result                                IX+6      3   parameter
+
+
+; Stack Frame Size: 27 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  397	
+;  398	uint8_t function_intersection_angle(expression** result, expression* g, expression* h){
+_function_intersection_angle:
+	LD	HL,-22
+	CALL	__frameset
+;  399	    
+;  400	    uint8_t i;
+;  401	    expression* equation = new_expression(EXPT_OPERATION, EXPI_EQUATION, 2,
+;  402	                                          copy_expression(g),
+;  403	                                          copy_expression(h));
+	LD	BC,(IX+12)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+9)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,4
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	(IX+-4),HL
+;  404	    expression* variable = guess_symbol(equation, "", 0);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,L__54
+	PUSH	BC
+	LD	BC,(IX+-4)
+	PUSH	BC
+	CALL	_guess_symbol
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	(IX+-13),HL
+;  405	    expression* g_derivative;
+;  406	    expression* h_derivative;
+;  407	    expression* g_slope;
+;  408	    expression* h_slope;
+;  409	    
+;  410	    solve(equation, NULL);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+-4)
+	PUSH	BC
+	CALL	_solve
+	POP	BC
+	POP	BC
+;  411	    embed_in_list_if_necessary(equation);
+	LD	BC,(IX+-4)
+	PUSH	BC
+	CALL	_embed_in_list_if_necessary
+	POP	BC
+;  412	    
+;  413	    for (i = 0; i < equation->child_count; i++) {
+	LD	(IX+-1),0
+	JR	L_131
+L_129:
+;  414	        if (equation->children[i]->children[0]->identifier != EXPI_SYMBOL) {
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	LD	IY,(IX+-4)
+	LD	DE,(IY+11)
+	ADD	HL,BC
+	ADD	HL,DE
+	LD	IY,(HL)
+	LD	HL,(IY+11)
+	LD	IY,(HL)
+	LD	HL,(IY+3)
+	OR	A,A
+	LD	BC,2
+	SBC	HL,BC
+	JR	Z,L_130
+;  415	            *result = new_expression(EXPT_FUNCTION, EXPI_ANGLE, 2,
+;  416	                                     copy_expression(g),
+;  417	                                     copy_expression(h));
+	LD	BC,(IX+12)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+9)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,30
+	PUSH	BC
+	LD	BC,3
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	IY,(IX+6)
+	LD	(IY),HL
+;  418	            return RETS_UNCHANGED;
+	LD	A,4
+	JR	L_138
+;  419	        }
+;  420	    }
+L_130:
+	INC	(IX+-1)
+L_131:
+	LD	A,(IX+-1)
+	LD	IY,(IX+-4)
+	CP	A,(IY+10)
+	JR	C,L_129
+;  421	    
+;  422	    *result = new_expression(EXPT_STRUCTURE, EXPI_LIST, 0);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,40
+	PUSH	BC
+	LD	BC,4
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	IY,(IX+6)
+;  423	    derivative(&g_derivative, g, variable, true);
+	LD	BC,1
+	PUSH	BC
+	LD	(IY),HL
+	LD	BC,(IX+-13)
+	PUSH	BC
+	LD	BC,(IX+9)
+	PUSH	BC
+	PEA	IX+-19
+	CALL	_derivative
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+;  424	    derivative(&h_derivative, h, variable, true);
+	LD	BC,1
+	PUSH	BC
+	LD	BC,(IX+-13)
+	PUSH	BC
+	LD	BC,(IX+12)
+	PUSH	BC
+	PEA	IX+-22
+	CALL	_derivative
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+;  425	    
+;  426	    for (i = 0; i < equation->child_count; i++) {
+	LD	(IX+-1),0
+	JR	L_136
+L_134:
+;  427	        
+;  428	        g_slope = copy_expression(g_derivative);
+	LD	BC,(IX+-19)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	LD	(IX+-7),HL
+;  429	        replace_occurences(g_slope, variable, copy_expression(equation->children[i]->children[1]));
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	(IX+-16),HL
+	LD	IY,(IX+-4)
+	LD	BC,(IY+11)
+	ADD	HL,BC
+	LD	IY,(HL)
+	LD	IY,(IY+11)
+	LEA	HL,IY+3
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+-13)
+	PUSH	BC
+	LD	BC,(IX+-7)
+	PUSH	BC
+	CALL	_replace_occurences
+	POP	BC
+	POP	BC
+	POP	BC
+;  430	        simplify(g_slope, true);
+	LD	BC,1
+	PUSH	BC
+	LD	BC,(IX+-7)
+	PUSH	BC
+	CALL	_simplify
+	POP	BC
+	POP	BC
+;  431	        
+;  432	        h_slope = copy_expression(h_derivative);
+	LD	BC,(IX+-22)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	LD	(IX+-10),HL
+;  433	        replace_occurences(h_slope, variable, copy_expression(equation->children[i]->children[1]));
+	LD	BC,(IX+-16)
+	LD	IY,(IX+-4)
+	LD	HL,(IY+11)
+	ADD	HL,BC
+	LD	IY,(HL)
+	LD	IY,(IY+11)
+	LEA	HL,IY+3
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+-13)
+	PUSH	BC
+	LD	BC,(IX+-10)
+	PUSH	BC
+	CALL	_replace_occurences
+	POP	BC
+	POP	BC
+	POP	BC
+;  434	        simplify(h_slope, true);
+	LD	BC,1
+	PUSH	BC
+	LD	BC,(IX+-10)
+	PUSH	BC
+	CALL	_simplify
+	POP	BC
+	POP	BC
+;  435	        
+;  436	        append_child(*result, new_expression(EXPT_FUNCTION, EXPI_ARCTAN, 1,
+;  437	                                            new_expression(EXPT_FUNCTION, EXPI_ABS, 1,
+;  438	                                                           new_expression(EXPT_OPERATION, EXPI_DIVISION, 2,
+;  439	                                                                          new_expression(EXPT_OPERATION, EXPI_SUBTRACTION, 2,
+;  440	                                                                                         copy_expression(g_slope),
+;  441	                                                                                         copy_expression(h_slope)),
+;  442	                                                                          new_expression(EXPT_OPERATION, EXPI_ADDITION, 2,
+;  443	                                                                                         new_literal(1, 1, 1),
+;  444	                                                                                         new_expression(EXPT_OPERATION, EXPI_MULTIPLICATION, 2,
+;  445	                                                                                                        copy_expression(g_slope),
+;  446	                                                                                                        copy_expression(h_slope)))))));
+	LD	BC,(IX+-10)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+-7)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,7
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	PUSH	BC
+	CALL	_new_literal
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,5
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+-10)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+-7)
+	PUSH	BC
+	CALL	_copy_expression
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,6
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,2
+	PUSH	BC
+	LD	BC,8
+	PUSH	BC
+	LD	BC,2
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,1
+	PUSH	BC
+	LD	BC,10
+	PUSH	BC
+	LD	BC,3
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,1
+	PUSH	BC
+	LD	BC,18
+	PUSH	BC
+	LD	BC,3
+	PUSH	BC
+	CALL	_new_expression
+	POP	BC
+	POP	BC
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_append_child
+	POP	BC
+	POP	BC
+;  447	        
+;  448	        free_expression(g_slope, false);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+-7)
+	PUSH	BC
+	CALL	_free_expression
+	POP	BC
+	POP	BC
+;  449	        free_expression(h_slope, false);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+-10)
+	PUSH	BC
+	CALL	_free_expression
+	POP	BC
+	POP	BC
+	INC	(IX+-1)
+;  450	        
+;  451	        
+;  452	    }
+L_136:
+	LD	A,(IX+-1)
+	LD	IY,(IX+-4)
+	CP	A,(IY+10)
+	JR	C,L_134
+;  453	    
+;  454	    simplify(*result, true);
+	LD	BC,1
+	PUSH	BC
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_simplify
+	POP	BC
+	POP	BC
+;  455	    
+;  456	    merge_nested_lists(*result, false);
+	LD	BC,0
+	PUSH	BC
+	LD	HL,(IX+6)
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_merge_nested_lists
+	POP	BC
+	POP	BC
+;  457	    
+;  458	    return RETS_SUCCESS;
+	LD	A,2
+;  459	    
+;  460	}
+L_138:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _function_intersection_angle ***************************
+;Name                         Addr/Register   Size   Type
+;_merge_nested_lists                 IMPORT  -----   function
+;_free_expression                    IMPORT  -----   function
+;_new_literal                        IMPORT  -----   function
+;_append_child                       IMPORT  -----   function
+;_simplify                           IMPORT  -----   function
+;_replace_occurences                 IMPORT  -----   function
+;_derivative                         IMPORT  -----   function
+;_embed_in_list_if_necessary         IMPORT  -----   function
+;_solve                              IMPORT  -----   function
+;_guess_symbol                       IMPORT  -----   function
+;_copy_expression                    IMPORT  -----   function
+;_new_expression                     IMPORT  -----   function
+;h_derivative                         IX-22      3   variable
+;g_derivative                         IX-19      3   variable
+;G_5                                  IX-16      3   variable
+;variable                             IX-13      3   variable
+;h_slope                              IX-10      3   variable
+;g_slope                               IX-7      3   variable
+;equation                              IX-4      3   variable
+;i                                     IX-1      1   variable
+;h                                    IX+12      3   parameter
+;g                                     IX+9      3   parameter
+;result                                IX+6      3   parameter
+
+
+; Stack Frame Size: 37 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	SEGMENT STRSECT
+L__54:
+	DB	0
+	XREF _solve:ROM
+	XREF _simplify:ROM
+	XREF _any_expression_to_expression:ROM
+	XREF _get_expression_string:ROM
+	XREF _guess_symbol:ROM
+	XREF _replace_occurences:ROM
+	XREF _merge_nested_lists:ROM
+	XREF _embed_in_list_if_necessary:ROM
+	XREF _count_occurrences:ROM
+	XREF _expression_is_smaller_than:ROM
+	XREF _expression_is_greater_than:ROM
+	XREF _expressions_are_equivalent:ROM
+	XREF _expressions_are_identical:ROM
+	XREF _append_child:ROM
+	XREF _free_expression:ROM
+	XREF _replace_expression:ROM
+	XREF _copy_expression:ROM
+	XREF _new_symbol:ROM
+	XREF _new_literal:ROM
+	XREF _new_expression:ROM
+	XREF _set_error:ROM
+	XREF __frameset:ROM
+	XREF __setflag:ROM
+	XREF __icmpzero:ROM
+	XREF __case8:ROM
+	XREF __seqcase:ROM
+	XDEF _function_intersection_angle
+	XDEF _function_normal
+	XDEF _function_tangent
+	XDEF _stationary_points
+	XDEF _derivative
+	XDEF _trigonometric_derivative
+	XDEF _log_derivative
+	XDEF _ln_derivative
+	XDEF _exponentation_derivative
+	XDEF _multiplication_derivative
+	XDEF _addition_derivative
+	END

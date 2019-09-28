@@ -1,0 +1,2661 @@
+; Zilog eZ80 ANSI C Compiler Release 3.4
+; -optsize -noreduceopt -nomodsect -peephole -globalopt
+; -localcse -const=ROM 
+	FILE	"SRC\INPUT.C"
+	.assume ADL=1
+	SEGMENT BSS
+_key:
+	DS	1
+_input_buffer_left:
+	DS	150
+_input_buffer_right:
+	DS	150
+_second_button_pressed:
+	DS	1
+_alpha_button_pressed:
+	DS	1
+_var1_position:
+	DS	1
+_var2_position:
+	DS	1
+_last_queries:
+	DS	3
+	SEGMENT DATA
+_selected_history_item:
+	DB	0
+;    1	/*
+;    2	 
+;    3	 Copyright (c) 2019 Hannes Eberhard
+;    4	 
+;    5	 Permission is hereby granted, free of charge, to any person obtaining a copy
+;    6	 of this software and associated documentation files (the "Software"), to deal
+;    7	 in the Software without restriction, including without limitation the rights
+;    8	 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+;    9	 copies of the Software, and to permit persons to whom the Software is
+;   10	 furnished to do so, subject to the following conditions:
+;   11	 
+;   12	 The above copyright notice and this permission notice shall be included in all
+;   13	 copies or substantial portions of the Software.
+;   14	 
+;   15	 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+;   16	 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+;   17	 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+;   18	 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+;   19	 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+;   20	 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+;   21	 SOFTWARE.
+;   22	 
+;   23	 */
+;   24	
+;   25	#include "includes.h"
+;   26	
+;   27	sk_key_t key;
+;   28	char input_buffer_left[INPUT_BUFFER_SIZE];
+;   29	char input_buffer_right[INPUT_BUFFER_SIZE];
+;   30	bool second_button_pressed;
+;   31	bool alpha_button_pressed;
+;   32	int8_t var1_position;
+;   33	int8_t var2_position;
+;   34	
+;   35	history* last_queries;
+;   36	uint8_t selected_history_item = 0;
+	SEGMENT CODE
+;   37	
+;   38	history_item* new_history_item(const char* input, const char* output) {
+_new_history_item:
+	LD	HL,-3
+	CALL	__frameset
+;   39	    history_item* result = calloc(1 , sizeof(history_item));
+	LD	BC,6
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	CALL	_calloc
+	POP	BC
+	POP	BC
+	LD	(IX+-3),HL
+;   40	    result->input = calloc(sizeof(input) + 1, sizeof(char));
+	LD	BC,1
+	PUSH	BC
+	LD	BC,4
+	PUSH	BC
+	CALL	_calloc
+	POP	BC
+	POP	BC
+	LD	IY,(IX+-3)
+;   41	    result->output = calloc(sizeof(output) + 1, sizeof(char));
+	LD	BC,1
+	PUSH	BC
+	LD	BC,4
+	PUSH	BC
+	LD	(IY+0),HL
+	CALL	_calloc
+	POP	BC
+	POP	BC
+	LD	IY,(IX+-3)
+	LD	(IY+3),HL
+;   42	    strcpy(result->input, input);
+	LD	BC,(IX+6)
+	PUSH	BC
+	LD	BC,(IY+0)
+	PUSH	BC
+	CALL	_strcpy
+	POP	BC
+	POP	BC
+;   43	    strcpy(result->output, output);
+	LD	BC,(IX+9)
+	PUSH	BC
+	LD	IY,(IX+-3)
+	LD	BC,(IY+3)
+	PUSH	BC
+	CALL	_strcpy
+	POP	BC
+	POP	BC
+;   44	    return result;
+	LD	HL,(IX+-3)
+;   45	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _new_history_item ***************************
+;Name                         Addr/Register   Size   Type
+;_strcpy                             IMPORT  -----   function
+;_calloc                             IMPORT  -----   function
+;result                                IX-3      3   variable
+;output                                IX+9      3   parameter
+;input                                 IX+6      3   parameter
+
+
+; Stack Frame Size: 15 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;   46	
+;   47	void free_history_item(history_item* source) {
+_free_history_item:
+	CALL	__frameset0
+;   48	    free(source->input);
+	LD	IY,(IX+6)
+	LD	BC,(IY+0)
+	PUSH	BC
+	CALL	_free
+	POP	BC
+;   49	    free(source->output);
+	LD	IY,(IX+6)
+	LD	BC,(IY+3)
+	PUSH	BC
+	CALL	_free
+	POP	BC
+;   50	    return;
+;   51	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _free_history_item ***************************
+;Name                         Addr/Register   Size   Type
+;_free                               IMPORT  -----   function
+;source                                IX+6      3   parameter
+
+
+; Stack Frame Size: 9 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;   52	
+;   53	void free_history(history* source) {
+_free_history:
+	LD	HL,-1
+	CALL	__frameset
+;   54	    
+;   55	    uint8_t i;
+;   56	    
+;   57	    for (i = 0; i < source->item_count; i++) {
+	LD	(IX+-1),0
+	JR	L_5
+L_3:
+;   58	        free_history_item(source->items[i]);
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LD	IY,(IX+6)
+	LEA	HL,IY+1
+	ADD	HL,BC
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_free_history_item
+	POP	BC
+	INC	(IX+-1)
+;   59	    }
+L_5:
+	LD	A,(IX+-1)
+	LD	IY,(IX+6)
+	CP	A,(IY+0)
+	JR	C,L_3
+;   60	    
+;   61	    free(source);
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_free
+	POP	BC
+;   62	    
+;   63	    return;
+;   64	    
+;   65	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _free_history ***************************
+;Name                         Addr/Register   Size   Type
+;_free                               IMPORT  -----   function
+;i                                     IX-1      1   variable
+;source                                IX+6      3   parameter
+
+
+; Stack Frame Size: 10 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;   66	
+;   67	void append_new_history_item(history* last_queries, const char* input, const char* output) {
+_append_new_history_item:
+	LD	HL,-1
+	CALL	__frameset
+;   68	    
+;   69	    uint8_t i;
+;   70	    
+;   71	    if (last_queries->item_count == 10) {
+	LD	IY,(IX+6)
+	LD	A,(IY+0)
+	CP	A,10
+	JR	NZ,L_13
+;   72	        free_history_item(last_queries->items[9]);
+	LD	IY,(IX+6)
+	LEA	HL,IY+28
+	LD	BC,(HL)
+	PUSH	BC
+	CALL	_free_history_item
+	POP	BC
+;   73	    }
+L_13:
+;   74	
+;   75	    for (i = last_queries->item_count; i > 0; i--) {
+	LD	IY,(IX+6)
+	LD	A,(IY+0)
+	LD	(IX+-1),A
+	JR	L_12
+L_10:
+;   76	        last_queries->items[i] = last_queries->items[i - 1];
+	LD	A,(IX+-1)
+	UEXT	HL
+	LD	L,A
+	DEC	HL
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LD	A,(IX+-1)
+	LD	IY,(IX+6)
+	LEA	HL,IY+1
+	ADD	HL,BC
+	LD	DE,(HL)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LEA	HL,IY+1
+	ADD	HL,BC
+	LD	(HL),DE
+	DEC	(IX+-1)
+;   77	    }
+L_12:
+	XOR	A,A
+	CP	A,(IX+-1)
+	JR	C,L_10
+;   78	    
+;   79	    last_queries->items[0] = new_history_item(input, output);
+	LD	BC,(IX+12)
+	PUSH	BC
+	LD	BC,(IX+9)
+	PUSH	BC
+	CALL	_new_history_item
+	POP	BC
+	POP	BC
+	LD	IY,(IX+6)
+	LD	(IY+1),HL
+;   80	    
+;   81	    last_queries->item_count = (last_queries->item_count++) % 10;
+	LD	A,(IY+0)
+	UEXT	HL
+	LD	L,A
+	LD	BC,10
+	CALL	__irems
+	LD	(IY+0),L
+	LD	A,(IY+0)
+	INC	A
+	LD	(IY+0),A
+;   82	    
+;   83	    return;
+;   84	    
+;   85	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _append_new_history_item ***************************
+;Name                         Addr/Register   Size   Type
+;i                                     IX-1      1   variable
+;output                               IX+12      3   parameter
+;input                                 IX+9      3   parameter
+;last_queries                          IX+6      3   parameter
+
+
+; Stack Frame Size: 16 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;   86	
+;   87	void shift_char(char* a, char* b, int8_t direction) {
+_shift_char:
+	LD	HL,-8
+	CALL	__frameset
+;   88	    
+;   89	    char* temp = calloc(INPUT_BUFFER_SIZE, sizeof(char));
+	LD	BC,1
+	PUSH	BC
+	LD	BC,150
+	PUSH	BC
+	CALL	_calloc
+	POP	BC
+	POP	BC
+	LD	(IX+-4),HL
+;   90	    char transfer;
+;   91	    
+;   92	    if (direction == 1 && strlen(b) > 0) {
+	LD	A,(IX+12)
+	CP	A,1
+	JR	NZ,L_21
+	LD	BC,(IX+9)
+	PUSH	BC
+	CALL	_strlen
+	POP	BC
+	LD	BC,HL
+	OR	A,A
+	SBC	HL,HL
+	OR	A,A
+	SBC	HL,BC
+	JR	NC,L_21
+;   93	        a[strlen(a) + 1] = '\0';
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_strlen
+	POP	BC
+	LD	BC,HL
+	INC	BC
+	LD	HL,(IX+6)
+	ADD	HL,BC
+	LD	(HL),0
+;   94	        a[strlen(a)] = b[0];
+	LD	DE,(IX+9)
+	LD	BC,(IX+6)
+	PUSH	BC
+	LD	(IX+-7),DE
+	LD	(IX+-8),D
+	CALL	_strlen
+	LD	DE,(IX+-7)
+	LD	D,(IX+-8)
+	POP	BC
+	LD	BC,(IX+6)
+	LD	IY,DE
+	LD	A,(IY)
+	ADD	HL,BC
+	LD	(HL),A
+;   95	        strcpy(b, b + 1);
+	LD	BC,(IX+9)
+	INC	BC
+	PUSH	BC
+	LD	BC,(IX+9)
+	PUSH	BC
+	CALL	_strcpy
+	POP	BC
+	POP	BC
+;   96	    } else if (direction == -1 && strlen(a) > 0) {
+	JR	L_22
+L_21:
+	LD	A,(IX+12)
+	CP	A,-1
+	JR	NZ,L_22
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_strlen
+	POP	BC
+	LD	BC,HL
+	OR	A,A
+	SBC	HL,HL
+	OR	A,A
+	SBC	HL,BC
+	JR	NC,L_22
+;   97	        transfer = a[strlen(a) - 1];
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_strlen
+	POP	BC
+	LD	BC,HL
+	DEC	BC
+	LD	HL,(IX+6)
+	ADD	HL,BC
+	LD	A,(HL)
+	LD	(IX+-1),A
+;   98	        a[strlen(a) - 1] = '\0';
+	LD	BC,(IX+6)
+	PUSH	BC
+	CALL	_strlen
+	POP	BC
+	LD	BC,HL
+	DEC	BC
+	LD	HL,(IX+6)
+	ADD	HL,BC
+	LD	(HL),0
+;   99	        memmove(&b[1], b, strlen(b));
+	LD	BC,(IX+9)
+	PUSH	BC
+	CALL	_strlen
+	POP	BC
+	PUSH	HL
+	LD	BC,(IX+9)
+	PUSH	BC
+	LD	BC,(IX+9)
+	INC	BC
+	PUSH	BC
+	CALL	_memmove
+	POP	BC
+	POP	BC
+	POP	BC
+;  100	        b[0] = transfer;
+	LD	HL,(IX+9)
+	LD	A,(IX+-1)
+	LD	(HL),A
+;  101	    }
+L_22:
+;  102	    
+;  103	    free(temp);
+	LD	BC,(IX+-4)
+	PUSH	BC
+	CALL	_free
+	POP	BC
+;  104	    
+;  105	    return;
+;  106	    
+;  107	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _shift_char ***************************
+;Name                         Addr/Register   Size   Type
+;_free                               IMPORT  -----   function
+;_memmove                            IMPORT  -----   function
+;_strcpy                             IMPORT  -----   function
+;_strlen                             IMPORT  -----   function
+;_calloc                             IMPORT  -----   function
+;temp                                  IX-4      3   variable
+;transfer                              IX-1      1   variable
+;direction                            IX+12      1   parameter
+;b                                     IX+9      3   parameter
+;a                                     IX+6      3   parameter
+
+
+; Stack Frame Size: 23 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+;  108	
+;  109	uint8_t get_input(void) {
+_get_input:
+	LD	HL,-60
+	CALL	__frameset
+;  110	    
+;  111	    char* function_menu_result;
+;  112	    
+;  113	    switch ((key = wait_for_any_keyup())) {
+	CALL	_wait_for_any_keyup
+	UEXT	HL
+	LD	L,A
+	LD	(_key),A
+	CALL	__seqcase
+L__12:
+	DW	56
+	DW	1
+	DB	0
+	DW24	L_30	
+
+	DW24	L_32	
+
+	DW24	L_31	
+
+	DW24	L_29	
+
+	DW24	L_219	
+
+	DW24	L_219	
+
+	DW24	L_219	
+
+	DW24	L_219	
+
+	DW24	L_207	
+
+	DW24	L_138	
+
+	DW24	L_139	
+
+	DW24	L_144	
+
+	DW24	L_149	
+
+	DW24	L_76	
+
+	DW24	L_208	
+
+	DW24	L_219	
+
+	DW24	L_201	
+
+	DW24	L_170	
+
+	DW24	L_181	
+
+	DW24	L_196	
+
+	DW24	L_121	
+
+	DW24	L_105	
+
+	DW24	L_66	
+
+	DW24	L_219	
+
+	DW24	L_202	
+
+	DW24	L_165	
+
+	DW24	L_176	
+
+	DW24	L_191	
+
+	DW24	L_116	
+
+	DW24	L_99	
+
+	DW24	L_63	
+
+	DW24	L_55	
+
+	DW24	L_155	
+
+	DW24	L_160	
+
+	DW24	L_171	
+
+	DW24	L_186	
+
+	DW24	L_111	
+
+	DW24	L_93	
+
+	DW24	L_60	
+
+	DW24	L_45	
+
+	DW24	L_219	
+
+	DW24	L_213	
+
+	DW24	L_132	
+
+	DW24	L_126	
+
+	DW24	L_82	
+
+	DW24	L_88	
+
+	DW24	L_56	
+
+	DW24	L_38	
+
+	DW24	L_219	
+
+	DW24	L_27	
+
+	DW24	L_26	
+
+	DW24	L_25	
+
+	DW24	L_24	
+
+	DW24	L_33	
+
+	DW24	L_43	
+
+	DW24	L_44	
+
+	DW24	L_219	
+
+;  114	            
+;  115	        case sk_Yequ:
+L_24:
+;  116	            function_menu_result = draw_handle_function_menu(0);
+	LD	BC,0
+	PUSH	BC
+	CALL	_draw_handle_function_menu
+	POP	BC
+	LD	(IX+-3),HL
+;  117	            strcat(input_buffer_left, function_menu_result);
+	LD	BC,HL
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+;  118	            free(function_menu_result);
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_free
+	POP	BC
+;  119	            break;
+	JR	L_219
+;  120	        case sk_Window:
+L_25:
+;  121	            function_menu_result = draw_handle_function_menu(1);
+	LD	BC,1
+	PUSH	BC
+	CALL	_draw_handle_function_menu
+	POP	BC
+	LD	(IX+-3),HL
+;  122	            strcat(input_buffer_left, function_menu_result);
+	LD	BC,HL
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+;  123	            free(function_menu_result);
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_free
+	POP	BC
+;  124	            break;
+	JR	L_219
+;  125	        case sk_Zoom:
+L_26:
+;  126	            function_menu_result = draw_handle_function_menu(2);
+	LD	BC,2
+	PUSH	BC
+	CALL	_draw_handle_function_menu
+	POP	BC
+	LD	(IX+-3),HL
+;  127	            strcat(input_buffer_left, function_menu_result);
+	LD	BC,HL
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+;  128	            free(function_menu_result);
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_free
+	POP	BC
+;  129	            break;
+	JR	L_219
+;  130	        case sk_Trace:
+L_27:
+;  131	            function_menu_result = draw_handle_function_menu(3);
+	LD	BC,3
+	PUSH	BC
+	CALL	_draw_handle_function_menu
+	POP	BC
+	LD	(IX+-3),HL
+;  132	            strcat(input_buffer_left, function_menu_result);
+	LD	BC,HL
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+;  133	            free(function_menu_result);
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_free
+	POP	BC
+;  134	            break;
+	JR	L_219
+;  135	        case sk_Graph: break;
+;  136	            
+;  137	        case sk_Up: strcat(input_buffer_left, draw_handle_history_menu(last_queries, 0)); break;
+L_29:
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(_last_queries)
+	PUSH	BC
+	CALL	_draw_handle_history_menu
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  138	        case sk_Down: strcat(input_buffer_left, draw_handle_history_menu(last_queries, 1)); break;
+L_30:
+	LD	BC,1
+	PUSH	BC
+	LD	BC,(_last_queries)
+	PUSH	BC
+	CALL	_draw_handle_history_menu
+	POP	BC
+	POP	BC
+	PUSH	HL
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  139	        case sk_Right: shift_char(input_buffer_left, input_buffer_right, 1); break;
+L_31:
+	LD	BC,1
+	PUSH	BC
+	LD	BC,_input_buffer_right
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_shift_char
+	POP	BC
+	POP	BC
+	POP	BC
+	JR	L_219
+;  140	        case sk_Left: shift_char(input_buffer_left, input_buffer_right, -1); break;
+L_32:
+	LD	BC,16777215
+	PUSH	BC
+	LD	BC,_input_buffer_right
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_shift_char
+	POP	BC
+	POP	BC
+	POP	BC
+	JR	L_219
+;  141	            
+;  142	        case sk_2nd:
+L_33:
+;  143	            second_button_pressed = !second_button_pressed;
+	LD	A,(_second_button_pressed)
+	OR	A,A
+	JR	NZ,L_35
+	LD	BC,1
+	LD	(IX+-60),BC
+	JR	L_36
+L_35:
+	LD	BC,0
+	LD	(IX+-60),BC
+L_36:
+	LD	A,(IX+-60)
+	LD	(_second_button_pressed),A
+;  144	            alpha_button_pressed = false;
+	XOR	A,A
+	LD	(_alpha_button_pressed),A
+;  145	            break;
+	JR	L_219
+;  146	        case sk_Alpha:
+L_38:
+;  147	            alpha_button_pressed = !alpha_button_pressed;
+	LD	A,(_alpha_button_pressed)
+	OR	A,A
+	JR	NZ,L_40
+	LD	BC,1
+	LD	(IX+-6),BC
+	JR	L_41
+L_40:
+	LD	BC,0
+	LD	(IX+-6),BC
+L_41:
+	LD	A,(IX+-6)
+	LD	(_alpha_button_pressed),A
+;  148	            second_button_pressed = false;
+	XOR	A,A
+	LD	(_second_button_pressed),A
+;  149	            break;
+	JR	L_219
+;  150	            
+;  151	        case sk_Mode: draw_handle_mode_menu(); break;
+L_43:
+	CALL	_draw_handle_mode_menu
+	JR	L_219
+;  152	        case sk_Del: input_buffer_left[strlen(input_buffer_left) - 1] = '\0'; break;
+L_44:
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strlen
+	POP	BC
+	DEC	HL
+	LD	BC,_input_buffer_left
+	ADD	HL,BC
+	LD	(HL),0
+	JR	L_219
+;  153	        case sk_GraphVar:
+L_45:
+;  154	            if (var1_position != -1) input_buffer_left[strlen(input_buffer_left) - 1] = '\0';
+	LD	A,(_var1_position)
+	CP	A,-1
+	JR	Z,L_47
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strlen
+	POP	BC
+	DEC	HL
+	LD	BC,_input_buffer_left
+	ADD	HL,BC
+	LD	(HL),0
+L_47:
+;  155	            var1_position = (var1_position + 1) % 6;
+	LD	A,(_var1_position)
+	LD	B,A
+	SEXT	HL
+	LD	L,B
+	INC	HL
+	LD	BC,6
+	CALL	__irems
+	LD	A,L
+	LD	(_var1_position),A
+;  156	            switch (var1_position) {
+	LD	B,A
+	SEXT	HL
+	LD	L,B
+	CALL	__seqcase
+L__16:
+	DW	6
+	DW	0
+	DB	0
+	DW24	L_48	
+
+	DW24	L_49	
+
+	DW24	L_50	
+
+	DW24	L_51	
+
+	DW24	L_52	
+
+	DW24	L_53	
+
+	DW24	L_219	
+
+;  157	                case 0: strcat(input_buffer_left, "x"); break;
+L_48:
+	LD	BC,L__17
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  158	                case 1: strcat(input_buffer_left, "y"); break;
+L_49:
+	LD	BC,L__18
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  159	                case 2: strcat(input_buffer_left, "z"); break;
+L_50:
+	LD	BC,L__19
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  160	                case 3: strcat(input_buffer_left, "a"); break;
+L_51:
+	LD	BC,L__20
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  161	                case 4: strcat(input_buffer_left, "b"); break;
+L_52:
+	LD	BC,L__21
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  162	                case 5: strcat(input_buffer_left, "c"); break;
+L_53:
+	LD	BC,L__22
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  163	            }
+;  164	            break;
+;  165	        case sk_Stat: strcat(input_buffer_left, "Ls("); break;
+L_55:
+	LD	BC,L__23
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  166	            
+;  167	        case sk_Math:
+L_56:
+;  168	            if (alpha_button_pressed) {
+	LD	A,(_alpha_button_pressed)
+	OR	A,A
+	JR	Z,L_58
+;  169	                strcat(input_buffer_left, "a"); break;
+	LD	BC,L__25
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  170	            } else {
+L_58:
+;  171	                function_menu_result = draw_handle_function_menu(0);
+	LD	BC,0
+	PUSH	BC
+	CALL	_draw_handle_function_menu
+	POP	BC
+	LD	(IX+-3),HL
+;  172	                strcat(input_buffer_left, function_menu_result);
+	LD	BC,HL
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+;  173	                free(function_menu_result);
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_free
+	POP	BC
+;  174	            }
+;  175	            break;
+	JR	L_219
+;  176	        case sk_Apps: if (alpha_button_pressed) strcat(input_buffer_left, "b"); break;
+L_60:
+	LD	A,(_alpha_button_pressed)
+	OR	A,A
+	JR	Z,L_219
+	LD	BC,L__27
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  177	        case sk_Prgm: if (alpha_button_pressed) strcat(input_buffer_left, "c"); break;
+L_63:
+	LD	A,(_alpha_button_pressed)
+	OR	A,A
+	JR	Z,L_219
+	LD	BC,L__29
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  178	        case sk_Vars:
+L_66:
+;  179	            if (var2_position != -1) input_buffer_left[strlen(input_buffer_left) - 1] = '\0';
+	LD	A,(_var2_position)
+	CP	A,-1
+	JR	Z,L_68
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strlen
+	POP	BC
+	DEC	HL
+	LD	BC,_input_buffer_left
+	ADD	HL,BC
+	LD	(HL),0
+L_68:
+;  180	            var2_position = (var2_position + 1) % 6;
+	LD	A,(_var2_position)
+	LD	B,A
+	SEXT	HL
+	LD	L,B
+	INC	HL
+	LD	BC,6
+	CALL	__irems
+	LD	A,L
+	LD	(_var2_position),A
+;  181	            switch (var2_position) {
+	LD	B,A
+	SEXT	HL
+	LD	L,B
+	CALL	__seqcase
+L__31:
+	DW	6
+	DW	0
+	DB	0
+	DW24	L_69	
+
+	DW24	L_70	
+
+	DW24	L_71	
+
+	DW24	L_72	
+
+	DW24	L_73	
+
+	DW24	L_74	
+
+	DW24	L_219	
+
+;  182	                case 0: strcat(input_buffer_left, "X"); break;
+L_69:
+	LD	BC,L__32
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  183	                case 1: strcat(input_buffer_left, "Y"); break;
+L_70:
+	LD	BC,L__33
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  184	                case 2: strcat(input_buffer_left, "Z"); break;
+L_71:
+	LD	BC,L__34
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  185	                case 3: strcat(input_buffer_left, "A"); break;
+L_72:
+	LD	BC,L__35
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  186	                case 4: strcat(input_buffer_left, "B"); break;
+L_73:
+	LD	BC,L__36
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  187	                case 5: strcat(input_buffer_left, "C"); break;
+L_74:
+	LD	BC,L__37
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  188	            }
+;  189	            break;
+;  190	            
+;  191	        case sk_Power:
+L_76:
+;  192	            if (second_button_pressed) {
+	LD	A,(_second_button_pressed)
+	OR	A,A
+	JR	Z,L_80
+;  193	                strcat(input_buffer_left, "pi");
+	LD	BC,L__39
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+;  194	            } else if (alpha_button_pressed) {
+	JR	L_219
+L_80:
+	LD	A,(_alpha_button_pressed)
+	OR	A,A
+	JR	Z,L_78
+;  195	                strcat(input_buffer_left, "h");
+	LD	BC,L__41
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+;  196	            } else {
+	JR	L_219
+L_78:
+;  197	                strcat(input_buffer_left, "^");
+	LD	BC,L__42
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+;  198	            }
+;  199	            break;
+	JR	L_219
+;  200	        case sk_Square:
+L_82:
+;  201	            if (second_button_pressed) {
+	LD	A,(_second_button_pressed)
+	OR	A,A
+	JR	Z,L_86
+;  202	                strcat(input_buffer_left, "^(1/2)");
+	LD	BC,L__44
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+;  203	            } else if (alpha_button_pressed) {
+	JR	L_219
+L_86:
+	LD	A,(_alpha_button_pressed)
+	OR	A,A
+	JR	Z,L_84
+;  204	                strcat(input_buffer_left, "i");
+	LD	BC,L__46
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+;  205	            } else {
+	JR	L_219
+L_84:
+;  206	                strcat(input_buffer_left, "^2");
+	LD	BC,L__47
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+;  207	            }
+;  208	            break;
+	JR	L_219
+;  209	        case sk_Recip: strcat(input_buffer_left, (alpha_button_pressed) ? "d" : "^(-1)"); break;
+L_88:
+	LD	A,(_alpha_button_pressed)
+	OR	A,A
+	JR	Z,L_91
+	LD	BC,L__49
+	LD	(IX+-9),BC
+	JR	L_92
+L_91:
+	LD	BC,L__50
+	LD	(IX+-9),BC
+L_92:
+	LD	BC,(IX+-9)
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  210	            
+;  211	        case sk_Sin:
+L_93:
+;  212	            if (second_button_pressed) {
+	LD	A,(_second_button_pressed)
+	OR	A,A
+	JR	Z,L_97
+;  213	                strcat(input_buffer_left, "arcsin(");
+	LD	BC,L__52
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+;  214	            } else if (alpha_button_pressed) {
+	JR	L_219
+L_97:
+	LD	A,(_alpha_button_pressed)
+	OR	A,A
+	JR	Z,L_95
+;  215	                strcat(input_buffer_left, "e");
+	LD	BC,L__54
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+;  216	            } else {
+	JR	L_219
+L_95:
+;  217	                strcat(input_buffer_left, "sin(");
+	LD	BC,L__55
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+;  218	            }
+;  219	            break;
+	JR	L_219
+;  220	        case sk_Cos:
+L_99:
+;  221	            if (second_button_pressed) {
+	LD	A,(_second_button_pressed)
+	OR	A,A
+	JR	Z,L_103
+;  222	                strcat(input_buffer_left, "arccos(");
+	LD	BC,L__57
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+;  223	            } else if (alpha_button_pressed) {
+	JR	L_219
+L_103:
+	LD	A,(_alpha_button_pressed)
+	OR	A,A
+	JR	Z,L_101
+;  224	                strcat(input_buffer_left, "f");
+	LD	BC,L__59
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+;  225	            } else {
+	JR	L_219
+L_101:
+;  226	                strcat(input_buffer_left, "cos(");
+	LD	BC,L__60
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+;  227	            }
+;  228	            break;
+	JR	L_219
+;  229	        case sk_Tan:
+L_105:
+;  230	            if (second_button_pressed) {
+	LD	A,(_second_button_pressed)
+	OR	A,A
+	JR	Z,L_109
+;  231	                strcat(input_buffer_left, "arctan(");
+	LD	BC,L__62
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+;  232	            } else if (alpha_button_pressed) {
+	JR	L_219
+L_109:
+	LD	A,(_alpha_button_pressed)
+	OR	A,A
+	JR	Z,L_107
+;  233	                strcat(input_buffer_left, "g");
+	LD	BC,L__64
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+;  234	            } else {
+	JR	L_219
+L_107:
+;  235	                strcat(input_buffer_left, "tan(");
+	LD	BC,L__65
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+;  236	            }
+;  237	            break;
+	JR	L_219
+;  238	            
+;  239	        case sk_Comma: strcat(input_buffer_left, (alpha_button_pressed) ? "j" : ","); break;
+L_111:
+	LD	A,(_alpha_button_pressed)
+	OR	A,A
+	JR	Z,L_114
+	LD	BC,L__67
+	LD	(IX+-12),BC
+	JR	L_115
+L_114:
+	LD	BC,L__68
+	LD	(IX+-12),BC
+L_115:
+	LD	BC,(IX+-12)
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  240	        case sk_LParen: strcat(input_buffer_left, (alpha_button_pressed) ? "k" : "("); break;
+L_116:
+	LD	A,(_alpha_button_pressed)
+	OR	A,A
+	JR	Z,L_119
+	LD	BC,L__70
+	LD	(IX+-15),BC
+	JR	L_120
+L_119:
+	LD	BC,L__71
+	LD	(IX+-15),BC
+L_120:
+	LD	BC,(IX+-15)
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  241	        case sk_RParen: strcat(input_buffer_left, (alpha_button_pressed) ? "l" : ")"); break;
+L_121:
+	LD	A,(_alpha_button_pressed)
+	OR	A,A
+	JR	Z,L_124
+	LD	BC,L__73
+	LD	(IX+-18),BC
+	JR	L_125
+L_124:
+	LD	BC,L__74
+	LD	(IX+-18),BC
+L_125:
+	LD	BC,(IX+-18)
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  242	            
+;  243	        case sk_Log:
+L_126:
+;  244	            if (second_button_pressed) {
+	LD	A,(_second_button_pressed)
+	OR	A,A
+	JR	Z,L_130
+;  245	                strcat(input_buffer_left, "10^");
+	LD	BC,L__76
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+;  246	            } else if (alpha_button_pressed) {
+	JR	L_219
+L_130:
+	LD	A,(_alpha_button_pressed)
+	OR	A,A
+	JR	Z,L_128
+;  247	                strcat(input_buffer_left, "n");
+	LD	BC,L__78
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+;  248	            } else {
+	JR	L_219
+L_128:
+;  249	                strcat(input_buffer_left, "log(");
+	LD	BC,L__79
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+;  250	            }
+;  251	            break;
+	JR	L_219
+;  252	        case sk_Ln:
+L_132:
+;  253	            if (second_button_pressed) {
+	LD	A,(_second_button_pressed)
+	OR	A,A
+	JR	Z,L_136
+;  254	                strcat(input_buffer_left, "e^");
+	LD	BC,L__81
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+;  255	            } else if (alpha_button_pressed) {
+	JR	L_219
+L_136:
+	LD	A,(_alpha_button_pressed)
+	OR	A,A
+	JR	Z,L_134
+;  256	                strcat(input_buffer_left, "s");
+	LD	BC,L__83
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+;  257	            } else {
+	JR	L_219
+L_134:
+;  258	                strcat(input_buffer_left, "ln(");
+	LD	BC,L__84
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+;  259	            }
+;  260	            break;
+	JR	L_219
+;  261	            
+;  262	        case sk_Add: strcat(input_buffer_left, "+"); break;
+L_138:
+	LD	BC,L__85
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  263	        case sk_Sub: strcat(input_buffer_left, (alpha_button_pressed) ? "w" : "-"); break;
+L_139:
+	LD	A,(_alpha_button_pressed)
+	OR	A,A
+	JR	Z,L_142
+	LD	BC,L__87
+	LD	(IX+-21),BC
+	JR	L_143
+L_142:
+	LD	BC,L__88
+	LD	(IX+-21),BC
+L_143:
+	LD	BC,(IX+-21)
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  264	        case sk_Mul: strcat(input_buffer_left, (alpha_button_pressed) ? "r" : "*"); break;
+L_144:
+	LD	A,(_alpha_button_pressed)
+	OR	A,A
+	JR	Z,L_147
+	LD	BC,L__90
+	LD	(IX+-24),BC
+	JR	L_148
+L_147:
+	LD	BC,L__91
+	LD	(IX+-24),BC
+L_148:
+	LD	BC,(IX+-24)
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  265	        case sk_Div:
+L_149:
+;  266	            if (second_button_pressed) {
+	LD	A,(_second_button_pressed)
+	OR	A,A
+	JR	Z,L_153
+;  267	                strcat(input_buffer_left, "e");
+	LD	BC,L__93
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+;  268	            } else if (alpha_button_pressed) {
+	JR	L_219
+L_153:
+	LD	A,(_alpha_button_pressed)
+	OR	A,A
+	JR	Z,L_151
+;  269	                strcat(input_buffer_left, "m");
+	LD	BC,L__95
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+;  270	            } else {
+	JR	L_219
+L_151:
+;  271	                strcat(input_buffer_left, "/");
+	LD	BC,L__96
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+;  272	            }
+;  273	            break;
+	JR	L_219
+;  274	            
+;  275	        case sk_0: strcat(input_buffer_left, (alpha_button_pressed) ? " " : "0"); break;
+L_155:
+	LD	A,(_alpha_button_pressed)
+	OR	A,A
+	JR	Z,L_158
+	LD	BC,L__98
+	LD	(IX+-27),BC
+	JR	L_159
+L_158:
+	LD	BC,L__99
+	LD	(IX+-27),BC
+L_159:
+	LD	BC,(IX+-27)
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  276	        case sk_1: strcat(input_buffer_left, (alpha_button_pressed) ? "y" : "1"); break;
+L_160:
+	LD	A,(_alpha_button_pressed)
+	OR	A,A
+	JR	Z,L_163
+	LD	BC,L__101
+	LD	(IX+-30),BC
+	JR	L_164
+L_163:
+	LD	BC,L__102
+	LD	(IX+-30),BC
+L_164:
+	LD	BC,(IX+-30)
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  277	        case sk_2: strcat(input_buffer_left, (alpha_button_pressed) ? "z" : "2"); break;
+L_165:
+	LD	A,(_alpha_button_pressed)
+	OR	A,A
+	JR	Z,L_168
+	LD	BC,L__104
+	LD	(IX+-33),BC
+	JR	L_169
+L_168:
+	LD	BC,L__105
+	LD	(IX+-33),BC
+L_169:
+	LD	BC,(IX+-33)
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  278	        case sk_3: strcat(input_buffer_left, "3"); break;
+L_170:
+	LD	BC,L__106
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  279	        case sk_4: strcat(input_buffer_left, (alpha_button_pressed) ? "t" : "4"); break;
+L_171:
+	LD	A,(_alpha_button_pressed)
+	OR	A,A
+	JR	Z,L_174
+	LD	BC,L__108
+	LD	(IX+-36),BC
+	JR	L_175
+L_174:
+	LD	BC,L__109
+	LD	(IX+-36),BC
+L_175:
+	LD	BC,(IX+-36)
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  280	        case sk_5: strcat(input_buffer_left, (alpha_button_pressed) ? "u" : "5"); break;
+L_176:
+	LD	A,(_alpha_button_pressed)
+	OR	A,A
+	JR	Z,L_179
+	LD	BC,L__111
+	LD	(IX+-39),BC
+	JR	L_180
+L_179:
+	LD	BC,L__112
+	LD	(IX+-39),BC
+L_180:
+	LD	BC,(IX+-39)
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  281	        case sk_6: strcat(input_buffer_left, (alpha_button_pressed) ? "v" : "6"); break;
+L_181:
+	LD	A,(_alpha_button_pressed)
+	OR	A,A
+	JR	Z,L_184
+	LD	BC,L__114
+	LD	(IX+-42),BC
+	JR	L_185
+L_184:
+	LD	BC,L__115
+	LD	(IX+-42),BC
+L_185:
+	LD	BC,(IX+-42)
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  282	        case sk_7: strcat(input_buffer_left, (alpha_button_pressed) ? "o" : "7"); break;
+L_186:
+	LD	A,(_alpha_button_pressed)
+	OR	A,A
+	JR	Z,L_189
+	LD	BC,L__117
+	LD	(IX+-45),BC
+	JR	L_190
+L_189:
+	LD	BC,L__118
+	LD	(IX+-45),BC
+L_190:
+	LD	BC,(IX+-45)
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  283	        case sk_8: strcat(input_buffer_left, (alpha_button_pressed) ? "p" : "8"); break;
+L_191:
+	LD	A,(_alpha_button_pressed)
+	OR	A,A
+	JR	Z,L_194
+	LD	BC,L__120
+	LD	(IX+-48),BC
+	JR	L_195
+L_194:
+	LD	BC,L__121
+	LD	(IX+-48),BC
+L_195:
+	LD	BC,(IX+-48)
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  284	        case sk_9: strcat(input_buffer_left, (alpha_button_pressed) ? "q" : "9"); break;
+L_196:
+	LD	A,(_alpha_button_pressed)
+	OR	A,A
+	JR	Z,L_199
+	LD	BC,L__123
+	LD	(IX+-51),BC
+	JR	L_200
+L_199:
+	LD	BC,L__124
+	LD	(IX+-51),BC
+L_200:
+	LD	BC,(IX+-51)
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  285	            
+;  286	        case sk_Chs: strcat(input_buffer_left, "-"); break;
+L_201:
+	LD	BC,L__125
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  287	        case sk_DecPnt: strcat(input_buffer_left, (second_button_pressed) ? "i" : "."); break;
+L_202:
+	LD	A,(_second_button_pressed)
+	OR	A,A
+	JR	Z,L_205
+	LD	BC,L__127
+	LD	(IX+-54),BC
+	JR	L_206
+L_205:
+	LD	BC,L__128
+	LD	(IX+-54),BC
+L_206:
+	LD	BC,(IX+-54)
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+	JR	L_219
+;  288	            
+;  289	        case sk_Enter: return RETS_SUCCESS; break;
+L_207:
+	LD	A,2
+	JR	L_227
+;  290	        case sk_Clear:
+L_208:
+;  291	            if (strlen(input_buffer_left) == 0 && strlen(input_buffer_right) == 0) {
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strlen
+	POP	BC
+	CALL	__icmpzero
+	JR	NZ,L_211
+	LD	BC,_input_buffer_right
+	PUSH	BC
+	CALL	_strlen
+	POP	BC
+	CALL	__icmpzero
+	JR	NZ,L_211
+;  292	                return RETS_ERROR;
+	LD	A,1
+	JR	L_227
+;  293	            } else {
+L_211:
+;  294	                memset(input_buffer_left, 0, 50);
+	LD	BC,50
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_memset
+	POP	BC
+	POP	BC
+	POP	BC
+;  295	                memset(input_buffer_right, 0, 50);
+	LD	BC,50
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,_input_buffer_right
+	PUSH	BC
+	CALL	_memset
+	POP	BC
+	POP	BC
+	POP	BC
+;  296	            }
+;  297	            break;
+	JR	L_219
+;  298	        case sk_Store: strcat(input_buffer_left, (alpha_button_pressed) ? "x" : "="); break;
+L_213:
+	LD	A,(_alpha_button_pressed)
+	OR	A,A
+	JR	Z,L_216
+	LD	BC,L__132
+	LD	(IX+-57),BC
+	JR	L_217
+L_216:
+	LD	BC,L__133
+	LD	(IX+-57),BC
+L_217:
+	LD	BC,(IX+-57)
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+;  299	            
+;  300	    }
+L_219:
+;  301	    
+;  302	    if (key != sk_GraphVar) {
+	LD	A,(_key)
+	CP	A,40
+	JR	Z,L_221
+;  303	        var1_position = -1;
+	LD	A,255
+	LD	(_var1_position),A
+;  304	    }
+L_221:
+;  305	    
+;  306	    if (key != sk_Vars) {
+	LD	A,(_key)
+	CP	A,23
+	JR	Z,L_223
+;  307	        var2_position = -1;
+	LD	A,255
+	LD	(_var2_position),A
+;  308	    }
+L_223:
+;  309	    
+;  310	    if (key != sk_2nd) {
+	LD	A,(_key)
+	CP	A,54
+	JR	Z,L_225
+;  311	        second_button_pressed = false;
+	XOR	A,A
+	LD	(_second_button_pressed),A
+;  312	    }
+L_225:
+;  313	    
+;  314	    if (key != sk_Alpha) {
+	LD	A,(_key)
+	CP	A,48
+	JR	Z,L_226
+;  315	        alpha_button_pressed = false;
+	XOR	A,A
+	LD	(_alpha_button_pressed),A
+;  316	    }
+L_226:
+;  317	    
+;  318	    return RETS_CHANGED;
+	LD	A,3
+;  319	    
+;  320	}
+L_227:
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _get_input ***************************
+;Name                         Addr/Register   Size   Type
+;_memset                             IMPORT  -----   function
+;_var2_position                      STATIC      1   variable
+;_var1_position                      STATIC      1   variable
+;_strlen                             IMPORT  -----   function
+;_draw_handle_mode_menu              IMPORT  -----   function
+;_alpha_button_pressed               STATIC      1   variable
+;_second_button_pressed              STATIC      1   variable
+;_input_buffer_right                 STATIC    150   variable
+;_last_queries                       STATIC      3   variable
+;_draw_handle_history_menu           IMPORT  -----   function
+;_free                               IMPORT  -----   function
+;_input_buffer_left                  STATIC    150   variable
+;_strcat                             IMPORT  -----   function
+;_draw_handle_function_menu          IMPORT  -----   function
+;_key                                STATIC      1   variable
+;_wait_for_any_keyup                 IMPORT  -----   function
+;temp37                               IX-60      3   variable
+;temp214                              IX-57      3   variable
+;temp203                              IX-54      3   variable
+;temp197                              IX-51      3   variable
+;temp192                              IX-48      3   variable
+;temp187                              IX-45      3   variable
+;temp182                              IX-42      3   variable
+;temp177                              IX-39      3   variable
+;temp172                              IX-36      3   variable
+;temp166                              IX-33      3   variable
+;temp161                              IX-30      3   variable
+;temp156                              IX-27      3   variable
+;temp145                              IX-24      3   variable
+;temp140                              IX-21      3   variable
+;temp122                              IX-18      3   variable
+;temp117                              IX-15      3   variable
+;temp112                              IX-12      3   variable
+;temp89                                IX-9      3   variable
+;temp42                                IX-6      3   variable
+;function_menu_result                  IX-3      3   variable
+
+
+; Stack Frame Size: 66 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	SEGMENT STRSECT
+L__17:
+	DB	"x"
+	DB	0
+L__18:
+	DB	"y"
+	DB	0
+L__19:
+	DB	"z"
+	DB	0
+L__20:
+	DB	"a"
+	DB	0
+L__21:
+	DB	"b"
+	DB	0
+L__22:
+	DB	"c"
+	DB	0
+L__23:
+	DB	"Ls("
+	DB	0
+L__25:
+	DB	"a"
+	DB	0
+L__27:
+	DB	"b"
+	DB	0
+L__29:
+	DB	"c"
+	DB	0
+L__32:
+	DB	"X"
+	DB	0
+L__33:
+	DB	"Y"
+	DB	0
+L__34:
+	DB	"Z"
+	DB	0
+L__35:
+	DB	"A"
+	DB	0
+L__36:
+	DB	"B"
+	DB	0
+L__37:
+	DB	"C"
+	DB	0
+L__39:
+	DB	"pi"
+	DB	0
+L__41:
+	DB	"h"
+	DB	0
+L__42:
+	DB	"^"
+	DB	0
+L__44:
+	DB	"^(1/2)"
+	DB	0
+L__46:
+	DB	"i"
+	DB	0
+L__47:
+	DB	"^2"
+	DB	0
+L__49:
+	DB	"d"
+	DB	0
+L__50:
+	DB	"^(-1)"
+	DB	0
+L__52:
+	DB	"arcsin("
+	DB	0
+L__54:
+	DB	"e"
+	DB	0
+L__55:
+	DB	"sin("
+	DB	0
+L__57:
+	DB	"arccos("
+	DB	0
+L__59:
+	DB	"f"
+	DB	0
+L__60:
+	DB	"cos("
+	DB	0
+L__62:
+	DB	"arctan("
+	DB	0
+L__64:
+	DB	"g"
+	DB	0
+L__65:
+	DB	"tan("
+	DB	0
+L__67:
+	DB	"j"
+	DB	0
+L__68:
+	DB	","
+	DB	0
+L__70:
+	DB	"k"
+	DB	0
+L__71:
+	DB	"("
+	DB	0
+L__73:
+	DB	"l"
+	DB	0
+L__74:
+	DB	")"
+	DB	0
+L__76:
+	DB	"10^"
+	DB	0
+L__78:
+	DB	"n"
+	DB	0
+L__79:
+	DB	"log("
+	DB	0
+L__81:
+	DB	"e^"
+	DB	0
+L__83:
+	DB	"s"
+	DB	0
+L__84:
+	DB	"ln("
+	DB	0
+L__85:
+	DB	"+"
+	DB	0
+L__87:
+	DB	"w"
+	DB	0
+L__88:
+	DB	"-"
+	DB	0
+L__90:
+	DB	"r"
+	DB	0
+L__91:
+	DB	"*"
+	DB	0
+L__93:
+	DB	"e"
+	DB	0
+L__95:
+	DB	"m"
+	DB	0
+L__96:
+	DB	"/"
+	DB	0
+L__98:
+	DB	" "
+	DB	0
+L__99:
+	DB	"0"
+	DB	0
+L__101:
+	DB	"y"
+	DB	0
+L__102:
+	DB	"1"
+	DB	0
+L__104:
+	DB	"z"
+	DB	0
+L__105:
+	DB	"2"
+	DB	0
+L__106:
+	DB	"3"
+	DB	0
+L__108:
+	DB	"t"
+	DB	0
+L__109:
+	DB	"4"
+	DB	0
+L__111:
+	DB	"u"
+	DB	0
+L__112:
+	DB	"5"
+	DB	0
+L__114:
+	DB	"v"
+	DB	0
+L__115:
+	DB	"6"
+	DB	0
+L__117:
+	DB	"o"
+	DB	0
+L__118:
+	DB	"7"
+	DB	0
+L__120:
+	DB	"p"
+	DB	0
+L__121:
+	DB	"8"
+	DB	0
+L__123:
+	DB	"q"
+	DB	0
+L__124:
+	DB	"9"
+	DB	0
+L__125:
+	DB	"-"
+	DB	0
+L__127:
+	DB	"i"
+	DB	0
+L__128:
+	DB	"."
+	DB	0
+L__132:
+	DB	"x"
+	DB	0
+L__133:
+	DB	"="
+	DB	0
+	SEGMENT CODE
+;  321	
+;  322	uint8_t handle_draw_input(void) {
+_handle_draw_input:
+	LD	HL,-304
+	CALL	__frameset
+;  323	    
+;  324	    bool is_running = true;
+	LD	(IX+-4),1
+;  325	    char buffer[INPUT_BUFFER_SIZE];
+;  326	    char result[INPUT_BUFFER_SIZE];
+;  327	    return_status status = RETS_NULL;
+	LD	BC,0
+	LD	(IX+-3),BC
+;  328	
+;  329	    memset(input_buffer_left, 0, INPUT_BUFFER_SIZE);
+	LD	BC,150
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_memset
+	POP	BC
+	POP	BC
+	POP	BC
+;  330	    memset(input_buffer_right, 0, INPUT_BUFFER_SIZE);
+	LD	BC,150
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	BC,_input_buffer_right
+	PUSH	BC
+	CALL	_memset
+	POP	BC
+	POP	BC
+	POP	BC
+;  331	    memset(buffer, 0, INPUT_BUFFER_SIZE);
+	LD	BC,150
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	HL,IX
+	LD	BC,-154
+	ADD	HL,BC
+	LD	BC,HL
+	PUSH	BC
+	CALL	_memset
+	POP	BC
+	POP	BC
+	POP	BC
+;  332	
+;  333	    last_queries = calloc(1, sizeof(history));
+	LD	BC,31
+	PUSH	BC
+	LD	BC,1
+	PUSH	BC
+	CALL	_calloc
+	POP	BC
+	POP	BC
+	LD	(_last_queries),HL
+;  334	
+;  335	    second_button_pressed = false;
+	XOR	A,A
+	LD	(_second_button_pressed),A
+;  336	    alpha_button_pressed = false;
+	XOR	A,A
+	LD	(_alpha_button_pressed),A
+;  337	
+;  338	    var1_position = -1;
+	LD	A,255
+	LD	(_var1_position),A
+;  339	    var2_position = -1;
+	LD	(_var2_position),A
+;  340	
+;  341	    last_queries->item_count = 0;
+	LD	IY,(_last_queries)
+	LD	(IY+0),0
+;  342	
+;  343	    while (is_running) {
+	JR	L_243
+L_244:
+;  344	
+;  345	        if (status != RETS_NULL) {
+	LD	HL,(IX+-3)
+	CALL	__icmpzero
+	JR	Z,L_229
+;  346	            status = get_input();
+	CALL	_get_input
+	UEXT	HL
+	LD	L,A
+	LD	(IX+-3),HL
+;  347	        }
+L_229:
+;  348	
+;  349	        gfx_FillScreen(GCOL_BACKGROUND_PRIMARY);
+	LD	BC,1
+	PUSH	BC
+	CALL	_gfx_FillScreen
+	POP	BC
+;  350	        draw_header("symbolic3", "", "Computer Algebra");
+	LD	BC,L__140
+	PUSH	BC
+	LD	BC,L__141
+	PUSH	BC
+	LD	BC,L__142
+	PUSH	BC
+	CALL	_draw_header
+	POP	BC
+	POP	BC
+	POP	BC
+;  351	
+;  352	        gfx_SetTextXY(MARGIN, 40);
+	LD	BC,40
+	PUSH	BC
+	LD	BC,10
+	PUSH	BC
+	CALL	_gfx_SetTextXY
+	POP	BC
+	POP	BC
+;  353	        gfx_SetTextFGColor(GCOL_TEXT_PRIMARY);
+	LD	BC,3
+	PUSH	BC
+	CALL	_gfx_SetTextFGColor
+	POP	BC
+;  354	        print_character_wise(input_buffer_left);
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_print_character_wise
+	POP	BC
+;  355	
+;  356	        if (second_button_pressed) {
+	LD	A,(_second_button_pressed)
+	OR	A,A
+	JR	Z,L_233
+;  357	            gfx_SetTextFGColor(GCOL_BLUE);
+	LD	BC,11
+	PUSH	BC
+	CALL	_gfx_SetTextFGColor
+	POP	BC
+;  358	        } else if (alpha_button_pressed) {
+	JR	L_234
+L_233:
+	LD	A,(_alpha_button_pressed)
+	OR	A,A
+	JR	Z,L_231
+;  359	            gfx_SetTextFGColor(GCOL_GREEN);
+	LD	BC,10
+	PUSH	BC
+	CALL	_gfx_SetTextFGColor
+	POP	BC
+;  360	        } else {
+	JR	L_234
+L_231:
+;  361	            gfx_SetTextFGColor(GCOL_SYMBOLIC3);
+	LD	BC,12
+	PUSH	BC
+	CALL	_gfx_SetTextFGColor
+	POP	BC
+;  362	        }
+L_234:
+;  363	
+;  364	        print_character_wise(" | ");
+	LD	BC,L__145
+	PUSH	BC
+	CALL	_print_character_wise
+	POP	BC
+;  365	
+;  366	        gfx_SetTextFGColor(GCOL_TEXT_PRIMARY);
+	LD	BC,3
+	PUSH	BC
+	CALL	_gfx_SetTextFGColor
+	POP	BC
+;  367	        print_character_wise(input_buffer_right);
+	LD	BC,_input_buffer_right
+	PUSH	BC
+	CALL	_print_character_wise
+	POP	BC
+;  368	
+;  369	        if (status == RETS_SUCCESS && (strlen(input_buffer_left) > 0 || strlen(input_buffer_right) > 0)) {
+	LD	HL,(IX+-3)
+	LD	BC,2
+	OR	A,A
+	SBC	HL,BC
+	JR	NZ,L_241
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	CALL	_strlen
+	POP	BC
+	LD	BC,HL
+	OR	A,A
+	SBC	HL,HL
+	OR	A,A
+	SBC	HL,BC
+	JR	C,L_240
+	LD	BC,_input_buffer_right
+	PUSH	BC
+	CALL	_strlen
+	POP	BC
+	LD	BC,HL
+	OR	A,A
+	SBC	HL,HL
+	OR	A,A
+	SBC	HL,BC
+	JR	NC,L_241
+L_240:
+;  370	            
+;  371	            memset(buffer, 0, INPUT_BUFFER_SIZE);
+	LD	BC,150
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	LD	HL,IX
+	LD	BC,-154
+	ADD	HL,BC
+	LD	BC,HL
+	PUSH	BC
+	CALL	_memset
+	POP	BC
+	POP	BC
+	POP	BC
+;  372	            strcat(buffer, input_buffer_left);
+	LD	BC,_input_buffer_left
+	PUSH	BC
+	LD	HL,IX
+	LD	BC,-154
+	ADD	HL,BC
+	LD	BC,HL
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+;  373	            strcat(buffer, input_buffer_right);
+	LD	BC,_input_buffer_right
+	PUSH	BC
+	LD	HL,IX
+	LD	BC,-154
+	ADD	HL,BC
+	LD	BC,HL
+	PUSH	BC
+	CALL	_strcat
+	POP	BC
+	POP	BC
+;  374	            
+;  375	            if (symbolic4(result, buffer) == RETS_SUCCESS) {
+	LD	HL,IX
+	LD	BC,-154
+	ADD	HL,BC
+	LD	BC,HL
+	PUSH	BC
+	LD	HL,IX
+	LD	BC,-304
+	ADD	HL,BC
+	LD	BC,HL
+	PUSH	BC
+	CALL	_symbolic4
+	POP	BC
+	POP	BC
+	UEXT	HL
+	LD	L,A
+	OR	A,A
+	LD	BC,2
+	SBC	HL,BC
+	JR	NZ,L_238
+;  376	                gfx_SetTextXY(MARGIN, gfx_GetTextY() + 20);
+	CALL	_gfx_GetTextY
+	LD	IY,HL
+	LEA	BC,IY+20
+	PUSH	BC
+	LD	BC,10
+	PUSH	BC
+	CALL	_gfx_SetTextXY
+	POP	BC
+	POP	BC
+;  377	                gfx_SetTextFGColor(GCOL_SYMBOLIC3);
+	LD	BC,12
+	PUSH	BC
+	CALL	_gfx_SetTextFGColor
+	POP	BC
+;  378	                print_character_wise(result);
+	LD	HL,IX
+	LD	BC,-304
+	ADD	HL,BC
+	LD	BC,HL
+	PUSH	BC
+	CALL	_print_character_wise
+	POP	BC
+;  379	                append_new_history_item(last_queries, buffer, result);
+	LD	HL,IX
+	LD	BC,-304
+	ADD	HL,BC
+	LD	BC,HL
+	PUSH	BC
+	LD	HL,IX
+	LD	BC,-154
+	ADD	HL,BC
+	LD	BC,HL
+	PUSH	BC
+	LD	BC,(_last_queries)
+	PUSH	BC
+	CALL	_append_new_history_item
+	POP	BC
+	POP	BC
+	POP	BC
+;  380	            } else {
+	JR	L_242
+L_238:
+;  381	                gfx_SetTextXY(MARGIN, gfx_GetTextY() + 20);
+	CALL	_gfx_GetTextY
+	LD	IY,HL
+	LEA	BC,IY+20
+	PUSH	BC
+	LD	BC,10
+	PUSH	BC
+	CALL	_gfx_SetTextXY
+	POP	BC
+	POP	BC
+;  382	                gfx_SetTextFGColor(GCOL_TEXT_PRIMARY);
+	LD	BC,3
+	PUSH	BC
+	CALL	_gfx_SetTextFGColor
+	POP	BC
+;  383	                print_character_wise("ERROR");
+	LD	BC,L__150
+	PUSH	BC
+	CALL	_print_character_wise
+	POP	BC
+;  384	            }
+;  385	            
+;  386	        } else if (status == RETS_ERROR) {
+	JR	L_242
+L_241:
+	LD	BC,1
+	LD	HL,(IX+-3)
+	OR	A,A
+	SBC	HL,BC
+	JR	NZ,L_242
+;  387	            is_running = false;
+	LD	(IX+-4),0
+;  388	        }
+L_242:
+;  389	
+;  390	        status = RETS_CHANGED;
+	LD	BC,3
+	LD	(IX+-3),BC
+;  391	
+;  392	    }
+L_243:
+	LD	A,(IX+-4)
+	OR	A,A
+	JR	NZ,L_244
+;  393	    
+;  394	    return RETS_SUCCESS;
+	LD	A,2
+;  395	    
+;  396	}
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _handle_draw_input ***************************
+;Name                         Addr/Register   Size   Type
+;_gfx_GetTextY                       IMPORT  -----   function
+;_symbolic4                          IMPORT  -----   function
+;_strcat                             IMPORT  -----   function
+;_strlen                             IMPORT  -----   function
+;_print_character_wise               IMPORT  -----   function
+;_gfx_SetTextFGColor                 IMPORT  -----   function
+;_gfx_SetTextXY                      IMPORT  -----   function
+;_draw_header                        IMPORT  -----   function
+;_gfx_FillScreen                     IMPORT  -----   function
+;_get_input                          IMPORT  -----   function
+;_var2_position                      STATIC      1   variable
+;_var1_position                      STATIC      1   variable
+;_alpha_button_pressed               STATIC      1   variable
+;_second_button_pressed              STATIC      1   variable
+;_last_queries                       STATIC      3   variable
+;_calloc                             IMPORT  -----   function
+;_input_buffer_right                 STATIC    150   variable
+;_input_buffer_left                  STATIC    150   variable
+;_memset                             IMPORT  -----   function
+;result                              IX-304    150   variable
+;buffer                              IX-154    150   variable
+;is_running                            IX-4      1   variable
+;status                                IX-3      3   variable
+
+
+; Stack Frame Size: 310 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	SEGMENT STRSECT
+L__140:
+	DB	"Computer Algebra"
+	DB	0
+L__141:
+	DB	0
+L__142:
+	DB	"symbolic3"
+	DB	0
+L__145:
+	DB	" | "
+	DB	0
+L__150:
+	DB	"ERROR"
+	DB	0
+	XREF _draw_handle_mode_menu:ROM
+	XREF _draw_handle_history_menu:ROM
+	XREF _draw_handle_function_menu:ROM
+	XREF _draw_header:ROM
+	XREF _print_character_wise:ROM
+	XREF _wait_for_any_keyup:ROM
+	XREF _gfx_SetTextFGColor:ROM
+	XREF _gfx_SetTextXY:ROM
+	XREF _gfx_GetTextY:ROM
+	XREF _gfx_FillScreen:ROM
+	XREF _symbolic4:ROM
+	XREF _strlen:ROM
+	XREF _strcat:ROM
+	XREF _strcpy:ROM
+	XREF _memmove:ROM
+	XREF _memset:ROM
+	XREF _free:ROM
+	XREF _calloc:ROM
+	XREF __irems:ROM
+	XREF __frameset0:ROM
+	XREF __frameset:ROM
+	XREF __icmpzero:ROM
+	XREF __seqcase:ROM
+	XDEF _handle_draw_input
+	XDEF _get_input
+	XDEF _shift_char
+	XDEF _append_new_history_item
+	XDEF _free_history
+	XDEF _free_history_item
+	XDEF _new_history_item
+	XDEF _selected_history_item
+	XDEF _last_queries
+	XDEF _var2_position
+	XDEF _var1_position
+	XDEF _alpha_button_pressed
+	XDEF _second_button_pressed
+	XDEF _input_buffer_right
+	XDEF _input_buffer_left
+	XDEF _key
+	END
