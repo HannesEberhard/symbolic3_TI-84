@@ -24,7 +24,7 @@
 
 #include "includes.h"
 
-bool dark_mode = true;
+bool dark_mode = false;
 
 void gfx_init(void) {
     
@@ -79,7 +79,6 @@ void gfx_print(const char* string, uint16_t x, uint16_t y) {
     gfx_SetTextXY(x, y);
     gfx_PrintString(string);
     gfx_SetTextXY(gfx_GetTextX() + gfx_GetStringWidth(string), y);
-    return;
 }
 
 void gfx_print_justified(const char* string, justification x_justification, uint16_t x_offset, justification y_justification, uint16_t y_offset) {
@@ -120,14 +119,11 @@ void gfx_print_justified(const char* string, justification x_justification, uint
     gfx_SetTextXY(x, y);
     gfx_PrintString(string);
     
-    return;
-    
 }
 
 void gfx_print_line(const char* string, justification x_justification) {
     gfx_print_justified(string, x_justification, 0, JUST_NULL, 0);
     gfx_SetTextXY(MARGIN, gfx_GetTextY() + LINE_HEIGHT + FONT_HEIGHT);
-    return;
 }
 
 void gfx_print_box(const char* string, uint16_t width, uint8_t line_height) {
@@ -213,7 +209,5 @@ void draw_header(const char* left, const char* center, const char* right) {
     if (right != NULL) {
         gfx_print_justified(right, JUST_RIGHT, 0, JUST_TOP, y_offset);
     }
-    
-    return;
     
 }

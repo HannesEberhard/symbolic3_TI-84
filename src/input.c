@@ -47,7 +47,6 @@ history_item* new_history_item(const char* input, const char* output) {
 void free_history_item(history_item* source) {
     free(source->input);
     free(source->output);
-    return;
 }
 
 void free_history(history* source) {
@@ -60,8 +59,6 @@ void free_history(history* source) {
     
     free(source);
     
-    return;
-    
 }
 
 void append_new_history_item(history* last_queries, const char* input, const char* output) {
@@ -70,6 +67,7 @@ void append_new_history_item(history* last_queries, const char* input, const cha
     
     if (last_queries->item_count == 10) {
         free_history_item(last_queries->items[9]);
+        last_queries->item_count--;
     }
 
     for (i = last_queries->item_count; i > 0; i--) {
@@ -78,9 +76,7 @@ void append_new_history_item(history* last_queries, const char* input, const cha
     
     last_queries->items[0] = new_history_item(input, output);
     
-    last_queries->item_count = (last_queries->item_count++) % 10;
-    
-    return;
+    last_queries->item_count++;
     
 }
 
@@ -101,8 +97,6 @@ void shift_char(char* a, char* b, int8_t direction) {
     }
     
     free(temp);
-    
-    return;
     
 }
 
@@ -291,8 +285,8 @@ uint8_t get_input(void) {
             if (strlen(input_buffer_left) == 0 && strlen(input_buffer_right) == 0) {
                 return RETS_ERROR;
             } else {
-                memset(input_buffer_left, 0, 50);
-                memset(input_buffer_right, 0, 50);
+                memset(input_buffer_left, 0, INPUT_BUFFER_SIZE);
+                memset(input_buffer_right, 0, INPUT_BUFFER_SIZE);
             }
             break;
         case sk_Store: strcat(input_buffer_left, (alpha_button_pressed) ? "x" : "="); break;
@@ -322,13 +316,13 @@ uint8_t get_input(void) {
 uint8_t handle_draw_input(void) {
     
     bool is_running = true;
-    char buffer[INPUT_BUFFER_SIZE];
-    char result[INPUT_BUFFER_SIZE];
+    char input_buffer[2 * INPUT_BUFFER_SIZE];
+    char result[2 * INPUT_BUFFER_SIZE];
     return_status status = RETS_NULL;
 
     memset(input_buffer_left, 0, INPUT_BUFFER_SIZE);
     memset(input_buffer_right, 0, INPUT_BUFFER_SIZE);
-    memset(buffer, 0, INPUT_BUFFER_SIZE);
+    memset(input_buffer, 0, INPUT_BUFFER_SIZE);
 
     last_queries = calloc(1, sizeof(history));
 
@@ -342,9 +336,7 @@ uint8_t handle_draw_input(void) {
 
     while (is_running) {
 
-        if (status != RETS_NULL) {
-            status = get_input();
-        }
+        if (status != RETS_NULL) status = get_input();
 
         gfx_FillScreen(GCOL_BACKGROUND_PRIMARY);
         draw_header("symbolic3", "", "Computer Algebra");
@@ -368,15 +360,17 @@ uint8_t handle_draw_input(void) {
 
         if (status == RETS_SUCCESS && (strlen(input_buffer_left) > 0 || strlen(input_buffer_right) > 0)) {
             
-            memset(buffer, 0, INPUT_BUFFER_SIZE);
-            strcat(buffer, input_buffer_left);
-            strcat(buffer, input_buffer_right);
+            memset(input_buffer, 0, 2 * INPUT_BUFFER_SIZE);
+            strcat(input_buffer, input_buffer_left);
+            strcat(input_buffer, input_buffer_right);
             
-            if (symbolic4(result, buffer) == RETS_SUCCESS) {
+            memset(result, 0, 2 * INPUT_BUFFER_SIZE);
+            
+            if (symbolic4(result, input_buffer) == RETS_SUCCESS) {
                 gfx_SetTextXY(MARGIN, gfx_GetTextY() + 20);
                 gfx_SetTextFGColor(GCOL_SYMBOLIC3);
                 print_character_wise(result);
-                append_new_history_item(last_queries, buffer, result);
+                append_new_history_item(last_queries, input_buffer, result);
             } else {
                 gfx_SetTextXY(MARGIN, gfx_GetTextY() + 20);
                 gfx_SetTextFGColor(GCOL_TEXT_PRIMARY);

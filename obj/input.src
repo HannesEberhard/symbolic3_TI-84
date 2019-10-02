@@ -148,8 +148,7 @@ _free_history_item:
 	PUSH	BC
 	CALL	_free
 	POP	BC
-;   50	    return;
-;   51	}
+;   50	}
 	LD	SP,IX
 	POP	IX
 	RET	
@@ -165,19 +164,19 @@ _free_history_item:
 ;       Spill Code: 0 (instruction)
 
 
-;   52	
-;   53	void free_history(history* source) {
+;   51	
+;   52	void free_history(history* source) {
 _free_history:
 	LD	HL,-1
 	CALL	__frameset
-;   54	    
-;   55	    uint8_t i;
-;   56	    
-;   57	    for (i = 0; i < source->item_count; i++) {
+;   53	    
+;   54	    uint8_t i;
+;   55	    
+;   56	    for (i = 0; i < source->item_count; i++) {
 	LD	(IX+-1),0
 	JR	L_5
 L_3:
-;   58	        free_history_item(source->items[i]);
+;   57	        free_history_item(source->items[i]);
 	LD	A,(IX+-1)
 	UEXT	HL
 	LD	L,A
@@ -193,22 +192,20 @@ L_3:
 	CALL	_free_history_item
 	POP	BC
 	INC	(IX+-1)
-;   59	    }
+;   58	    }
 L_5:
 	LD	A,(IX+-1)
 	LD	IY,(IX+6)
 	CP	A,(IY+0)
 	JR	C,L_3
-;   60	    
-;   61	    free(source);
+;   59	    
+;   60	    free(source);
 	LD	BC,(IX+6)
 	PUSH	BC
 	CALL	_free
 	POP	BC
-;   62	    
-;   63	    return;
-;   64	    
-;   65	}
+;   61	    
+;   62	}
 	LD	SP,IX
 	POP	IX
 	RET	
@@ -225,36 +222,41 @@ L_5:
 ;       Spill Code: 0 (instruction)
 
 
-;   66	
-;   67	void append_new_history_item(history* last_queries, const char* input, const char* output) {
+;   63	
+;   64	void append_new_history_item(history* last_queries, const char* input, const char* output) {
 _append_new_history_item:
 	LD	HL,-1
 	CALL	__frameset
-;   68	    
-;   69	    uint8_t i;
-;   70	    
-;   71	    if (last_queries->item_count == 10) {
+;   65	    
+;   66	    uint8_t i;
+;   67	    
+;   68	    if (last_queries->item_count == 10) {
 	LD	IY,(IX+6)
 	LD	A,(IY+0)
 	CP	A,10
-	JR	NZ,L_13
-;   72	        free_history_item(last_queries->items[9]);
+	JR	NZ,L_14
+;   69	        free_history_item(last_queries->items[9]);
 	LD	IY,(IX+6)
 	LEA	HL,IY+28
 	LD	BC,(HL)
 	PUSH	BC
 	CALL	_free_history_item
 	POP	BC
-;   73	    }
-L_13:
-;   74	
-;   75	    for (i = last_queries->item_count; i > 0; i--) {
+;   70	        last_queries->item_count--;
+	LD	IY,(IX+6)
+	LD	A,(IY+0)
+	DEC	A
+	LD	(IY+0),A
+;   71	    }
+L_14:
+;   72	
+;   73	    for (i = last_queries->item_count; i > 0; i--) {
 	LD	IY,(IX+6)
 	LD	A,(IY+0)
 	LD	(IX+-1),A
-	JR	L_12
-L_10:
-;   76	        last_queries->items[i] = last_queries->items[i - 1];
+	JR	L_13
+L_11:
+;   74	        last_queries->items[i] = last_queries->items[i - 1];
 	LD	A,(IX+-1)
 	UEXT	HL
 	LD	L,A
@@ -267,24 +269,24 @@ L_10:
 	LD	IY,(IX+6)
 	LEA	HL,IY+1
 	ADD	HL,BC
-	LD	DE,(HL)
+	LD	BC,(HL)
 	UEXT	HL
 	LD	L,A
-	LD	BC,HL
+	LD	DE,HL
 	ADD	HL,HL
-	ADD	HL,BC
-	LD	BC,HL
+	ADD	HL,DE
+	LD	DE,HL
 	LEA	HL,IY+1
-	ADD	HL,BC
-	LD	(HL),DE
+	ADD	HL,DE
+	LD	(HL),BC
 	DEC	(IX+-1)
-;   77	    }
-L_12:
+;   75	    }
+L_13:
 	XOR	A,A
 	CP	A,(IX+-1)
-	JR	C,L_10
-;   78	    
-;   79	    last_queries->items[0] = new_history_item(input, output);
+	JR	C,L_11
+;   76	    
+;   77	    last_queries->items[0] = new_history_item(input, output);
 	LD	BC,(IX+12)
 	PUSH	BC
 	LD	BC,(IX+9)
@@ -294,21 +296,13 @@ L_12:
 	POP	BC
 	LD	IY,(IX+6)
 	LD	(IY+1),HL
-;   80	    
-;   81	    last_queries->item_count = (last_queries->item_count++) % 10;
-	LD	A,(IY+0)
-	UEXT	HL
-	LD	L,A
-	LD	BC,10
-	CALL	__irems
-	LD	(IY+0),L
+;   78	    
+;   79	    last_queries->item_count++;
 	LD	A,(IY+0)
 	INC	A
 	LD	(IY+0),A
-;   82	    
-;   83	    return;
-;   84	    
-;   85	}
+;   80	    
+;   81	}
 	LD	SP,IX
 	POP	IX
 	RET	
@@ -326,13 +320,13 @@ L_12:
 ;       Spill Code: 0 (instruction)
 
 
-;   86	
-;   87	void shift_char(char* a, char* b, int8_t direction) {
+;   82	
+;   83	void shift_char(char* a, char* b, int8_t direction) {
 _shift_char:
 	LD	HL,-8
 	CALL	__frameset
-;   88	    
-;   89	    char* temp = calloc(INPUT_BUFFER_SIZE, sizeof(char));
+;   84	    
+;   85	    char* temp = calloc(INPUT_BUFFER_SIZE, sizeof(char));
 	LD	BC,1
 	PUSH	BC
 	LD	BC,150
@@ -341,12 +335,12 @@ _shift_char:
 	POP	BC
 	POP	BC
 	LD	(IX+-4),HL
-;   90	    char transfer;
-;   91	    
-;   92	    if (direction == 1 && strlen(b) > 0) {
+;   86	    char transfer;
+;   87	    
+;   88	    if (direction == 1 && strlen(b) > 0) {
 	LD	A,(IX+12)
 	CP	A,1
-	JR	NZ,L_21
+	JR	NZ,L_22
 	LD	BC,(IX+9)
 	PUSH	BC
 	CALL	_strlen
@@ -356,8 +350,8 @@ _shift_char:
 	SBC	HL,HL
 	OR	A,A
 	SBC	HL,BC
-	JR	NC,L_21
-;   93	        a[strlen(a) + 1] = '\0';
+	JR	NC,L_22
+;   89	        a[strlen(a) + 1] = '\0';
 	LD	BC,(IX+6)
 	PUSH	BC
 	CALL	_strlen
@@ -367,7 +361,7 @@ _shift_char:
 	LD	HL,(IX+6)
 	ADD	HL,BC
 	LD	(HL),0
-;   94	        a[strlen(a)] = b[0];
+;   90	        a[strlen(a)] = b[0];
 	LD	DE,(IX+9)
 	LD	BC,(IX+6)
 	PUSH	BC
@@ -382,7 +376,7 @@ _shift_char:
 	LD	A,(IY)
 	ADD	HL,BC
 	LD	(HL),A
-;   95	        strcpy(b, b + 1);
+;   91	        strcpy(b, b + 1);
 	LD	BC,(IX+9)
 	INC	BC
 	PUSH	BC
@@ -391,12 +385,12 @@ _shift_char:
 	CALL	_strcpy
 	POP	BC
 	POP	BC
-;   96	    } else if (direction == -1 && strlen(a) > 0) {
-	JR	L_22
-L_21:
+;   92	    } else if (direction == -1 && strlen(a) > 0) {
+	JR	L_23
+L_22:
 	LD	A,(IX+12)
 	CP	A,-1
-	JR	NZ,L_22
+	JR	NZ,L_23
 	LD	BC,(IX+6)
 	PUSH	BC
 	CALL	_strlen
@@ -406,8 +400,8 @@ L_21:
 	SBC	HL,HL
 	OR	A,A
 	SBC	HL,BC
-	JR	NC,L_22
-;   97	        transfer = a[strlen(a) - 1];
+	JR	NC,L_23
+;   93	        transfer = a[strlen(a) - 1];
 	LD	BC,(IX+6)
 	PUSH	BC
 	CALL	_strlen
@@ -418,7 +412,7 @@ L_21:
 	ADD	HL,BC
 	LD	A,(HL)
 	LD	(IX+-1),A
-;   98	        a[strlen(a) - 1] = '\0';
+;   94	        a[strlen(a) - 1] = '\0';
 	LD	BC,(IX+6)
 	PUSH	BC
 	CALL	_strlen
@@ -428,7 +422,7 @@ L_21:
 	LD	HL,(IX+6)
 	ADD	HL,BC
 	LD	(HL),0
-;   99	        memmove(&b[1], b, strlen(b));
+;   95	        memmove(&b[1], b, strlen(b));
 	LD	BC,(IX+9)
 	PUSH	BC
 	CALL	_strlen
@@ -443,22 +437,20 @@ L_21:
 	POP	BC
 	POP	BC
 	POP	BC
-;  100	        b[0] = transfer;
+;   96	        b[0] = transfer;
 	LD	HL,(IX+9)
 	LD	A,(IX+-1)
 	LD	(HL),A
-;  101	    }
-L_22:
-;  102	    
-;  103	    free(temp);
+;   97	    }
+L_23:
+;   98	    
+;   99	    free(temp);
 	LD	BC,(IX+-4)
 	PUSH	BC
 	CALL	_free
 	POP	BC
-;  104	    
-;  105	    return;
-;  106	    
-;  107	}
+;  100	    
+;  101	}
 	LD	SP,IX
 	POP	IX
 	RET	
@@ -482,15 +474,15 @@ L_22:
 ;       Spill Code: 0 (instruction)
 
 
-;  108	
-;  109	uint8_t get_input(void) {
+;  102	
+;  103	uint8_t get_input(void) {
 _get_input:
 	LD	HL,-60
 	CALL	__frameset
-;  110	    
-;  111	    char* function_menu_result;
-;  112	    
-;  113	    switch ((key = wait_for_any_keyup())) {
+;  104	    
+;  105	    char* function_menu_result;
+;  106	    
+;  107	    switch ((key = wait_for_any_keyup())) {
 	CALL	_wait_for_any_keyup
 	UEXT	HL
 	LD	L,A
@@ -500,103 +492,105 @@ L__12:
 	DW	56
 	DW	1
 	DB	0
-	DW24	L_30	
+	DW24	L_31	
+
+	DW24	L_33	
 
 	DW24	L_32	
 
-	DW24	L_31	
+	DW24	L_30	
 
-	DW24	L_29	
+	DW24	L_220	
 
-	DW24	L_219	
+	DW24	L_220	
 
-	DW24	L_219	
+	DW24	L_220	
 
-	DW24	L_219	
-
-	DW24	L_219	
-
-	DW24	L_207	
-
-	DW24	L_138	
-
-	DW24	L_139	
-
-	DW24	L_144	
-
-	DW24	L_149	
-
-	DW24	L_76	
+	DW24	L_220	
 
 	DW24	L_208	
 
-	DW24	L_219	
+	DW24	L_139	
 
-	DW24	L_201	
+	DW24	L_140	
 
-	DW24	L_170	
+	DW24	L_145	
 
-	DW24	L_181	
+	DW24	L_150	
 
-	DW24	L_196	
+	DW24	L_77	
 
-	DW24	L_121	
+	DW24	L_209	
 
-	DW24	L_105	
-
-	DW24	L_66	
-
-	DW24	L_219	
+	DW24	L_220	
 
 	DW24	L_202	
 
-	DW24	L_165	
-
-	DW24	L_176	
-
-	DW24	L_191	
-
-	DW24	L_116	
-
-	DW24	L_99	
-
-	DW24	L_63	
-
-	DW24	L_55	
-
-	DW24	L_155	
-
-	DW24	L_160	
-
 	DW24	L_171	
 
-	DW24	L_186	
+	DW24	L_182	
 
-	DW24	L_111	
+	DW24	L_197	
 
-	DW24	L_93	
+	DW24	L_122	
 
-	DW24	L_60	
+	DW24	L_106	
 
-	DW24	L_45	
+	DW24	L_67	
 
-	DW24	L_219	
+	DW24	L_220	
 
-	DW24	L_213	
+	DW24	L_203	
 
-	DW24	L_132	
+	DW24	L_166	
 
-	DW24	L_126	
+	DW24	L_177	
 
-	DW24	L_82	
+	DW24	L_192	
 
-	DW24	L_88	
+	DW24	L_117	
+
+	DW24	L_100	
+
+	DW24	L_64	
 
 	DW24	L_56	
 
-	DW24	L_38	
+	DW24	L_156	
 
-	DW24	L_219	
+	DW24	L_161	
+
+	DW24	L_172	
+
+	DW24	L_187	
+
+	DW24	L_112	
+
+	DW24	L_94	
+
+	DW24	L_61	
+
+	DW24	L_46	
+
+	DW24	L_220	
+
+	DW24	L_214	
+
+	DW24	L_133	
+
+	DW24	L_127	
+
+	DW24	L_83	
+
+	DW24	L_89	
+
+	DW24	L_57	
+
+	DW24	L_39	
+
+	DW24	L_220	
+
+	DW24	L_28	
 
 	DW24	L_27	
 
@@ -604,26 +598,24 @@ L__12:
 
 	DW24	L_25	
 
-	DW24	L_24	
-
-	DW24	L_33	
-
-	DW24	L_43	
+	DW24	L_34	
 
 	DW24	L_44	
 
-	DW24	L_219	
+	DW24	L_45	
 
-;  114	            
-;  115	        case sk_Yequ:
-L_24:
-;  116	            function_menu_result = draw_handle_function_menu(0);
+	DW24	L_220	
+
+;  108	            
+;  109	        case sk_Yequ:
+L_25:
+;  110	            function_menu_result = draw_handle_function_menu(0);
 	LD	BC,0
 	PUSH	BC
 	CALL	_draw_handle_function_menu
 	POP	BC
 	LD	(IX+-3),HL
-;  117	            strcat(input_buffer_left, function_menu_result);
+;  111	            strcat(input_buffer_left, function_menu_result);
 	LD	BC,HL
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -631,22 +623,22 @@ L_24:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-;  118	            free(function_menu_result);
+;  112	            free(function_menu_result);
 	LD	BC,(IX+-3)
 	PUSH	BC
 	CALL	_free
 	POP	BC
-;  119	            break;
-	JR	L_219
-;  120	        case sk_Window:
-L_25:
-;  121	            function_menu_result = draw_handle_function_menu(1);
+;  113	            break;
+	JR	L_220
+;  114	        case sk_Window:
+L_26:
+;  115	            function_menu_result = draw_handle_function_menu(1);
 	LD	BC,1
 	PUSH	BC
 	CALL	_draw_handle_function_menu
 	POP	BC
 	LD	(IX+-3),HL
-;  122	            strcat(input_buffer_left, function_menu_result);
+;  116	            strcat(input_buffer_left, function_menu_result);
 	LD	BC,HL
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -654,22 +646,22 @@ L_25:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-;  123	            free(function_menu_result);
+;  117	            free(function_menu_result);
 	LD	BC,(IX+-3)
 	PUSH	BC
 	CALL	_free
 	POP	BC
-;  124	            break;
-	JR	L_219
-;  125	        case sk_Zoom:
-L_26:
-;  126	            function_menu_result = draw_handle_function_menu(2);
+;  118	            break;
+	JR	L_220
+;  119	        case sk_Zoom:
+L_27:
+;  120	            function_menu_result = draw_handle_function_menu(2);
 	LD	BC,2
 	PUSH	BC
 	CALL	_draw_handle_function_menu
 	POP	BC
 	LD	(IX+-3),HL
-;  127	            strcat(input_buffer_left, function_menu_result);
+;  121	            strcat(input_buffer_left, function_menu_result);
 	LD	BC,HL
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -677,22 +669,22 @@ L_26:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-;  128	            free(function_menu_result);
+;  122	            free(function_menu_result);
 	LD	BC,(IX+-3)
 	PUSH	BC
 	CALL	_free
 	POP	BC
-;  129	            break;
-	JR	L_219
-;  130	        case sk_Trace:
-L_27:
-;  131	            function_menu_result = draw_handle_function_menu(3);
+;  123	            break;
+	JR	L_220
+;  124	        case sk_Trace:
+L_28:
+;  125	            function_menu_result = draw_handle_function_menu(3);
 	LD	BC,3
 	PUSH	BC
 	CALL	_draw_handle_function_menu
 	POP	BC
 	LD	(IX+-3),HL
-;  132	            strcat(input_buffer_left, function_menu_result);
+;  126	            strcat(input_buffer_left, function_menu_result);
 	LD	BC,HL
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -700,17 +692,17 @@ L_27:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-;  133	            free(function_menu_result);
+;  127	            free(function_menu_result);
 	LD	BC,(IX+-3)
 	PUSH	BC
 	CALL	_free
 	POP	BC
-;  134	            break;
-	JR	L_219
-;  135	        case sk_Graph: break;
-;  136	            
-;  137	        case sk_Up: strcat(input_buffer_left, draw_handle_history_menu(last_queries, 0)); break;
-L_29:
+;  128	            break;
+	JR	L_220
+;  129	        case sk_Graph: break;
+;  130	            
+;  131	        case sk_Up: strcat(input_buffer_left, draw_handle_history_menu(last_queries, 0)); break;
+L_30:
 	LD	BC,0
 	PUSH	BC
 	LD	BC,(_last_queries)
@@ -724,9 +716,9 @@ L_29:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  138	        case sk_Down: strcat(input_buffer_left, draw_handle_history_menu(last_queries, 1)); break;
-L_30:
+	JR	L_220
+;  132	        case sk_Down: strcat(input_buffer_left, draw_handle_history_menu(last_queries, 1)); break;
+L_31:
 	LD	BC,1
 	PUSH	BC
 	LD	BC,(_last_queries)
@@ -740,9 +732,9 @@ L_30:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  139	        case sk_Right: shift_char(input_buffer_left, input_buffer_right, 1); break;
-L_31:
+	JR	L_220
+;  133	        case sk_Right: shift_char(input_buffer_left, input_buffer_right, 1); break;
+L_32:
 	LD	BC,1
 	PUSH	BC
 	LD	BC,_input_buffer_right
@@ -753,9 +745,9 @@ L_31:
 	POP	BC
 	POP	BC
 	POP	BC
-	JR	L_219
-;  140	        case sk_Left: shift_char(input_buffer_left, input_buffer_right, -1); break;
-L_32:
+	JR	L_220
+;  134	        case sk_Left: shift_char(input_buffer_left, input_buffer_right, -1); break;
+L_33:
 	LD	BC,16777215
 	PUSH	BC
 	LD	BC,_input_buffer_right
@@ -766,55 +758,55 @@ L_32:
 	POP	BC
 	POP	BC
 	POP	BC
-	JR	L_219
-;  141	            
-;  142	        case sk_2nd:
-L_33:
-;  143	            second_button_pressed = !second_button_pressed;
+	JR	L_220
+;  135	            
+;  136	        case sk_2nd:
+L_34:
+;  137	            second_button_pressed = !second_button_pressed;
 	LD	A,(_second_button_pressed)
 	OR	A,A
-	JR	NZ,L_35
+	JR	NZ,L_36
 	LD	BC,1
 	LD	(IX+-60),BC
-	JR	L_36
-L_35:
+	JR	L_37
+L_36:
 	LD	BC,0
 	LD	(IX+-60),BC
-L_36:
+L_37:
 	LD	A,(IX+-60)
 	LD	(_second_button_pressed),A
-;  144	            alpha_button_pressed = false;
+;  138	            alpha_button_pressed = false;
 	XOR	A,A
 	LD	(_alpha_button_pressed),A
-;  145	            break;
-	JR	L_219
-;  146	        case sk_Alpha:
-L_38:
-;  147	            alpha_button_pressed = !alpha_button_pressed;
+;  139	            break;
+	JR	L_220
+;  140	        case sk_Alpha:
+L_39:
+;  141	            alpha_button_pressed = !alpha_button_pressed;
 	LD	A,(_alpha_button_pressed)
 	OR	A,A
-	JR	NZ,L_40
+	JR	NZ,L_41
 	LD	BC,1
 	LD	(IX+-6),BC
-	JR	L_41
-L_40:
+	JR	L_42
+L_41:
 	LD	BC,0
 	LD	(IX+-6),BC
-L_41:
+L_42:
 	LD	A,(IX+-6)
 	LD	(_alpha_button_pressed),A
-;  148	            second_button_pressed = false;
+;  142	            second_button_pressed = false;
 	XOR	A,A
 	LD	(_second_button_pressed),A
-;  149	            break;
-	JR	L_219
-;  150	            
-;  151	        case sk_Mode: draw_handle_mode_menu(); break;
-L_43:
-	CALL	_draw_handle_mode_menu
-	JR	L_219
-;  152	        case sk_Del: input_buffer_left[strlen(input_buffer_left) - 1] = '\0'; break;
+;  143	            break;
+	JR	L_220
+;  144	            
+;  145	        case sk_Mode: draw_handle_mode_menu(); break;
 L_44:
+	CALL	_draw_handle_mode_menu
+	JR	L_220
+;  146	        case sk_Del: input_buffer_left[strlen(input_buffer_left) - 1] = '\0'; break;
+L_45:
 	LD	BC,_input_buffer_left
 	PUSH	BC
 	CALL	_strlen
@@ -823,13 +815,13 @@ L_44:
 	LD	BC,_input_buffer_left
 	ADD	HL,BC
 	LD	(HL),0
-	JR	L_219
-;  153	        case sk_GraphVar:
-L_45:
-;  154	            if (var1_position != -1) input_buffer_left[strlen(input_buffer_left) - 1] = '\0';
+	JR	L_220
+;  147	        case sk_GraphVar:
+L_46:
+;  148	            if (var1_position != -1) input_buffer_left[strlen(input_buffer_left) - 1] = '\0';
 	LD	A,(_var1_position)
 	CP	A,-1
-	JR	Z,L_47
+	JR	Z,L_48
 	LD	BC,_input_buffer_left
 	PUSH	BC
 	CALL	_strlen
@@ -838,8 +830,8 @@ L_45:
 	LD	BC,_input_buffer_left
 	ADD	HL,BC
 	LD	(HL),0
-L_47:
-;  155	            var1_position = (var1_position + 1) % 6;
+L_48:
+;  149	            var1_position = (var1_position + 1) % 6;
 	LD	A,(_var1_position)
 	LD	B,A
 	SEXT	HL
@@ -849,7 +841,7 @@ L_47:
 	CALL	__irems
 	LD	A,L
 	LD	(_var1_position),A
-;  156	            switch (var1_position) {
+;  150	            switch (var1_position) {
 	LD	B,A
 	SEXT	HL
 	LD	L,B
@@ -858,8 +850,6 @@ L__16:
 	DW	6
 	DW	0
 	DB	0
-	DW24	L_48	
-
 	DW24	L_49	
 
 	DW24	L_50	
@@ -870,10 +860,12 @@ L__16:
 
 	DW24	L_53	
 
-	DW24	L_219	
+	DW24	L_54	
 
-;  157	                case 0: strcat(input_buffer_left, "x"); break;
-L_48:
+	DW24	L_220	
+
+;  151	                case 0: strcat(input_buffer_left, "x"); break;
+L_49:
 	LD	BC,L__17
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -881,9 +873,9 @@ L_48:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  158	                case 1: strcat(input_buffer_left, "y"); break;
-L_49:
+	JR	L_220
+;  152	                case 1: strcat(input_buffer_left, "y"); break;
+L_50:
 	LD	BC,L__18
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -891,9 +883,9 @@ L_49:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  159	                case 2: strcat(input_buffer_left, "z"); break;
-L_50:
+	JR	L_220
+;  153	                case 2: strcat(input_buffer_left, "z"); break;
+L_51:
 	LD	BC,L__19
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -901,9 +893,9 @@ L_50:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  160	                case 3: strcat(input_buffer_left, "a"); break;
-L_51:
+	JR	L_220
+;  154	                case 3: strcat(input_buffer_left, "a"); break;
+L_52:
 	LD	BC,L__20
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -911,9 +903,9 @@ L_51:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  161	                case 4: strcat(input_buffer_left, "b"); break;
-L_52:
+	JR	L_220
+;  155	                case 4: strcat(input_buffer_left, "b"); break;
+L_53:
 	LD	BC,L__21
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -921,9 +913,9 @@ L_52:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  162	                case 5: strcat(input_buffer_left, "c"); break;
-L_53:
+	JR	L_220
+;  156	                case 5: strcat(input_buffer_left, "c"); break;
+L_54:
 	LD	BC,L__22
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -931,11 +923,11 @@ L_53:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  163	            }
-;  164	            break;
-;  165	        case sk_Stat: strcat(input_buffer_left, "Ls("); break;
-L_55:
+	JR	L_220
+;  157	            }
+;  158	            break;
+;  159	        case sk_Stat: strcat(input_buffer_left, "Ls("); break;
+L_56:
 	LD	BC,L__23
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -943,15 +935,15 @@ L_55:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  166	            
-;  167	        case sk_Math:
-L_56:
-;  168	            if (alpha_button_pressed) {
+	JR	L_220
+;  160	            
+;  161	        case sk_Math:
+L_57:
+;  162	            if (alpha_button_pressed) {
 	LD	A,(_alpha_button_pressed)
 	OR	A,A
-	JR	Z,L_58
-;  169	                strcat(input_buffer_left, "a"); break;
+	JR	Z,L_59
+;  163	                strcat(input_buffer_left, "a"); break;
 	LD	BC,L__25
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -959,16 +951,16 @@ L_56:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  170	            } else {
-L_58:
-;  171	                function_menu_result = draw_handle_function_menu(0);
+	JR	L_220
+;  164	            } else {
+L_59:
+;  165	                function_menu_result = draw_handle_function_menu(0);
 	LD	BC,0
 	PUSH	BC
 	CALL	_draw_handle_function_menu
 	POP	BC
 	LD	(IX+-3),HL
-;  172	                strcat(input_buffer_left, function_menu_result);
+;  166	                strcat(input_buffer_left, function_menu_result);
 	LD	BC,HL
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -976,19 +968,19 @@ L_58:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-;  173	                free(function_menu_result);
+;  167	                free(function_menu_result);
 	LD	BC,(IX+-3)
 	PUSH	BC
 	CALL	_free
 	POP	BC
-;  174	            }
-;  175	            break;
-	JR	L_219
-;  176	        case sk_Apps: if (alpha_button_pressed) strcat(input_buffer_left, "b"); break;
-L_60:
+;  168	            }
+;  169	            break;
+	JR	L_220
+;  170	        case sk_Apps: if (alpha_button_pressed) strcat(input_buffer_left, "b"); break;
+L_61:
 	LD	A,(_alpha_button_pressed)
 	OR	A,A
-	JR	Z,L_219
+	JR	Z,L_220
 	LD	BC,L__27
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -996,12 +988,12 @@ L_60:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  177	        case sk_Prgm: if (alpha_button_pressed) strcat(input_buffer_left, "c"); break;
-L_63:
+	JR	L_220
+;  171	        case sk_Prgm: if (alpha_button_pressed) strcat(input_buffer_left, "c"); break;
+L_64:
 	LD	A,(_alpha_button_pressed)
 	OR	A,A
-	JR	Z,L_219
+	JR	Z,L_220
 	LD	BC,L__29
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1009,13 +1001,13 @@ L_63:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  178	        case sk_Vars:
-L_66:
-;  179	            if (var2_position != -1) input_buffer_left[strlen(input_buffer_left) - 1] = '\0';
+	JR	L_220
+;  172	        case sk_Vars:
+L_67:
+;  173	            if (var2_position != -1) input_buffer_left[strlen(input_buffer_left) - 1] = '\0';
 	LD	A,(_var2_position)
 	CP	A,-1
-	JR	Z,L_68
+	JR	Z,L_69
 	LD	BC,_input_buffer_left
 	PUSH	BC
 	CALL	_strlen
@@ -1024,8 +1016,8 @@ L_66:
 	LD	BC,_input_buffer_left
 	ADD	HL,BC
 	LD	(HL),0
-L_68:
-;  180	            var2_position = (var2_position + 1) % 6;
+L_69:
+;  174	            var2_position = (var2_position + 1) % 6;
 	LD	A,(_var2_position)
 	LD	B,A
 	SEXT	HL
@@ -1035,7 +1027,7 @@ L_68:
 	CALL	__irems
 	LD	A,L
 	LD	(_var2_position),A
-;  181	            switch (var2_position) {
+;  175	            switch (var2_position) {
 	LD	B,A
 	SEXT	HL
 	LD	L,B
@@ -1044,8 +1036,6 @@ L__31:
 	DW	6
 	DW	0
 	DB	0
-	DW24	L_69	
-
 	DW24	L_70	
 
 	DW24	L_71	
@@ -1056,10 +1046,12 @@ L__31:
 
 	DW24	L_74	
 
-	DW24	L_219	
+	DW24	L_75	
 
-;  182	                case 0: strcat(input_buffer_left, "X"); break;
-L_69:
+	DW24	L_220	
+
+;  176	                case 0: strcat(input_buffer_left, "X"); break;
+L_70:
 	LD	BC,L__32
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1067,9 +1059,9 @@ L_69:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  183	                case 1: strcat(input_buffer_left, "Y"); break;
-L_70:
+	JR	L_220
+;  177	                case 1: strcat(input_buffer_left, "Y"); break;
+L_71:
 	LD	BC,L__33
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1077,9 +1069,9 @@ L_70:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  184	                case 2: strcat(input_buffer_left, "Z"); break;
-L_71:
+	JR	L_220
+;  178	                case 2: strcat(input_buffer_left, "Z"); break;
+L_72:
 	LD	BC,L__34
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1087,9 +1079,9 @@ L_71:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  185	                case 3: strcat(input_buffer_left, "A"); break;
-L_72:
+	JR	L_220
+;  179	                case 3: strcat(input_buffer_left, "A"); break;
+L_73:
 	LD	BC,L__35
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1097,9 +1089,9 @@ L_72:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  186	                case 4: strcat(input_buffer_left, "B"); break;
-L_73:
+	JR	L_220
+;  180	                case 4: strcat(input_buffer_left, "B"); break;
+L_74:
 	LD	BC,L__36
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1107,9 +1099,9 @@ L_73:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  187	                case 5: strcat(input_buffer_left, "C"); break;
-L_74:
+	JR	L_220
+;  181	                case 5: strcat(input_buffer_left, "C"); break;
+L_75:
 	LD	BC,L__37
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1117,17 +1109,17 @@ L_74:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  188	            }
-;  189	            break;
-;  190	            
-;  191	        case sk_Power:
-L_76:
-;  192	            if (second_button_pressed) {
+	JR	L_220
+;  182	            }
+;  183	            break;
+;  184	            
+;  185	        case sk_Power:
+L_77:
+;  186	            if (second_button_pressed) {
 	LD	A,(_second_button_pressed)
 	OR	A,A
-	JR	Z,L_80
-;  193	                strcat(input_buffer_left, "pi");
+	JR	Z,L_81
+;  187	                strcat(input_buffer_left, "pi");
 	LD	BC,L__39
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1135,13 +1127,13 @@ L_76:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-;  194	            } else if (alpha_button_pressed) {
-	JR	L_219
-L_80:
+;  188	            } else if (alpha_button_pressed) {
+	JR	L_220
+L_81:
 	LD	A,(_alpha_button_pressed)
 	OR	A,A
-	JR	Z,L_78
-;  195	                strcat(input_buffer_left, "h");
+	JR	Z,L_79
+;  189	                strcat(input_buffer_left, "h");
 	LD	BC,L__41
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1149,10 +1141,10 @@ L_80:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-;  196	            } else {
-	JR	L_219
-L_78:
-;  197	                strcat(input_buffer_left, "^");
+;  190	            } else {
+	JR	L_220
+L_79:
+;  191	                strcat(input_buffer_left, "^");
 	LD	BC,L__42
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1160,16 +1152,16 @@ L_78:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-;  198	            }
-;  199	            break;
-	JR	L_219
-;  200	        case sk_Square:
-L_82:
-;  201	            if (second_button_pressed) {
+;  192	            }
+;  193	            break;
+	JR	L_220
+;  194	        case sk_Square:
+L_83:
+;  195	            if (second_button_pressed) {
 	LD	A,(_second_button_pressed)
 	OR	A,A
-	JR	Z,L_86
-;  202	                strcat(input_buffer_left, "^(1/2)");
+	JR	Z,L_87
+;  196	                strcat(input_buffer_left, "^(1/2)");
 	LD	BC,L__44
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1177,13 +1169,13 @@ L_82:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-;  203	            } else if (alpha_button_pressed) {
-	JR	L_219
-L_86:
+;  197	            } else if (alpha_button_pressed) {
+	JR	L_220
+L_87:
 	LD	A,(_alpha_button_pressed)
 	OR	A,A
-	JR	Z,L_84
-;  204	                strcat(input_buffer_left, "i");
+	JR	Z,L_85
+;  198	                strcat(input_buffer_left, "i");
 	LD	BC,L__46
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1191,10 +1183,10 @@ L_86:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-;  205	            } else {
-	JR	L_219
-L_84:
-;  206	                strcat(input_buffer_left, "^2");
+;  199	            } else {
+	JR	L_220
+L_85:
+;  200	                strcat(input_buffer_left, "^2");
 	LD	BC,L__47
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1202,21 +1194,21 @@ L_84:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-;  207	            }
-;  208	            break;
-	JR	L_219
-;  209	        case sk_Recip: strcat(input_buffer_left, (alpha_button_pressed) ? "d" : "^(-1)"); break;
-L_88:
+;  201	            }
+;  202	            break;
+	JR	L_220
+;  203	        case sk_Recip: strcat(input_buffer_left, (alpha_button_pressed) ? "d" : "^(-1)"); break;
+L_89:
 	LD	A,(_alpha_button_pressed)
 	OR	A,A
-	JR	Z,L_91
+	JR	Z,L_92
 	LD	BC,L__49
 	LD	(IX+-9),BC
-	JR	L_92
-L_91:
+	JR	L_93
+L_92:
 	LD	BC,L__50
 	LD	(IX+-9),BC
-L_92:
+L_93:
 	LD	BC,(IX+-9)
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1224,15 +1216,15 @@ L_92:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  210	            
-;  211	        case sk_Sin:
-L_93:
-;  212	            if (second_button_pressed) {
+	JR	L_220
+;  204	            
+;  205	        case sk_Sin:
+L_94:
+;  206	            if (second_button_pressed) {
 	LD	A,(_second_button_pressed)
 	OR	A,A
-	JR	Z,L_97
-;  213	                strcat(input_buffer_left, "arcsin(");
+	JR	Z,L_98
+;  207	                strcat(input_buffer_left, "arcsin(");
 	LD	BC,L__52
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1240,13 +1232,13 @@ L_93:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-;  214	            } else if (alpha_button_pressed) {
-	JR	L_219
-L_97:
+;  208	            } else if (alpha_button_pressed) {
+	JR	L_220
+L_98:
 	LD	A,(_alpha_button_pressed)
 	OR	A,A
-	JR	Z,L_95
-;  215	                strcat(input_buffer_left, "e");
+	JR	Z,L_96
+;  209	                strcat(input_buffer_left, "e");
 	LD	BC,L__54
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1254,10 +1246,10 @@ L_97:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-;  216	            } else {
-	JR	L_219
-L_95:
-;  217	                strcat(input_buffer_left, "sin(");
+;  210	            } else {
+	JR	L_220
+L_96:
+;  211	                strcat(input_buffer_left, "sin(");
 	LD	BC,L__55
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1265,16 +1257,16 @@ L_95:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-;  218	            }
-;  219	            break;
-	JR	L_219
-;  220	        case sk_Cos:
-L_99:
-;  221	            if (second_button_pressed) {
+;  212	            }
+;  213	            break;
+	JR	L_220
+;  214	        case sk_Cos:
+L_100:
+;  215	            if (second_button_pressed) {
 	LD	A,(_second_button_pressed)
 	OR	A,A
-	JR	Z,L_103
-;  222	                strcat(input_buffer_left, "arccos(");
+	JR	Z,L_104
+;  216	                strcat(input_buffer_left, "arccos(");
 	LD	BC,L__57
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1282,13 +1274,13 @@ L_99:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-;  223	            } else if (alpha_button_pressed) {
-	JR	L_219
-L_103:
+;  217	            } else if (alpha_button_pressed) {
+	JR	L_220
+L_104:
 	LD	A,(_alpha_button_pressed)
 	OR	A,A
-	JR	Z,L_101
-;  224	                strcat(input_buffer_left, "f");
+	JR	Z,L_102
+;  218	                strcat(input_buffer_left, "f");
 	LD	BC,L__59
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1296,10 +1288,10 @@ L_103:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-;  225	            } else {
-	JR	L_219
-L_101:
-;  226	                strcat(input_buffer_left, "cos(");
+;  219	            } else {
+	JR	L_220
+L_102:
+;  220	                strcat(input_buffer_left, "cos(");
 	LD	BC,L__60
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1307,16 +1299,16 @@ L_101:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-;  227	            }
-;  228	            break;
-	JR	L_219
-;  229	        case sk_Tan:
-L_105:
-;  230	            if (second_button_pressed) {
+;  221	            }
+;  222	            break;
+	JR	L_220
+;  223	        case sk_Tan:
+L_106:
+;  224	            if (second_button_pressed) {
 	LD	A,(_second_button_pressed)
 	OR	A,A
-	JR	Z,L_109
-;  231	                strcat(input_buffer_left, "arctan(");
+	JR	Z,L_110
+;  225	                strcat(input_buffer_left, "arctan(");
 	LD	BC,L__62
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1324,13 +1316,13 @@ L_105:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-;  232	            } else if (alpha_button_pressed) {
-	JR	L_219
-L_109:
+;  226	            } else if (alpha_button_pressed) {
+	JR	L_220
+L_110:
 	LD	A,(_alpha_button_pressed)
 	OR	A,A
-	JR	Z,L_107
-;  233	                strcat(input_buffer_left, "g");
+	JR	Z,L_108
+;  227	                strcat(input_buffer_left, "g");
 	LD	BC,L__64
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1338,10 +1330,10 @@ L_109:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-;  234	            } else {
-	JR	L_219
-L_107:
-;  235	                strcat(input_buffer_left, "tan(");
+;  228	            } else {
+	JR	L_220
+L_108:
+;  229	                strcat(input_buffer_left, "tan(");
 	LD	BC,L__65
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1349,22 +1341,22 @@ L_107:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-;  236	            }
-;  237	            break;
-	JR	L_219
-;  238	            
-;  239	        case sk_Comma: strcat(input_buffer_left, (alpha_button_pressed) ? "j" : ","); break;
-L_111:
+;  230	            }
+;  231	            break;
+	JR	L_220
+;  232	            
+;  233	        case sk_Comma: strcat(input_buffer_left, (alpha_button_pressed) ? "j" : ","); break;
+L_112:
 	LD	A,(_alpha_button_pressed)
 	OR	A,A
-	JR	Z,L_114
+	JR	Z,L_115
 	LD	BC,L__67
 	LD	(IX+-12),BC
-	JR	L_115
-L_114:
+	JR	L_116
+L_115:
 	LD	BC,L__68
 	LD	(IX+-12),BC
-L_115:
+L_116:
 	LD	BC,(IX+-12)
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1372,19 +1364,19 @@ L_115:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  240	        case sk_LParen: strcat(input_buffer_left, (alpha_button_pressed) ? "k" : "("); break;
-L_116:
+	JR	L_220
+;  234	        case sk_LParen: strcat(input_buffer_left, (alpha_button_pressed) ? "k" : "("); break;
+L_117:
 	LD	A,(_alpha_button_pressed)
 	OR	A,A
-	JR	Z,L_119
+	JR	Z,L_120
 	LD	BC,L__70
 	LD	(IX+-15),BC
-	JR	L_120
-L_119:
+	JR	L_121
+L_120:
 	LD	BC,L__71
 	LD	(IX+-15),BC
-L_120:
+L_121:
 	LD	BC,(IX+-15)
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1392,19 +1384,19 @@ L_120:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  241	        case sk_RParen: strcat(input_buffer_left, (alpha_button_pressed) ? "l" : ")"); break;
-L_121:
+	JR	L_220
+;  235	        case sk_RParen: strcat(input_buffer_left, (alpha_button_pressed) ? "l" : ")"); break;
+L_122:
 	LD	A,(_alpha_button_pressed)
 	OR	A,A
-	JR	Z,L_124
+	JR	Z,L_125
 	LD	BC,L__73
 	LD	(IX+-18),BC
-	JR	L_125
-L_124:
+	JR	L_126
+L_125:
 	LD	BC,L__74
 	LD	(IX+-18),BC
-L_125:
+L_126:
 	LD	BC,(IX+-18)
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1412,15 +1404,15 @@ L_125:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  242	            
-;  243	        case sk_Log:
-L_126:
-;  244	            if (second_button_pressed) {
+	JR	L_220
+;  236	            
+;  237	        case sk_Log:
+L_127:
+;  238	            if (second_button_pressed) {
 	LD	A,(_second_button_pressed)
 	OR	A,A
-	JR	Z,L_130
-;  245	                strcat(input_buffer_left, "10^");
+	JR	Z,L_131
+;  239	                strcat(input_buffer_left, "10^");
 	LD	BC,L__76
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1428,13 +1420,13 @@ L_126:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-;  246	            } else if (alpha_button_pressed) {
-	JR	L_219
-L_130:
+;  240	            } else if (alpha_button_pressed) {
+	JR	L_220
+L_131:
 	LD	A,(_alpha_button_pressed)
 	OR	A,A
-	JR	Z,L_128
-;  247	                strcat(input_buffer_left, "n");
+	JR	Z,L_129
+;  241	                strcat(input_buffer_left, "n");
 	LD	BC,L__78
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1442,10 +1434,10 @@ L_130:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-;  248	            } else {
-	JR	L_219
-L_128:
-;  249	                strcat(input_buffer_left, "log(");
+;  242	            } else {
+	JR	L_220
+L_129:
+;  243	                strcat(input_buffer_left, "log(");
 	LD	BC,L__79
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1453,16 +1445,16 @@ L_128:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-;  250	            }
-;  251	            break;
-	JR	L_219
-;  252	        case sk_Ln:
-L_132:
-;  253	            if (second_button_pressed) {
+;  244	            }
+;  245	            break;
+	JR	L_220
+;  246	        case sk_Ln:
+L_133:
+;  247	            if (second_button_pressed) {
 	LD	A,(_second_button_pressed)
 	OR	A,A
-	JR	Z,L_136
-;  254	                strcat(input_buffer_left, "e^");
+	JR	Z,L_137
+;  248	                strcat(input_buffer_left, "e^");
 	LD	BC,L__81
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1470,13 +1462,13 @@ L_132:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-;  255	            } else if (alpha_button_pressed) {
-	JR	L_219
-L_136:
+;  249	            } else if (alpha_button_pressed) {
+	JR	L_220
+L_137:
 	LD	A,(_alpha_button_pressed)
 	OR	A,A
-	JR	Z,L_134
-;  256	                strcat(input_buffer_left, "s");
+	JR	Z,L_135
+;  250	                strcat(input_buffer_left, "s");
 	LD	BC,L__83
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1484,10 +1476,10 @@ L_136:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-;  257	            } else {
-	JR	L_219
-L_134:
-;  258	                strcat(input_buffer_left, "ln(");
+;  251	            } else {
+	JR	L_220
+L_135:
+;  252	                strcat(input_buffer_left, "ln(");
 	LD	BC,L__84
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1495,12 +1487,12 @@ L_134:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-;  259	            }
-;  260	            break;
-	JR	L_219
-;  261	            
-;  262	        case sk_Add: strcat(input_buffer_left, "+"); break;
-L_138:
+;  253	            }
+;  254	            break;
+	JR	L_220
+;  255	            
+;  256	        case sk_Add: strcat(input_buffer_left, "+"); break;
+L_139:
 	LD	BC,L__85
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1508,19 +1500,19 @@ L_138:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  263	        case sk_Sub: strcat(input_buffer_left, (alpha_button_pressed) ? "w" : "-"); break;
-L_139:
+	JR	L_220
+;  257	        case sk_Sub: strcat(input_buffer_left, (alpha_button_pressed) ? "w" : "-"); break;
+L_140:
 	LD	A,(_alpha_button_pressed)
 	OR	A,A
-	JR	Z,L_142
+	JR	Z,L_143
 	LD	BC,L__87
 	LD	(IX+-21),BC
-	JR	L_143
-L_142:
+	JR	L_144
+L_143:
 	LD	BC,L__88
 	LD	(IX+-21),BC
-L_143:
+L_144:
 	LD	BC,(IX+-21)
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1528,19 +1520,19 @@ L_143:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  264	        case sk_Mul: strcat(input_buffer_left, (alpha_button_pressed) ? "r" : "*"); break;
-L_144:
+	JR	L_220
+;  258	        case sk_Mul: strcat(input_buffer_left, (alpha_button_pressed) ? "r" : "*"); break;
+L_145:
 	LD	A,(_alpha_button_pressed)
 	OR	A,A
-	JR	Z,L_147
+	JR	Z,L_148
 	LD	BC,L__90
 	LD	(IX+-24),BC
-	JR	L_148
-L_147:
+	JR	L_149
+L_148:
 	LD	BC,L__91
 	LD	(IX+-24),BC
-L_148:
+L_149:
 	LD	BC,(IX+-24)
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1548,14 +1540,14 @@ L_148:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  265	        case sk_Div:
-L_149:
-;  266	            if (second_button_pressed) {
+	JR	L_220
+;  259	        case sk_Div:
+L_150:
+;  260	            if (second_button_pressed) {
 	LD	A,(_second_button_pressed)
 	OR	A,A
-	JR	Z,L_153
-;  267	                strcat(input_buffer_left, "e");
+	JR	Z,L_154
+;  261	                strcat(input_buffer_left, "e");
 	LD	BC,L__93
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1563,13 +1555,13 @@ L_149:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-;  268	            } else if (alpha_button_pressed) {
-	JR	L_219
-L_153:
+;  262	            } else if (alpha_button_pressed) {
+	JR	L_220
+L_154:
 	LD	A,(_alpha_button_pressed)
 	OR	A,A
-	JR	Z,L_151
-;  269	                strcat(input_buffer_left, "m");
+	JR	Z,L_152
+;  263	                strcat(input_buffer_left, "m");
 	LD	BC,L__95
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1577,10 +1569,10 @@ L_153:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-;  270	            } else {
-	JR	L_219
-L_151:
-;  271	                strcat(input_buffer_left, "/");
+;  264	            } else {
+	JR	L_220
+L_152:
+;  265	                strcat(input_buffer_left, "/");
 	LD	BC,L__96
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1588,22 +1580,22 @@ L_151:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-;  272	            }
-;  273	            break;
-	JR	L_219
-;  274	            
-;  275	        case sk_0: strcat(input_buffer_left, (alpha_button_pressed) ? " " : "0"); break;
-L_155:
+;  266	            }
+;  267	            break;
+	JR	L_220
+;  268	            
+;  269	        case sk_0: strcat(input_buffer_left, (alpha_button_pressed) ? " " : "0"); break;
+L_156:
 	LD	A,(_alpha_button_pressed)
 	OR	A,A
-	JR	Z,L_158
+	JR	Z,L_159
 	LD	BC,L__98
 	LD	(IX+-27),BC
-	JR	L_159
-L_158:
+	JR	L_160
+L_159:
 	LD	BC,L__99
 	LD	(IX+-27),BC
-L_159:
+L_160:
 	LD	BC,(IX+-27)
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1611,19 +1603,19 @@ L_159:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  276	        case sk_1: strcat(input_buffer_left, (alpha_button_pressed) ? "y" : "1"); break;
-L_160:
+	JR	L_220
+;  270	        case sk_1: strcat(input_buffer_left, (alpha_button_pressed) ? "y" : "1"); break;
+L_161:
 	LD	A,(_alpha_button_pressed)
 	OR	A,A
-	JR	Z,L_163
+	JR	Z,L_164
 	LD	BC,L__101
 	LD	(IX+-30),BC
-	JR	L_164
-L_163:
+	JR	L_165
+L_164:
 	LD	BC,L__102
 	LD	(IX+-30),BC
-L_164:
+L_165:
 	LD	BC,(IX+-30)
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1631,19 +1623,19 @@ L_164:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  277	        case sk_2: strcat(input_buffer_left, (alpha_button_pressed) ? "z" : "2"); break;
-L_165:
+	JR	L_220
+;  271	        case sk_2: strcat(input_buffer_left, (alpha_button_pressed) ? "z" : "2"); break;
+L_166:
 	LD	A,(_alpha_button_pressed)
 	OR	A,A
-	JR	Z,L_168
+	JR	Z,L_169
 	LD	BC,L__104
 	LD	(IX+-33),BC
-	JR	L_169
-L_168:
+	JR	L_170
+L_169:
 	LD	BC,L__105
 	LD	(IX+-33),BC
-L_169:
+L_170:
 	LD	BC,(IX+-33)
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1651,9 +1643,9 @@ L_169:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  278	        case sk_3: strcat(input_buffer_left, "3"); break;
-L_170:
+	JR	L_220
+;  272	        case sk_3: strcat(input_buffer_left, "3"); break;
+L_171:
 	LD	BC,L__106
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1661,19 +1653,19 @@ L_170:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  279	        case sk_4: strcat(input_buffer_left, (alpha_button_pressed) ? "t" : "4"); break;
-L_171:
+	JR	L_220
+;  273	        case sk_4: strcat(input_buffer_left, (alpha_button_pressed) ? "t" : "4"); break;
+L_172:
 	LD	A,(_alpha_button_pressed)
 	OR	A,A
-	JR	Z,L_174
+	JR	Z,L_175
 	LD	BC,L__108
 	LD	(IX+-36),BC
-	JR	L_175
-L_174:
+	JR	L_176
+L_175:
 	LD	BC,L__109
 	LD	(IX+-36),BC
-L_175:
+L_176:
 	LD	BC,(IX+-36)
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1681,19 +1673,19 @@ L_175:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  280	        case sk_5: strcat(input_buffer_left, (alpha_button_pressed) ? "u" : "5"); break;
-L_176:
+	JR	L_220
+;  274	        case sk_5: strcat(input_buffer_left, (alpha_button_pressed) ? "u" : "5"); break;
+L_177:
 	LD	A,(_alpha_button_pressed)
 	OR	A,A
-	JR	Z,L_179
+	JR	Z,L_180
 	LD	BC,L__111
 	LD	(IX+-39),BC
-	JR	L_180
-L_179:
+	JR	L_181
+L_180:
 	LD	BC,L__112
 	LD	(IX+-39),BC
-L_180:
+L_181:
 	LD	BC,(IX+-39)
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1701,19 +1693,19 @@ L_180:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  281	        case sk_6: strcat(input_buffer_left, (alpha_button_pressed) ? "v" : "6"); break;
-L_181:
+	JR	L_220
+;  275	        case sk_6: strcat(input_buffer_left, (alpha_button_pressed) ? "v" : "6"); break;
+L_182:
 	LD	A,(_alpha_button_pressed)
 	OR	A,A
-	JR	Z,L_184
+	JR	Z,L_185
 	LD	BC,L__114
 	LD	(IX+-42),BC
-	JR	L_185
-L_184:
+	JR	L_186
+L_185:
 	LD	BC,L__115
 	LD	(IX+-42),BC
-L_185:
+L_186:
 	LD	BC,(IX+-42)
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1721,19 +1713,19 @@ L_185:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  282	        case sk_7: strcat(input_buffer_left, (alpha_button_pressed) ? "o" : "7"); break;
-L_186:
+	JR	L_220
+;  276	        case sk_7: strcat(input_buffer_left, (alpha_button_pressed) ? "o" : "7"); break;
+L_187:
 	LD	A,(_alpha_button_pressed)
 	OR	A,A
-	JR	Z,L_189
+	JR	Z,L_190
 	LD	BC,L__117
 	LD	(IX+-45),BC
-	JR	L_190
-L_189:
+	JR	L_191
+L_190:
 	LD	BC,L__118
 	LD	(IX+-45),BC
-L_190:
+L_191:
 	LD	BC,(IX+-45)
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1741,19 +1733,19 @@ L_190:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  283	        case sk_8: strcat(input_buffer_left, (alpha_button_pressed) ? "p" : "8"); break;
-L_191:
+	JR	L_220
+;  277	        case sk_8: strcat(input_buffer_left, (alpha_button_pressed) ? "p" : "8"); break;
+L_192:
 	LD	A,(_alpha_button_pressed)
 	OR	A,A
-	JR	Z,L_194
+	JR	Z,L_195
 	LD	BC,L__120
 	LD	(IX+-48),BC
-	JR	L_195
-L_194:
+	JR	L_196
+L_195:
 	LD	BC,L__121
 	LD	(IX+-48),BC
-L_195:
+L_196:
 	LD	BC,(IX+-48)
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1761,19 +1753,19 @@ L_195:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  284	        case sk_9: strcat(input_buffer_left, (alpha_button_pressed) ? "q" : "9"); break;
-L_196:
+	JR	L_220
+;  278	        case sk_9: strcat(input_buffer_left, (alpha_button_pressed) ? "q" : "9"); break;
+L_197:
 	LD	A,(_alpha_button_pressed)
 	OR	A,A
-	JR	Z,L_199
+	JR	Z,L_200
 	LD	BC,L__123
 	LD	(IX+-51),BC
-	JR	L_200
-L_199:
+	JR	L_201
+L_200:
 	LD	BC,L__124
 	LD	(IX+-51),BC
-L_200:
+L_201:
 	LD	BC,(IX+-51)
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1781,10 +1773,10 @@ L_200:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  285	            
-;  286	        case sk_Chs: strcat(input_buffer_left, "-"); break;
-L_201:
+	JR	L_220
+;  279	            
+;  280	        case sk_Chs: strcat(input_buffer_left, "-"); break;
+L_202:
 	LD	BC,L__125
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1792,19 +1784,19 @@ L_201:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  287	        case sk_DecPnt: strcat(input_buffer_left, (second_button_pressed) ? "i" : "."); break;
-L_202:
+	JR	L_220
+;  281	        case sk_DecPnt: strcat(input_buffer_left, (second_button_pressed) ? "i" : "."); break;
+L_203:
 	LD	A,(_second_button_pressed)
 	OR	A,A
-	JR	Z,L_205
+	JR	Z,L_206
 	LD	BC,L__127
 	LD	(IX+-54),BC
-	JR	L_206
-L_205:
+	JR	L_207
+L_206:
 	LD	BC,L__128
 	LD	(IX+-54),BC
-L_206:
+L_207:
 	LD	BC,(IX+-54)
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1812,34 +1804,34 @@ L_206:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-	JR	L_219
-;  288	            
-;  289	        case sk_Enter: return RETS_SUCCESS; break;
-L_207:
-	LD	A,2
-	JR	L_227
-;  290	        case sk_Clear:
+	JR	L_220
+;  282	            
+;  283	        case sk_Enter: return RETS_SUCCESS; break;
 L_208:
-;  291	            if (strlen(input_buffer_left) == 0 && strlen(input_buffer_right) == 0) {
+	LD	A,2
+	JR	L_228
+;  284	        case sk_Clear:
+L_209:
+;  285	            if (strlen(input_buffer_left) == 0 && strlen(input_buffer_right) == 0) {
 	LD	BC,_input_buffer_left
 	PUSH	BC
 	CALL	_strlen
 	POP	BC
 	CALL	__icmpzero
-	JR	NZ,L_211
+	JR	NZ,L_212
 	LD	BC,_input_buffer_right
 	PUSH	BC
 	CALL	_strlen
 	POP	BC
 	CALL	__icmpzero
-	JR	NZ,L_211
-;  292	                return RETS_ERROR;
+	JR	NZ,L_212
+;  286	                return RETS_ERROR;
 	LD	A,1
-	JR	L_227
-;  293	            } else {
-L_211:
-;  294	                memset(input_buffer_left, 0, 50);
-	LD	BC,50
+	JR	L_228
+;  287	            } else {
+L_212:
+;  288	                memset(input_buffer_left, 0, INPUT_BUFFER_SIZE);
+	LD	BC,150
 	PUSH	BC
 	LD	BC,0
 	PUSH	BC
@@ -1849,8 +1841,8 @@ L_211:
 	POP	BC
 	POP	BC
 	POP	BC
-;  295	                memset(input_buffer_right, 0, 50);
-	LD	BC,50
+;  289	                memset(input_buffer_right, 0, INPUT_BUFFER_SIZE);
+	LD	BC,150
 	PUSH	BC
 	LD	BC,0
 	PUSH	BC
@@ -1860,21 +1852,21 @@ L_211:
 	POP	BC
 	POP	BC
 	POP	BC
-;  296	            }
-;  297	            break;
-	JR	L_219
-;  298	        case sk_Store: strcat(input_buffer_left, (alpha_button_pressed) ? "x" : "="); break;
-L_213:
+;  290	            }
+;  291	            break;
+	JR	L_220
+;  292	        case sk_Store: strcat(input_buffer_left, (alpha_button_pressed) ? "x" : "="); break;
+L_214:
 	LD	A,(_alpha_button_pressed)
 	OR	A,A
-	JR	Z,L_216
+	JR	Z,L_217
 	LD	BC,L__132
 	LD	(IX+-57),BC
-	JR	L_217
-L_216:
+	JR	L_218
+L_217:
 	LD	BC,L__133
 	LD	(IX+-57),BC
-L_217:
+L_218:
 	LD	BC,(IX+-57)
 	PUSH	BC
 	LD	BC,_input_buffer_left
@@ -1882,55 +1874,55 @@ L_217:
 	CALL	_strcat
 	POP	BC
 	POP	BC
-;  299	            
-;  300	    }
-L_219:
-;  301	    
-;  302	    if (key != sk_GraphVar) {
+;  293	            
+;  294	    }
+L_220:
+;  295	    
+;  296	    if (key != sk_GraphVar) {
 	LD	A,(_key)
 	CP	A,40
-	JR	Z,L_221
-;  303	        var1_position = -1;
+	JR	Z,L_222
+;  297	        var1_position = -1;
 	LD	A,255
 	LD	(_var1_position),A
-;  304	    }
-L_221:
-;  305	    
-;  306	    if (key != sk_Vars) {
+;  298	    }
+L_222:
+;  299	    
+;  300	    if (key != sk_Vars) {
 	LD	A,(_key)
 	CP	A,23
-	JR	Z,L_223
-;  307	        var2_position = -1;
+	JR	Z,L_224
+;  301	        var2_position = -1;
 	LD	A,255
 	LD	(_var2_position),A
-;  308	    }
-L_223:
-;  309	    
-;  310	    if (key != sk_2nd) {
+;  302	    }
+L_224:
+;  303	    
+;  304	    if (key != sk_2nd) {
 	LD	A,(_key)
 	CP	A,54
-	JR	Z,L_225
-;  311	        second_button_pressed = false;
+	JR	Z,L_226
+;  305	        second_button_pressed = false;
 	XOR	A,A
 	LD	(_second_button_pressed),A
-;  312	    }
-L_225:
-;  313	    
-;  314	    if (key != sk_Alpha) {
+;  306	    }
+L_226:
+;  307	    
+;  308	    if (key != sk_Alpha) {
 	LD	A,(_key)
 	CP	A,48
-	JR	Z,L_226
-;  315	        alpha_button_pressed = false;
+	JR	Z,L_227
+;  309	        alpha_button_pressed = false;
 	XOR	A,A
 	LD	(_alpha_button_pressed),A
-;  316	    }
-L_226:
-;  317	    
-;  318	    return RETS_CHANGED;
-	LD	A,3
-;  319	    
-;  320	}
+;  310	    }
 L_227:
+;  311	    
+;  312	    return RETS_CHANGED;
+	LD	A,3
+;  313	    
+;  314	}
+L_228:
 	LD	SP,IX
 	POP	IX
 	RET	
@@ -1954,25 +1946,25 @@ L_227:
 ;_draw_handle_function_menu          IMPORT  -----   function
 ;_key                                STATIC      1   variable
 ;_wait_for_any_keyup                 IMPORT  -----   function
-;temp37                               IX-60      3   variable
-;temp214                              IX-57      3   variable
-;temp203                              IX-54      3   variable
-;temp197                              IX-51      3   variable
-;temp192                              IX-48      3   variable
-;temp187                              IX-45      3   variable
-;temp182                              IX-42      3   variable
-;temp177                              IX-39      3   variable
-;temp172                              IX-36      3   variable
-;temp166                              IX-33      3   variable
-;temp161                              IX-30      3   variable
-;temp156                              IX-27      3   variable
-;temp145                              IX-24      3   variable
-;temp140                              IX-21      3   variable
-;temp122                              IX-18      3   variable
-;temp117                              IX-15      3   variable
-;temp112                              IX-12      3   variable
-;temp89                                IX-9      3   variable
-;temp42                                IX-6      3   variable
+;temp38                               IX-60      3   variable
+;temp215                              IX-57      3   variable
+;temp204                              IX-54      3   variable
+;temp198                              IX-51      3   variable
+;temp193                              IX-48      3   variable
+;temp188                              IX-45      3   variable
+;temp183                              IX-42      3   variable
+;temp178                              IX-39      3   variable
+;temp173                              IX-36      3   variable
+;temp167                              IX-33      3   variable
+;temp162                              IX-30      3   variable
+;temp157                              IX-27      3   variable
+;temp146                              IX-24      3   variable
+;temp141                              IX-21      3   variable
+;temp123                              IX-18      3   variable
+;temp118                              IX-15      3   variable
+;temp113                              IX-12      3   variable
+;temp90                                IX-9      3   variable
+;temp43                                IX-6      3   variable
 ;function_menu_result                  IX-3      3   variable
 
 
@@ -2213,21 +2205,21 @@ L__133:
 	DB	"="
 	DB	0
 	SEGMENT CODE
-;  321	
-;  322	uint8_t handle_draw_input(void) {
+;  315	
+;  316	uint8_t handle_draw_input(void) {
 _handle_draw_input:
-	LD	HL,-304
+	LD	HL,-604
 	CALL	__frameset
-;  323	    
-;  324	    bool is_running = true;
+;  317	    
+;  318	    bool is_running = true;
 	LD	(IX+-4),1
-;  325	    char buffer[INPUT_BUFFER_SIZE];
-;  326	    char result[INPUT_BUFFER_SIZE];
-;  327	    return_status status = RETS_NULL;
+;  319	    char input_buffer[2 * INPUT_BUFFER_SIZE];
+;  320	    char result[2 * INPUT_BUFFER_SIZE];
+;  321	    return_status status = RETS_NULL;
 	LD	BC,0
 	LD	(IX+-3),BC
-;  328	
-;  329	    memset(input_buffer_left, 0, INPUT_BUFFER_SIZE);
+;  322	
+;  323	    memset(input_buffer_left, 0, INPUT_BUFFER_SIZE);
 	LD	BC,150
 	PUSH	BC
 	LD	BC,0
@@ -2238,7 +2230,7 @@ _handle_draw_input:
 	POP	BC
 	POP	BC
 	POP	BC
-;  330	    memset(input_buffer_right, 0, INPUT_BUFFER_SIZE);
+;  324	    memset(input_buffer_right, 0, INPUT_BUFFER_SIZE);
 	LD	BC,150
 	PUSH	BC
 	LD	BC,0
@@ -2249,13 +2241,13 @@ _handle_draw_input:
 	POP	BC
 	POP	BC
 	POP	BC
-;  331	    memset(buffer, 0, INPUT_BUFFER_SIZE);
+;  325	    memset(input_buffer, 0, INPUT_BUFFER_SIZE);
 	LD	BC,150
 	PUSH	BC
 	LD	BC,0
 	PUSH	BC
 	LD	HL,IX
-	LD	BC,-154
+	LD	BC,-304
 	ADD	HL,BC
 	LD	BC,HL
 	PUSH	BC
@@ -2263,8 +2255,8 @@ _handle_draw_input:
 	POP	BC
 	POP	BC
 	POP	BC
-;  332	
-;  333	    last_queries = calloc(1, sizeof(history));
+;  326	
+;  327	    last_queries = calloc(1, sizeof(history));
 	LD	BC,31
 	PUSH	BC
 	LD	BC,1
@@ -2273,46 +2265,44 @@ _handle_draw_input:
 	POP	BC
 	POP	BC
 	LD	(_last_queries),HL
-;  334	
-;  335	    second_button_pressed = false;
+;  328	
+;  329	    second_button_pressed = false;
 	XOR	A,A
 	LD	(_second_button_pressed),A
-;  336	    alpha_button_pressed = false;
+;  330	    alpha_button_pressed = false;
 	XOR	A,A
 	LD	(_alpha_button_pressed),A
-;  337	
-;  338	    var1_position = -1;
+;  331	
+;  332	    var1_position = -1;
 	LD	A,255
 	LD	(_var1_position),A
-;  339	    var2_position = -1;
+;  333	    var2_position = -1;
 	LD	(_var2_position),A
-;  340	
-;  341	    last_queries->item_count = 0;
+;  334	
+;  335	    last_queries->item_count = 0;
 	LD	IY,(_last_queries)
 	LD	(IY+0),0
-;  342	
-;  343	    while (is_running) {
-	JR	L_243
-L_244:
-;  344	
-;  345	        if (status != RETS_NULL) {
+;  336	
+;  337	    while (is_running) {
+	JR	L_244
+L_245:
+;  338	
+;  339	        if (status != RETS_NULL) status = get_input();
 	LD	HL,(IX+-3)
 	CALL	__icmpzero
-	JR	Z,L_229
-;  346	            status = get_input();
+	JR	Z,L_230
 	CALL	_get_input
 	UEXT	HL
 	LD	L,A
 	LD	(IX+-3),HL
-;  347	        }
-L_229:
-;  348	
-;  349	        gfx_FillScreen(GCOL_BACKGROUND_PRIMARY);
+L_230:
+;  340	
+;  341	        gfx_FillScreen(GCOL_BACKGROUND_PRIMARY);
 	LD	BC,1
 	PUSH	BC
 	CALL	_gfx_FillScreen
 	POP	BC
-;  350	        draw_header("symbolic3", "", "Computer Algebra");
+;  342	        draw_header("symbolic3", "", "Computer Algebra");
 	LD	BC,L__140
 	PUSH	BC
 	LD	BC,L__141
@@ -2323,8 +2313,8 @@ L_229:
 	POP	BC
 	POP	BC
 	POP	BC
-;  351	
-;  352	        gfx_SetTextXY(MARGIN, 40);
+;  343	
+;  344	        gfx_SetTextXY(MARGIN, 40);
 	LD	BC,40
 	PUSH	BC
 	LD	BC,10
@@ -2332,71 +2322,71 @@ L_229:
 	CALL	_gfx_SetTextXY
 	POP	BC
 	POP	BC
-;  353	        gfx_SetTextFGColor(GCOL_TEXT_PRIMARY);
+;  345	        gfx_SetTextFGColor(GCOL_TEXT_PRIMARY);
 	LD	BC,3
 	PUSH	BC
 	CALL	_gfx_SetTextFGColor
 	POP	BC
-;  354	        print_character_wise(input_buffer_left);
+;  346	        print_character_wise(input_buffer_left);
 	LD	BC,_input_buffer_left
 	PUSH	BC
 	CALL	_print_character_wise
 	POP	BC
-;  355	
-;  356	        if (second_button_pressed) {
+;  347	
+;  348	        if (second_button_pressed) {
 	LD	A,(_second_button_pressed)
 	OR	A,A
-	JR	Z,L_233
-;  357	            gfx_SetTextFGColor(GCOL_BLUE);
+	JR	Z,L_234
+;  349	            gfx_SetTextFGColor(GCOL_BLUE);
 	LD	BC,11
 	PUSH	BC
 	CALL	_gfx_SetTextFGColor
 	POP	BC
-;  358	        } else if (alpha_button_pressed) {
-	JR	L_234
-L_233:
+;  350	        } else if (alpha_button_pressed) {
+	JR	L_235
+L_234:
 	LD	A,(_alpha_button_pressed)
 	OR	A,A
-	JR	Z,L_231
-;  359	            gfx_SetTextFGColor(GCOL_GREEN);
+	JR	Z,L_232
+;  351	            gfx_SetTextFGColor(GCOL_GREEN);
 	LD	BC,10
 	PUSH	BC
 	CALL	_gfx_SetTextFGColor
 	POP	BC
-;  360	        } else {
-	JR	L_234
-L_231:
-;  361	            gfx_SetTextFGColor(GCOL_SYMBOLIC3);
+;  352	        } else {
+	JR	L_235
+L_232:
+;  353	            gfx_SetTextFGColor(GCOL_SYMBOLIC3);
 	LD	BC,12
 	PUSH	BC
 	CALL	_gfx_SetTextFGColor
 	POP	BC
-;  362	        }
-L_234:
-;  363	
-;  364	        print_character_wise(" | ");
+;  354	        }
+L_235:
+;  355	
+;  356	        print_character_wise(" | ");
 	LD	BC,L__145
 	PUSH	BC
 	CALL	_print_character_wise
 	POP	BC
-;  365	
-;  366	        gfx_SetTextFGColor(GCOL_TEXT_PRIMARY);
+;  357	
+;  358	        gfx_SetTextFGColor(GCOL_TEXT_PRIMARY);
 	LD	BC,3
 	PUSH	BC
 	CALL	_gfx_SetTextFGColor
 	POP	BC
-;  367	        print_character_wise(input_buffer_right);
+;  359	        print_character_wise(input_buffer_right);
 	LD	BC,_input_buffer_right
 	PUSH	BC
 	CALL	_print_character_wise
 	POP	BC
-;  368	
-;  369	        if (status == RETS_SUCCESS && (strlen(input_buffer_left) > 0 || strlen(input_buffer_right) > 0)) {
+;  360	
+;  361	        if (status == RETS_SUCCESS && (strlen(input_buffer_left) > 0 || strlen(input_buffer_right) > 0)) {
 	LD	HL,(IX+-3)
 	LD	BC,2
 	OR	A,A
 	SBC	HL,BC
-	JR	NZ,L_241
+	JR	NZ,L_242
 	LD	BC,_input_buffer_left
 	PUSH	BC
 	CALL	_strlen
@@ -2406,7 +2396,7 @@ L_234:
 	SBC	HL,HL
 	OR	A,A
 	SBC	HL,BC
-	JR	C,L_240
+	JR	C,L_241
 	LD	BC,_input_buffer_right
 	PUSH	BC
 	CALL	_strlen
@@ -2416,16 +2406,16 @@ L_234:
 	SBC	HL,HL
 	OR	A,A
 	SBC	HL,BC
-	JR	NC,L_241
-L_240:
-;  370	            
-;  371	            memset(buffer, 0, INPUT_BUFFER_SIZE);
-	LD	BC,150
+	JR	NC,L_242
+L_241:
+;  362	            
+;  363	            memset(input_buffer, 0, 2 * INPUT_BUFFER_SIZE);
+	LD	BC,300
 	PUSH	BC
 	LD	BC,0
 	PUSH	BC
 	LD	HL,IX
-	LD	BC,-154
+	LD	BC,-304
 	ADD	HL,BC
 	LD	BC,HL
 	PUSH	BC
@@ -2433,37 +2423,52 @@ L_240:
 	POP	BC
 	POP	BC
 	POP	BC
-;  372	            strcat(buffer, input_buffer_left);
+;  364	            strcat(input_buffer, input_buffer_left);
 	LD	BC,_input_buffer_left
 	PUSH	BC
 	LD	HL,IX
-	LD	BC,-154
+	LD	BC,-304
 	ADD	HL,BC
 	LD	BC,HL
 	PUSH	BC
 	CALL	_strcat
 	POP	BC
 	POP	BC
-;  373	            strcat(buffer, input_buffer_right);
+;  365	            strcat(input_buffer, input_buffer_right);
 	LD	BC,_input_buffer_right
 	PUSH	BC
 	LD	HL,IX
-	LD	BC,-154
+	LD	BC,-304
 	ADD	HL,BC
 	LD	BC,HL
 	PUSH	BC
 	CALL	_strcat
 	POP	BC
 	POP	BC
-;  374	            
-;  375	            if (symbolic4(result, buffer) == RETS_SUCCESS) {
+;  366	            
+;  367	            memset(result, 0, 2 * INPUT_BUFFER_SIZE);
+	LD	BC,300
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
 	LD	HL,IX
-	LD	BC,-154
+	LD	BC,-604
+	ADD	HL,BC
+	LD	BC,HL
+	PUSH	BC
+	CALL	_memset
+	POP	BC
+	POP	BC
+	POP	BC
+;  368	            
+;  369	            if (symbolic4(result, input_buffer) == RETS_SUCCESS) {
+	LD	HL,IX
+	LD	BC,-304
 	ADD	HL,BC
 	LD	BC,HL
 	PUSH	BC
 	LD	HL,IX
-	LD	BC,-304
+	LD	BC,-604
 	ADD	HL,BC
 	LD	BC,HL
 	PUSH	BC
@@ -2475,8 +2480,8 @@ L_240:
 	OR	A,A
 	LD	BC,2
 	SBC	HL,BC
-	JR	NZ,L_238
-;  376	                gfx_SetTextXY(MARGIN, gfx_GetTextY() + 20);
+	JR	NZ,L_239
+;  370	                gfx_SetTextXY(MARGIN, gfx_GetTextY() + 20);
 	CALL	_gfx_GetTextY
 	LD	IY,HL
 	LEA	BC,IY+20
@@ -2486,27 +2491,27 @@ L_240:
 	CALL	_gfx_SetTextXY
 	POP	BC
 	POP	BC
-;  377	                gfx_SetTextFGColor(GCOL_SYMBOLIC3);
+;  371	                gfx_SetTextFGColor(GCOL_SYMBOLIC3);
 	LD	BC,12
 	PUSH	BC
 	CALL	_gfx_SetTextFGColor
 	POP	BC
-;  378	                print_character_wise(result);
+;  372	                print_character_wise(result);
 	LD	HL,IX
-	LD	BC,-304
+	LD	BC,-604
 	ADD	HL,BC
 	LD	BC,HL
 	PUSH	BC
 	CALL	_print_character_wise
 	POP	BC
-;  379	                append_new_history_item(last_queries, buffer, result);
+;  373	                append_new_history_item(last_queries, input_buffer, result);
 	LD	HL,IX
-	LD	BC,-304
+	LD	BC,-604
 	ADD	HL,BC
 	LD	BC,HL
 	PUSH	BC
 	LD	HL,IX
-	LD	BC,-154
+	LD	BC,-304
 	ADD	HL,BC
 	LD	BC,HL
 	PUSH	BC
@@ -2516,10 +2521,10 @@ L_240:
 	POP	BC
 	POP	BC
 	POP	BC
-;  380	            } else {
-	JR	L_242
-L_238:
-;  381	                gfx_SetTextXY(MARGIN, gfx_GetTextY() + 20);
+;  374	            } else {
+	JR	L_243
+L_239:
+;  375	                gfx_SetTextXY(MARGIN, gfx_GetTextY() + 20);
 	CALL	_gfx_GetTextY
 	LD	IY,HL
 	LEA	BC,IY+20
@@ -2529,45 +2534,45 @@ L_238:
 	CALL	_gfx_SetTextXY
 	POP	BC
 	POP	BC
-;  382	                gfx_SetTextFGColor(GCOL_TEXT_PRIMARY);
+;  376	                gfx_SetTextFGColor(GCOL_TEXT_PRIMARY);
 	LD	BC,3
 	PUSH	BC
 	CALL	_gfx_SetTextFGColor
 	POP	BC
-;  383	                print_character_wise("ERROR");
+;  377	                print_character_wise("ERROR");
 	LD	BC,L__150
 	PUSH	BC
 	CALL	_print_character_wise
 	POP	BC
-;  384	            }
-;  385	            
-;  386	        } else if (status == RETS_ERROR) {
-	JR	L_242
-L_241:
+;  378	            }
+;  379	            
+;  380	        } else if (status == RETS_ERROR) {
+	JR	L_243
+L_242:
 	LD	BC,1
 	LD	HL,(IX+-3)
 	OR	A,A
 	SBC	HL,BC
-	JR	NZ,L_242
-;  387	            is_running = false;
+	JR	NZ,L_243
+;  381	            is_running = false;
 	LD	(IX+-4),0
-;  388	        }
-L_242:
-;  389	
-;  390	        status = RETS_CHANGED;
+;  382	        }
+L_243:
+;  383	
+;  384	        status = RETS_CHANGED;
 	LD	BC,3
 	LD	(IX+-3),BC
-;  391	
-;  392	    }
-L_243:
+;  385	
+;  386	    }
+L_244:
 	LD	A,(IX+-4)
 	OR	A,A
-	JR	NZ,L_244
-;  393	    
-;  394	    return RETS_SUCCESS;
+	JR	NZ,L_245
+;  387	    
+;  388	    return RETS_SUCCESS;
 	LD	A,2
-;  395	    
-;  396	}
+;  389	    
+;  390	}
 	LD	SP,IX
 	POP	IX
 	RET	
@@ -2594,13 +2599,13 @@ L_243:
 ;_input_buffer_right                 STATIC    150   variable
 ;_input_buffer_left                  STATIC    150   variable
 ;_memset                             IMPORT  -----   function
-;result                              IX-304    150   variable
-;buffer                              IX-154    150   variable
+;result                              IX-604    300   variable
+;input_buffer                        IX-304    300   variable
 ;is_running                            IX-4      1   variable
 ;status                                IX-3      3   variable
 
 
-; Stack Frame Size: 310 (bytes)
+; Stack Frame Size: 610 (bytes)
 ;       Spill Code: 0 (instruction)
 
 

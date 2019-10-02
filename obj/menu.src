@@ -316,9 +316,7 @@ L_27:
 	CALL	_free
 	POP	BC
 ;   99	    
-;  100	    return;
-;  101	    
-;  102	}
+;  100	}
 	LD	SP,IX
 	POP	IX
 	RET	
@@ -337,14 +335,14 @@ L_27:
 ;       Spill Code: 0 (instruction)
 
 
-;  103	
-;  104	void draw_menu(menu* source, uint8_t selected_tab, uint8_t selected_item) {
+;  101	
+;  102	void draw_menu(menu* source, uint8_t selected_tab, uint8_t selected_item) {
 _draw_menu:
 	LD	HL,-13
 	CALL	__frameset
-;  105	    
-;  106	    uint8_t i;
-;  107	    uint16_t header_width = LCD_WIDTH / source->tab_count;
+;  103	    
+;  104	    uint8_t i;
+;  105	    uint16_t header_width = LCD_WIDTH / source->tab_count;
 	LD	IY,(IX+6)
 	LD	A,(IY+0)
 	UEXT	HL
@@ -354,19 +352,19 @@ _draw_menu:
 	CALL	__idivs
 	LD	(IX+-3),L
 	LD	(IX+-2),H
-;  108	    
-;  109	    gfx_FillScreen(GCOL_BACKGROUND_PRIMARY);
+;  106	    
+;  107	    gfx_FillScreen(GCOL_BACKGROUND_PRIMARY);
 	LD	BC,1
 	PUSH	BC
 	CALL	_gfx_FillScreen
 	POP	BC
-;  110	    
-;  111	    gfx_SetColor(GCOL_HEADER);
+;  108	    
+;  109	    gfx_SetColor(GCOL_HEADER);
 	LD	BC,6
 	PUSH	BC
 	CALL	_gfx_SetColor
 	POP	BC
-;  112	    gfx_FillRectangle(0, 0, LCD_WIDTH, HEADER_HEIGHT);
+;  110	    gfx_FillRectangle(0, 0, LCD_WIDTH, HEADER_HEIGHT);
 	LD	BC,20
 	PUSH	BC
 	LD	BC,320
@@ -379,31 +377,31 @@ _draw_menu:
 	POP	BC
 	POP	BC
 	POP	BC
-;  113	    
-;  114	    if (source->tab_count > 1) {
+;  111	    
+;  112	    if (source->tab_count > 1) {
 	LD	IY,(IX+6)
 	LD	A,1
 	CP	A,(IY+0)
 	JR	NC,L_38
-;  115	        for (i = 0; i < source->tab_count; i++) {
+;  113	        for (i = 0; i < source->tab_count; i++) {
 	LD	(IX+-1),0
 	JR	L_36
 L_34:
-;  116	            if (selected_tab == i) {
+;  114	            if (selected_tab == i) {
 	LD	A,(IX+9)
 	CP	A,(IX+-1)
 	JR	NZ,L_32
-;  117	                gfx_SetTextFGColor(GCOL_SYMBOLIC3);
+;  115	                gfx_SetTextFGColor(GCOL_SYMBOLIC3);
 	LD	BC,12
 	PUSH	BC
 	CALL	_gfx_SetTextFGColor
 	POP	BC
-;  118	                gfx_SetColor(GCOL_BACKGROUND_PRIMARY);
+;  116	                gfx_SetColor(GCOL_BACKGROUND_PRIMARY);
 	LD	BC,1
 	PUSH	BC
 	CALL	_gfx_SetColor
 	POP	BC
-;  119	                gfx_FillRectangle(i * header_width, 0, header_width, HEADER_HEIGHT);
+;  117	                gfx_FillRectangle(i * header_width, 0, header_width, HEADER_HEIGHT);
 	LD	BC,20
 	PUSH	BC
 	LD	BC,(IX+-3)
@@ -426,17 +424,17 @@ L_34:
 	POP	BC
 	POP	BC
 	POP	BC
-;  120	            } else {
+;  118	            } else {
 	JR	L_33
 L_32:
-;  121	                gfx_SetTextFGColor(GCOL_WHITE);
+;  119	                gfx_SetTextFGColor(GCOL_WHITE);
 	LD	BC,8
 	PUSH	BC
 	CALL	_gfx_SetTextFGColor
 	POP	BC
-;  122	            }
+;  120	            }
 L_33:
-;  123	            gfx_print(source->tabs[i]->title, header_width * i + (header_width - gfx_GetStringWidth(source->tabs[i]->title)) / 2, (HEADER_HEIGHT - FONT_HEIGHT) / 2);
+;  121	            gfx_print(source->tabs[i]->title, header_width * i + (header_width - gfx_GetStringWidth(source->tabs[i]->title)) / 2, (HEADER_HEIGHT - FONT_HEIGHT) / 2);
 	LD	BC,6
 	PUSH	BC
 	LD	C,(IX+-1)
@@ -495,16 +493,16 @@ L_33:
 	POP	BC
 	POP	BC
 	INC	(IX+-1)
-;  124	        }
+;  122	        }
 L_36:
 	LD	A,(IX+-1)
 	LD	IY,(IX+6)
 	CP	A,(IY+0)
 	JR	C,L_34
 	JR	L_39
-;  125	    } else {
+;  123	    } else {
 L_38:
-;  126	        gfx_print(source->tabs[0]->title, (header_width - gfx_GetStringWidth(source->tabs[0]->title)) / 2, (HEADER_HEIGHT - FONT_HEIGHT) / 2);
+;  124	        gfx_print(source->tabs[0]->title, (header_width - gfx_GetStringWidth(source->tabs[0]->title)) / 2, (HEADER_HEIGHT - FONT_HEIGHT) / 2);
 	LD	BC,6
 	PUSH	BC
 	LD	BC,(IX+-3)
@@ -535,21 +533,21 @@ L_38:
 	POP	BC
 	POP	BC
 	POP	BC
-;  127	    }
+;  125	    }
 L_39:
-;  128	    
-;  129	    gfx_SetColor(GCOL_BACKGROUND_SECONDARY);
+;  126	    
+;  127	    gfx_SetColor(GCOL_BACKGROUND_SECONDARY);
 	LD	BC,2
 	PUSH	BC
 	CALL	_gfx_SetColor
 	POP	BC
-;  130	    
-;  131	    for (i = 0; i < source->tabs[selected_tab]->item_count; i++) {
+;  128	    
+;  129	    for (i = 0; i < source->tabs[selected_tab]->item_count; i++) {
 	LD	(IX+-1),0
 	JR	L_50
 L_48:
-;  132	        
-;  133	        if (i % 2 == 1) {
+;  130	        
+;  131	        if (i % 2 == 1) {
 	LD	A,(IX+-1)
 	UEXT	HL
 	LD	L,A
@@ -559,7 +557,7 @@ L_48:
 	LD	BC,1
 	SBC	HL,BC
 	JR	NZ,L_44
-;  134	            gfx_FillRectangle(0, (1.5 + i) * HEADER_HEIGHT, LCD_WIDTH, HEADER_HEIGHT);
+;  132	            gfx_FillRectangle(0, (1.5 + i) * HEADER_HEIGHT, LCD_WIDTH, HEADER_HEIGHT);
 	LD	BC,20
 	PUSH	BC
 	LD	BC,320
@@ -584,30 +582,30 @@ L_48:
 	POP	BC
 	POP	BC
 	POP	BC
-;  135	        }
+;  133	        }
 L_44:
-;  136	        
-;  137	        if (selected_item == i) {
+;  134	        
+;  135	        if (selected_item == i) {
 	LD	A,(IX+12)
 	CP	A,(IX+-1)
 	JR	NZ,L_43
-;  138	            gfx_SetTextFGColor(GCOL_SYMBOLIC3);
+;  136	            gfx_SetTextFGColor(GCOL_SYMBOLIC3);
 	LD	BC,12
 	PUSH	BC
 	CALL	_gfx_SetTextFGColor
 	POP	BC
-;  139	        } else {
+;  137	        } else {
 	JR	L_45
 L_43:
-;  140	            gfx_SetTextFGColor(GCOL_TEXT_PRIMARY);
+;  138	            gfx_SetTextFGColor(GCOL_TEXT_PRIMARY);
 	LD	BC,3
 	PUSH	BC
 	CALL	_gfx_SetTextFGColor
 	POP	BC
-;  141	        }
+;  139	        }
 L_45:
-;  142	        
-;  143	        gfx_SetTextXY(MARGIN, (1.5 + i) * HEADER_HEIGHT + (HEADER_HEIGHT - FONT_HEIGHT) / 2);
+;  140	        
+;  141	        gfx_SetTextXY(MARGIN, (1.5 + i) * HEADER_HEIGHT + (HEADER_HEIGHT - FONT_HEIGHT) / 2);
 	UEXT	HL
 	LD	L,(IX+-1)
 	LD	A,H
@@ -629,7 +627,7 @@ L_45:
 	CALL	_gfx_SetTextXY
 	POP	BC
 	POP	BC
-;  144	        if (i < 10) gfx_PrintInt(i + 1, 0);
+;  142	        if (i < 10) gfx_PrintInt(i + 1, 0);
 	LD	A,(IX+-1)
 	CP	A,10
 	JR	NC,L_47
@@ -644,7 +642,7 @@ L_45:
 	POP	BC
 	POP	BC
 L_47:
-;  145	        gfx_print_justified(source->tabs[selected_tab]->items[i]->title, JUST_LEFT, 1.5 * MARGIN, JUST_NULL, 0);
+;  143	        gfx_print_justified(source->tabs[selected_tab]->items[i]->title, JUST_LEFT, 1.5 * MARGIN, JUST_NULL, 0);
 	LD	BC,0
 	PUSH	BC
 	PUSH	BC
@@ -681,7 +679,7 @@ L_47:
 	POP	BC
 	POP	BC
 	POP	BC
-;  146	        gfx_print_justified(source->tabs[selected_tab]->items[i]->indicator, JUST_RIGHT, 0, JUST_NULL, 0);
+;  144	        gfx_print_justified(source->tabs[selected_tab]->items[i]->indicator, JUST_RIGHT, 0, JUST_NULL, 0);
 	LD	BC,0
 	PUSH	BC
 	PUSH	BC
@@ -718,8 +716,8 @@ L_47:
 	POP	BC
 	POP	BC
 	INC	(IX+-1)
-;  147	        
-;  148	    }
+;  145	        
+;  146	    }
 L_50:
 	LD	A,(IX+9)
 	UEXT	HL
@@ -745,10 +743,8 @@ L_50:
 	LD	A,(IX+-1)
 	CP	A,(IY+3)
 	JR	C,L_48
-;  149	    
-;  150	    return;
-;  151	    
-;  152	}
+;  147	    
+;  148	}
 	LD	SP,IX
 	POP	IX
 	RET	
@@ -777,18 +773,18 @@ L_50:
 ;       Spill Code: 0 (instruction)
 
 
-;  153	
-;  154	uint8_t handle_menu(menu* source, uint8_t* selected_tab, uint8_t* selected_item) {
+;  149	
+;  150	uint8_t handle_menu(menu* source, uint8_t* selected_tab, uint8_t* selected_item) {
 _handle_menu:
 	LD	HL,-1
 	CALL	__frameset
-;  155	    
-;  156	    sk_key_t key;
-;  157	    
-;  158	    while (true) {
-L_116:
-;  159	        
-;  160	        draw_menu(source, *selected_tab, *selected_item);
+;  151	    
+;  152	    sk_key_t key;
+;  153	    
+;  154	    while (true) {
+L_115:
+;  155	        
+;  156	        draw_menu(source, *selected_tab, *selected_item);
 	LD	HL,(IX+12)
 	LD	C,(HL)
 	LD	B,0
@@ -802,99 +798,99 @@ L_116:
 	POP	BC
 	POP	BC
 	POP	BC
-;  161	        key = wait_for_any_keyup();
+;  157	        key = wait_for_any_keyup();
 	CALL	_wait_for_any_keyup
 	LD	(IX+-1),A
-;  162	        
-;  163	        switch (key) {
+;  158	        
+;  159	        switch (key) {
 	UEXT	HL
 	LD	L,A
 	CALL	__case8
 L__16:
 	DW	21
 	DB	1
-	DW24	L_60	
+	DW24	L_59	
 
 	DB	2
-	DW24	L_64	
+	DW24	L_63	
 
 	DB	3
-	DW24	L_68	
+	DW24	L_67	
 
 	DB	4
-	DW24	L_56	
-
-	DB	9
-	DW24	L_53	
-
-	DB	10
 	DW24	L_55	
 
-	DB	15
+	DB	9
+	DW24	L_52	
+
+	DB	10
 	DW24	L_54	
 
+	DB	15
+	DW24	L_53	
+
 	DB	18
-	DW24	L_92	
+	DW24	L_91	
 
 	DB	19
-	DW24	L_101	
+	DW24	L_100	
 
 	DB	20
-	DW24	L_110	
+	DW24	L_109	
 
 	DB	26
-	DW24	L_89	
+	DW24	L_88	
 
 	DB	27
-	DW24	L_98	
+	DW24	L_97	
 
 	DB	28
-	DW24	L_107	
+	DW24	L_106	
 
 	DB	34
-	DW24	L_87	
+	DW24	L_86	
 
 	DB	35
-	DW24	L_95	
+	DW24	L_94	
 
 	DB	36
-	DW24	L_104	
+	DW24	L_103	
 
 	DB	49
-	DW24	L_84	
+	DW24	L_83	
 
 	DB	50
-	DW24	L_81	
+	DW24	L_80	
 
 	DB	51
-	DW24	L_78	
+	DW24	L_77	
 
 	DB	52
-	DW24	L_75	
+	DW24	L_74	
 
 	DB	53
-	DW24	L_72	
+	DW24	L_71	
 
-	DW24	L_116	
+	DW24	L_115	
 
-;  164	            case sk_Enter:
-L_53:
-;  165	                return RETS_SUCCESS;
+;  160	            case sk_Enter:
+L_52:
+;  161	                return RETS_SUCCESS;
 	LD	A,2
-	JR	L_117
-;  166	            case sk_Clear:
-L_54:
-;  167	                return RETS_ERROR;
+	JR	L_116
+;  162	            case sk_Clear:
+L_53:
+;  163	                return RETS_ERROR;
 	LD	A,1
-	JR	L_117
-;  168	            case sk_Add:
-L_55:
-;  169	                return RETS_CHANGED;
+	JR	L_116
+;  164	            case sk_Add:
+L_54:
+;  165	                return RETS_CHANGED;
 	LD	A,3
-	JR	L_117
-;  170	            case sk_Up:
-L_56:
-;  171	                if (*selected_item > 0) (*selected_item)--;
+	JR	L_116
+;  166	            case sk_Up:
+L_55:
+;  167	                if (*selected_item > 0) (*selected_item)--;
 	LD	HL,(IX+12)
 	LD	A,(HL)
 	UEXT	HL
@@ -905,17 +901,17 @@ L_56:
 	OR	A,A
 	SBC	HL,BC
 	CALL	__setflag
-	JP	P,L_116
+	JP	P,L_115
 	LD	HL,(IX+12)
 	LD	A,(HL)
 	DEC	A
 	LD	HL,(IX+12)
 	LD	(HL),A
-;  172	                break;
-	JR	L_116
-;  173	            case sk_Down:
-L_60:
-;  174	                if (*selected_item < source->tabs[*selected_tab]->item_count - 1) (*selected_item)++;
+;  168	                break;
+	JR	L_115
+;  169	            case sk_Down:
+L_59:
+;  170	                if (*selected_item < source->tabs[*selected_tab]->item_count - 1) (*selected_item)++;
 	LD	HL,(IX+9)
 	LD	A,(HL)
 	UEXT	HL
@@ -940,17 +936,17 @@ L_60:
 	OR	A,A
 	SBC	HL,BC
 	CALL	__setflag
-	JP	P,L_116
+	JP	P,L_115
 	LD	HL,(IX+12)
 	LD	A,(HL)
 	INC	A
 	LD	HL,(IX+12)
 	LD	(HL),A
-;  175	                break;
-	JR	L_116
-;  176	            case sk_Left:
-L_64:
-;  177	                if (*selected_tab > 0) (*selected_tab)--;
+;  171	                break;
+	JR	L_115
+;  172	            case sk_Left:
+L_63:
+;  173	                if (*selected_tab > 0) (*selected_tab)--;
 	LD	HL,(IX+9)
 	LD	A,(HL)
 	UEXT	HL
@@ -961,21 +957,21 @@ L_64:
 	OR	A,A
 	SBC	HL,BC
 	CALL	__setflag
-	JP	P,L_67
+	JP	P,L_66
 	LD	HL,(IX+9)
 	LD	A,(HL)
 	DEC	A
 	LD	HL,(IX+9)
 	LD	(HL),A
-L_67:
-;  178	                *selected_item = 0;
+L_66:
+;  174	                *selected_item = 0;
 	LD	HL,(IX+12)
 	LD	(HL),0
-;  179	                break;
-	JR	L_116
-;  180	            case sk_Right:
-L_68:
-;  181	                if (*selected_tab < source->tab_count - 1) (*selected_tab)++;
+;  175	                break;
+	JR	L_115
+;  176	            case sk_Right:
+L_67:
+;  177	                if (*selected_tab < source->tab_count - 1) (*selected_tab)++;
 	LD	IY,(IX+6)
 	LD	A,(IY+0)
 	UEXT	HL
@@ -989,101 +985,101 @@ L_68:
 	OR	A,A
 	SBC	HL,BC
 	CALL	__setflag
-	JP	P,L_71
+	JP	P,L_70
 	LD	HL,(IX+9)
 	LD	A,(HL)
 	INC	A
 	LD	HL,(IX+9)
 	LD	(HL),A
-L_71:
-;  182	                *selected_item = 0;
+L_70:
+;  178	                *selected_item = 0;
 	LD	HL,(IX+12)
 	LD	(HL),0
-;  183	                break;
-	JR	L_116
-;  184	            case sk_Yequ:
-L_72:
-;  185	                if (source->tab_count > 0) {
+;  179	                break;
+	JR	L_115
+;  180	            case sk_Yequ:
+L_71:
+;  181	                if (source->tab_count > 0) {
 	XOR	A,A
 	LD	IY,(IX+6)
 	CP	A,(IY+0)
-	JR	NC,L_116
-;  186	                    *selected_tab = 0;
+	JR	NC,L_115
+;  182	                    *selected_tab = 0;
 	LD	HL,(IX+9)
 	LD	(HL),0
-;  187	                    *selected_item = 0;
+;  183	                    *selected_item = 0;
 	LD	HL,(IX+12)
 	LD	(HL),0
-;  188	                }
-;  189	                break;
-	JR	L_116
-;  190	            case sk_Window:
-L_75:
-;  191	                if (source->tab_count > 1) {
+;  184	                }
+;  185	                break;
+	JR	L_115
+;  186	            case sk_Window:
+L_74:
+;  187	                if (source->tab_count > 1) {
 	LD	A,1
 	LD	IY,(IX+6)
 	CP	A,(IY+0)
-	JR	NC,L_116
-;  192	                    *selected_tab = 1;
+	JR	NC,L_115
+;  188	                    *selected_tab = 1;
 	LD	HL,(IX+9)
 	LD	(HL),1
-;  193	                    *selected_item = 0;
+;  189	                    *selected_item = 0;
 	LD	HL,(IX+12)
 	LD	(HL),0
-;  194	                }
-;  195	                break;
-	JR	L_116
-;  196	            case sk_Zoom:
-L_78:
-;  197	                if (source->tab_count > 2) {
+;  190	                }
+;  191	                break;
+	JR	L_115
+;  192	            case sk_Zoom:
+L_77:
+;  193	                if (source->tab_count > 2) {
 	LD	A,2
 	LD	IY,(IX+6)
 	CP	A,(IY+0)
-	JR	NC,L_116
-;  198	                    *selected_tab = 2;
+	JR	NC,L_115
+;  194	                    *selected_tab = 2;
 	LD	HL,(IX+9)
 	LD	(HL),2
-;  199	                    *selected_item = 0;
+;  195	                    *selected_item = 0;
 	LD	HL,(IX+12)
 	LD	(HL),0
-;  200	                }
-;  201	                break;
-	JR	L_116
-;  202	            case sk_Trace:
-L_81:
-;  203	                if (source->tab_count > 3) {
+;  196	                }
+;  197	                break;
+	JR	L_115
+;  198	            case sk_Trace:
+L_80:
+;  199	                if (source->tab_count > 3) {
 	LD	A,3
 	LD	IY,(IX+6)
 	CP	A,(IY+0)
-	JR	NC,L_116
-;  204	                    *selected_tab = 3;
+	JR	NC,L_115
+;  200	                    *selected_tab = 3;
 	LD	HL,(IX+9)
 	LD	(HL),3
-;  205	                    *selected_item = 0;
+;  201	                    *selected_item = 0;
 	LD	HL,(IX+12)
 	LD	(HL),0
-;  206	                }
-;  207	                break;
-	JR	L_116
-;  208	            case sk_Graph:
-L_84:
-;  209	                if (source->tab_count > 4) {
+;  202	                }
+;  203	                break;
+	JR	L_115
+;  204	            case sk_Graph:
+L_83:
+;  205	                if (source->tab_count > 4) {
 	LD	A,4
 	LD	IY,(IX+6)
 	CP	A,(IY+0)
-	JR	NC,L_116
-;  210	                    *selected_tab = 4;
+	JR	NC,L_115
+;  206	                    *selected_tab = 4;
 	LD	HL,(IX+9)
 	LD	(HL),4
-;  211	                    *selected_item = 0;
+;  207	                    *selected_item = 0;
 	LD	HL,(IX+12)
 	LD	(HL),0
-;  212	                }
-;  213	                break;
-	JR	L_116
-;  214	            case sk_1:
-L_87:
-;  215	                if (source->tabs[*selected_tab]->item_count > 0) {
+;  208	                }
+;  209	                break;
+	JR	L_115
+;  210	            case sk_1:
+L_86:
+;  211	                if (source->tabs[*selected_tab]->item_count > 0) {
 	LD	HL,(IX+9)
 	LD	A,(HL)
 	UEXT	HL
@@ -1098,17 +1094,17 @@ L_87:
 	LD	IY,(HL)
 	XOR	A,A
 	CP	A,(IY+3)
-	JR	NC,L_89
-;  216	                    *selected_item = 0;
+	JR	NC,L_88
+;  212	                    *selected_item = 0;
 	LD	HL,(IX+12)
 	LD	(HL),0
-;  217	                    return RETS_SUCCESS;
+;  213	                    return RETS_SUCCESS;
 	LD	A,2
-	JR	L_117
-;  218	                }
-;  219	            case sk_2:
-L_89:
-;  220	                if (source->tabs[*selected_tab]->item_count > 1) {
+	JR	L_116
+;  214	                }
+;  215	            case sk_2:
+L_88:
+;  216	                if (source->tabs[*selected_tab]->item_count > 1) {
 	LD	HL,(IX+9)
 	LD	A,(HL)
 	UEXT	HL
@@ -1123,17 +1119,17 @@ L_89:
 	LD	IY,(HL)
 	LD	A,1
 	CP	A,(IY+3)
-	JR	NC,L_92
-;  221	                    *selected_item = 1;
+	JR	NC,L_91
+;  217	                    *selected_item = 1;
 	LD	HL,(IX+12)
 	LD	(HL),1
-;  222	                    return RETS_SUCCESS;
+;  218	                    return RETS_SUCCESS;
 	LD	A,2
-	JR	L_117
-;  223	                }
-;  224	            case sk_3:
-L_92:
-;  225	                if (source->tabs[*selected_tab]->item_count > 2) {
+	JR	L_116
+;  219	                }
+;  220	            case sk_3:
+L_91:
+;  221	                if (source->tabs[*selected_tab]->item_count > 2) {
 	LD	HL,(IX+9)
 	LD	A,(HL)
 	UEXT	HL
@@ -1148,16 +1144,16 @@ L_92:
 	LD	IY,(HL)
 	LD	A,2
 	CP	A,(IY+3)
-	JR	NC,L_95
-;  226	                    *selected_item = 2;
+	JR	NC,L_94
+;  222	                    *selected_item = 2;
 	LD	HL,(IX+12)
 	LD	(HL),A
-;  227	                    return RETS_SUCCESS;
-	JR	L_117
-;  228	                }
-;  229	            case sk_4:
-L_95:
-;  230	                if (source->tabs[*selected_tab]->item_count > 3) {
+;  223	                    return RETS_SUCCESS;
+	JR	L_116
+;  224	                }
+;  225	            case sk_4:
+L_94:
+;  226	                if (source->tabs[*selected_tab]->item_count > 3) {
 	LD	HL,(IX+9)
 	LD	A,(HL)
 	UEXT	HL
@@ -1172,17 +1168,17 @@ L_95:
 	LD	IY,(HL)
 	LD	A,3
 	CP	A,(IY+3)
-	JR	NC,L_98
-;  231	                    *selected_item = 3;
+	JR	NC,L_97
+;  227	                    *selected_item = 3;
 	LD	HL,(IX+12)
 	LD	(HL),3
-;  232	                    return RETS_SUCCESS;
+;  228	                    return RETS_SUCCESS;
 	LD	A,2
-	JR	L_117
-;  233	                }
-;  234	            case sk_5:
-L_98:
-;  235	                if (source->tabs[*selected_tab]->item_count > 4) {
+	JR	L_116
+;  229	                }
+;  230	            case sk_5:
+L_97:
+;  231	                if (source->tabs[*selected_tab]->item_count > 4) {
 	LD	HL,(IX+9)
 	LD	A,(HL)
 	UEXT	HL
@@ -1197,17 +1193,17 @@ L_98:
 	LD	IY,(HL)
 	LD	A,4
 	CP	A,(IY+3)
-	JR	NC,L_101
-;  236	                    *selected_item = 4;
+	JR	NC,L_100
+;  232	                    *selected_item = 4;
 	LD	HL,(IX+12)
 	LD	(HL),4
-;  237	                    return RETS_SUCCESS;
+;  233	                    return RETS_SUCCESS;
 	LD	A,2
-	JR	L_117
-;  238	                }
-;  239	            case sk_6:
-L_101:
-;  240	                if (source->tabs[*selected_tab]->item_count > 5) {
+	JR	L_116
+;  234	                }
+;  235	            case sk_6:
+L_100:
+;  236	                if (source->tabs[*selected_tab]->item_count > 5) {
 	LD	HL,(IX+9)
 	LD	A,(HL)
 	UEXT	HL
@@ -1222,17 +1218,17 @@ L_101:
 	LD	IY,(HL)
 	LD	A,5
 	CP	A,(IY+3)
-	JR	NC,L_104
-;  241	                    *selected_item = 5;
+	JR	NC,L_103
+;  237	                    *selected_item = 5;
 	LD	HL,(IX+12)
 	LD	(HL),5
-;  242	                    return RETS_SUCCESS;
+;  238	                    return RETS_SUCCESS;
 	LD	A,2
-	JR	L_117
-;  243	                }
-;  244	            case sk_7:
-L_104:
-;  245	                if (source->tabs[*selected_tab]->item_count > 6) {
+	JR	L_116
+;  239	                }
+;  240	            case sk_7:
+L_103:
+;  241	                if (source->tabs[*selected_tab]->item_count > 6) {
 	LD	HL,(IX+9)
 	LD	A,(HL)
 	UEXT	HL
@@ -1247,17 +1243,17 @@ L_104:
 	LD	IY,(HL)
 	LD	A,6
 	CP	A,(IY+3)
-	JR	NC,L_107
-;  246	                    *selected_item = 6;
+	JR	NC,L_106
+;  242	                    *selected_item = 6;
 	LD	HL,(IX+12)
 	LD	(HL),6
-;  247	                    return RETS_SUCCESS;
+;  243	                    return RETS_SUCCESS;
 	LD	A,2
-	JR	L_117
-;  248	                }
-;  249	            case sk_8:
-L_107:
-;  250	                if (source->tabs[*selected_tab]->item_count > 7) {
+	JR	L_116
+;  244	                }
+;  245	            case sk_8:
+L_106:
+;  246	                if (source->tabs[*selected_tab]->item_count > 7) {
 	LD	HL,(IX+9)
 	LD	A,(HL)
 	UEXT	HL
@@ -1272,17 +1268,17 @@ L_107:
 	LD	IY,(HL)
 	LD	A,7
 	CP	A,(IY+3)
-	JR	NC,L_110
-;  251	                    *selected_item = 7;
+	JR	NC,L_109
+;  247	                    *selected_item = 7;
 	LD	HL,(IX+12)
 	LD	(HL),7
-;  252	                    return RETS_SUCCESS;
+;  248	                    return RETS_SUCCESS;
 	LD	A,2
-	JR	L_117
-;  253	                }
-;  254	            case sk_9:
-L_110:
-;  255	                if (source->tabs[*selected_tab]->item_count > 8) {
+	JR	L_116
+;  249	                }
+;  250	            case sk_9:
+L_109:
+;  251	                if (source->tabs[*selected_tab]->item_count > 8) {
 	LD	HL,(IX+9)
 	LD	A,(HL)
 	UEXT	HL
@@ -1297,20 +1293,20 @@ L_110:
 	LD	IY,(HL)
 	LD	A,8
 	CP	A,(IY+3)
-	JR	NC,L_116
-;  256	                    *selected_item = 8;
+	JR	NC,L_115
+;  252	                    *selected_item = 8;
 	LD	HL,(IX+12)
 	LD	(HL),8
-;  257	                    return RETS_SUCCESS;
+;  253	                    return RETS_SUCCESS;
 	LD	A,2
-;  258	                }
-;  259	            default: break;
-;  260	        }
-;  261	        
-;  262	    }
-;  263	    
-;  264	}
-L_117:
+;  254	                }
+;  255	            default: break;
+;  256	        }
+;  257	        
+;  258	    }
+;  259	    
+;  260	}
+L_116:
 	LD	SP,IX
 	POP	IX
 	RET	
@@ -1330,20 +1326,20 @@ L_117:
 ;       Spill Code: 0 (instruction)
 
 
-;  265	
-;  266	char* draw_handle_function_menu(uint8_t tab) {
+;  261	
+;  262	char* draw_handle_function_menu(uint8_t tab) {
 _draw_handle_function_menu:
 	LD	HL,-9
 	CALL	__frameset
-;  267	    
-;  268	    bool running = true;
+;  263	    
+;  264	    bool running = true;
 	LD	(IX+-6),1
-;  269	    uint8_t selected_tab = tab;
+;  265	    uint8_t selected_tab = tab;
 	LD	A,(IX+6)
 	LD	(IX+-5),A
-;  270	    uint8_t selected_item = 0;
+;  266	    uint8_t selected_item = 0;
 	LD	(IX+-4),0
-;  271	    char* result = calloc(10, sizeof(char));
+;  267	    char* result = calloc(10, sizeof(char));
 	LD	BC,1
 	PUSH	BC
 	LD	BC,10
@@ -1352,34 +1348,34 @@ _draw_handle_function_menu:
 	POP	BC
 	POP	BC
 	LD	(IX+-3),HL
-;  272	    
-;  273	    menu* menu_data = new_menu(4,
-;  274	                               new_menu_tab("Algebra", 4,
-;  275	                                            new_menu_item("simplify()", ""),
-;  276	                                            new_menu_item("solve()", ""),
-;  277	                                            new_menu_item("Factors()", ""),
-;  278	                                            new_menu_item("Value()", "")),
-;  279	                               new_menu_tab("Analysis", 5,
-;  280	                                            new_menu_item("Derivative()", ""),
-;  281	                                            new_menu_item("Integral()", ""),
-;  282	                                            new_menu_item("Tangent()", ""),
-;  283	                                            new_menu_item("Normal()", ""),
-;  284	                                            new_menu_item("Angle()", "")),
-;  285	                               new_menu_tab("Vector", 6,
-;  286	                                            new_menu_item("VectorMagnitude()", ""),
-;  287	                                            new_menu_item("VectorNormalized()", ""),
-;  288	                                            new_menu_item("VectorAngle()", ""),
-;  289	                                            new_menu_item("VectorDotProduct()", ""),
-;  290	                                            new_menu_item("VectorCrossProduct()", ""),
-;  291	                                            new_menu_item("VectorTripleProduct()", "")),
-;  292	                               new_menu_tab("Misc", 6,
-;  293	                                            new_menu_item("abs()", ""),
-;  294	                                            new_menu_item("ln()", ""),
-;  295	                                            new_menu_item("log()", ""),
-;  296	                                            new_menu_item("sin(), cos(), tan()", ""),
-;  297	                                            new_menu_item("arcsin(), arccos(), acrtan()", ""),
-;  298	                                            new_menu_item("approximate()", ""),
-;  299	                                            new_menu_item("List()", "")));
+;  268	    
+;  269	    menu* menu_data = new_menu(4,
+;  270	                               new_menu_tab("Algebra", 4,
+;  271	                                            new_menu_item("simplify()", ""),
+;  272	                                            new_menu_item("solve()", ""),
+;  273	                                            new_menu_item("Factors()", ""),
+;  274	                                            new_menu_item("Value()", "")),
+;  275	                               new_menu_tab("Analysis", 5,
+;  276	                                            new_menu_item("Derivative()", ""),
+;  277	                                            new_menu_item("Integral()", ""),
+;  278	                                            new_menu_item("Tangent()", ""),
+;  279	                                            new_menu_item("Normal()", ""),
+;  280	                                            new_menu_item("Angle()", "")),
+;  281	                               new_menu_tab("Vector", 6,
+;  282	                                            new_menu_item("VectorMagnitude()", ""),
+;  283	                                            new_menu_item("VectorNormalized()", ""),
+;  284	                                            new_menu_item("VectorAngle()", ""),
+;  285	                                            new_menu_item("VectorDotProduct()", ""),
+;  286	                                            new_menu_item("VectorCrossProduct()", ""),
+;  287	                                            new_menu_item("VectorTripleProduct()", "")),
+;  288	                               new_menu_tab("Misc", 7,
+;  289	                                            new_menu_item("abs()", ""),
+;  290	                                            new_menu_item("ln()", ""),
+;  291	                                            new_menu_item("log()", ""),
+;  292	                                            new_menu_item("sin(), cos(), tan()", ""),
+;  293	                                            new_menu_item("arcsin(), arccos(), acrtan()", ""),
+;  294	                                            new_menu_item("approximate()", ""),
+;  295	                                            new_menu_item("List()", "")));
 	LD	BC,L__36
 	PUSH	BC
 	LD	BC,L__37
@@ -1436,7 +1432,7 @@ _draw_handle_function_menu:
 	POP	BC
 	POP	BC
 	PUSH	HL
-	LD	BC,6
+	LD	BC,7
 	PUSH	BC
 	LD	BC,L__50
 	PUSH	BC
@@ -1608,8 +1604,8 @@ _draw_handle_function_menu:
 	POP	BC
 	POP	BC
 	LD	(IX+-9),HL
-;  300	    
-;  301	    memset(result, 0, 10);
+;  296	    
+;  297	    memset(result, 0, 10);
 	LD	BC,10
 	PUSH	BC
 	LD	BC,0
@@ -1620,11 +1616,11 @@ _draw_handle_function_menu:
 	POP	BC
 	POP	BC
 	POP	BC
-;  302	    
-;  303	    while (running) {
-	JR	L_151
-L_152:
-;  304	        switch (handle_menu(menu_data, &selected_tab, &selected_item)) {
+;  298	    
+;  299	    while (running) {
+	JR	L_150
+L_151:
+;  300	        switch (handle_menu(menu_data, &selected_tab, &selected_item)) {
 	PEA	IX+-4
 	PEA	IX+-5
 	LD	BC,(IX+-9)
@@ -1640,23 +1636,23 @@ L__84:
 	DW	3
 	DW	1
 	DB	0
+	DW24	L_149	
+
+	DW24	L_117	
+
 	DW24	L_150	
 
-	DW24	L_118	
+	DW24	L_150	
 
-	DW24	L_151	
-
-	DW24	L_151	
-
-;  305	                
-;  306	            case RETS_SUCCESS:
-L_118:
-;  307	                
-;  308	                if (selected_tab == 0) {
+;  301	                
+;  302	            case RETS_SUCCESS:
+L_117:
+;  303	                
+;  304	                if (selected_tab == 0) {
 	LD	A,(IX+-5)
 	OR	A,A
-	JR	NZ,L_147
-;  309	                    switch (selected_item) {
+	JR	NZ,L_146
+;  305	                    switch (selected_item) {
 	LD	A,(IX+-4)
 	UEXT	HL
 	LD	L,A
@@ -1665,18 +1661,18 @@ L__86:
 	DW	4
 	DW	0
 	DB	0
+	DW24	L_118	
+
 	DW24	L_119	
 
 	DW24	L_120	
 
 	DW24	L_121	
 
-	DW24	L_122	
+	DW24	L_147	
 
-	DW24	L_148	
-
-;  310	                        case 0: strcpy(result, "simplify("); break;
-L_119:
+;  306	                        case 0: strcpy(result, "simplify("); break;
+L_118:
 	LD	BC,L__87
 	PUSH	BC
 	LD	BC,(IX+-3)
@@ -1684,9 +1680,9 @@ L_119:
 	CALL	_strcpy
 	POP	BC
 	POP	BC
-	JR	L_148
-;  311	                        case 1: strcpy(result, "solve("); break;
-L_120:
+	JR	L_147
+;  307	                        case 1: strcpy(result, "solve("); break;
+L_119:
 	LD	BC,L__88
 	PUSH	BC
 	LD	BC,(IX+-3)
@@ -1694,9 +1690,9 @@ L_120:
 	CALL	_strcpy
 	POP	BC
 	POP	BC
-	JR	L_148
-;  312	                        case 2: strcpy(result, "Fac("); break;
-L_121:
+	JR	L_147
+;  308	                        case 2: strcpy(result, "Fac("); break;
+L_120:
 	LD	BC,L__89
 	PUSH	BC
 	LD	BC,(IX+-3)
@@ -1704,9 +1700,9 @@ L_121:
 	CALL	_strcpy
 	POP	BC
 	POP	BC
-	JR	L_148
-;  313	                        case 3: strcpy(result, "Val("); break;
-L_122:
+	JR	L_147
+;  309	                        case 3: strcpy(result, "Val("); break;
+L_121:
 	LD	BC,L__90
 	PUSH	BC
 	LD	BC,(IX+-3)
@@ -1714,14 +1710,14 @@ L_122:
 	CALL	_strcpy
 	POP	BC
 	POP	BC
-	JR	L_148
-;  314	                    }
-;  315	                } else if (selected_tab == 1) {
-L_147:
+	JR	L_147
+;  310	                    }
+;  311	                } else if (selected_tab == 1) {
+L_146:
 	LD	A,(IX+-5)
 	CP	A,1
-	JR	NZ,L_145
-;  316	                    switch (selected_item) {
+	JR	NZ,L_144
+;  312	                    switch (selected_item) {
 	LD	A,(IX+-4)
 	UEXT	HL
 	LD	L,A
@@ -1730,6 +1726,8 @@ L__92:
 	DW	5
 	DW	0
 	DB	0
+	DW24	L_122	
+
 	DW24	L_123	
 
 	DW24	L_124	
@@ -1738,12 +1736,10 @@ L__92:
 
 	DW24	L_126	
 
-	DW24	L_127	
+	DW24	L_147	
 
-	DW24	L_148	
-
-;  317	                        case 0: strcpy(result, "Deriv("); break;
-L_123:
+;  313	                        case 0: strcpy(result, "Deriv("); break;
+L_122:
 	LD	BC,L__93
 	PUSH	BC
 	LD	BC,(IX+-3)
@@ -1751,9 +1747,9 @@ L_123:
 	CALL	_strcpy
 	POP	BC
 	POP	BC
-	JR	L_148
-;  318	                        case 1: strcpy(result, "Int("); break;
-L_124:
+	JR	L_147
+;  314	                        case 1: strcpy(result, "Int("); break;
+L_123:
 	LD	BC,L__94
 	PUSH	BC
 	LD	BC,(IX+-3)
@@ -1761,9 +1757,9 @@ L_124:
 	CALL	_strcpy
 	POP	BC
 	POP	BC
-	JR	L_148
-;  319	                        case 2: strcpy(result, "Tang("); break;
-L_125:
+	JR	L_147
+;  315	                        case 2: strcpy(result, "Tang("); break;
+L_124:
 	LD	BC,L__95
 	PUSH	BC
 	LD	BC,(IX+-3)
@@ -1771,9 +1767,9 @@ L_125:
 	CALL	_strcpy
 	POP	BC
 	POP	BC
-	JR	L_148
-;  320	                        case 3: strcpy(result, "Norm("); break;
-L_126:
+	JR	L_147
+;  316	                        case 3: strcpy(result, "Norm("); break;
+L_125:
 	LD	BC,L__96
 	PUSH	BC
 	LD	BC,(IX+-3)
@@ -1781,9 +1777,9 @@ L_126:
 	CALL	_strcpy
 	POP	BC
 	POP	BC
-	JR	L_148
-;  321	                        case 4: strcpy(result, "Ang("); break;
-L_127:
+	JR	L_147
+;  317	                        case 4: strcpy(result, "Ang("); break;
+L_126:
 	LD	BC,L__97
 	PUSH	BC
 	LD	BC,(IX+-3)
@@ -1791,14 +1787,14 @@ L_127:
 	CALL	_strcpy
 	POP	BC
 	POP	BC
-	JR	L_148
-;  322	                    }
-;  323	                } else if (selected_tab == 2) {
-L_145:
+	JR	L_147
+;  318	                    }
+;  319	                } else if (selected_tab == 2) {
+L_144:
 	LD	A,(IX+-5)
 	CP	A,2
-	JR	NZ,L_143
-;  324	                    switch (selected_item) {
+	JR	NZ,L_142
+;  320	                    switch (selected_item) {
 	LD	A,(IX+-4)
 	UEXT	HL
 	LD	L,A
@@ -1807,6 +1803,8 @@ L__99:
 	DW	6
 	DW	0
 	DB	0
+	DW24	L_127	
+
 	DW24	L_128	
 
 	DW24	L_129	
@@ -1817,12 +1815,10 @@ L__99:
 
 	DW24	L_132	
 
-	DW24	L_133	
+	DW24	L_147	
 
-	DW24	L_148	
-
-;  325	                        case 0: strcpy(result, "VMag("); break;
-L_128:
+;  321	                        case 0: strcpy(result, "VMag("); break;
+L_127:
 	LD	BC,L__100
 	PUSH	BC
 	LD	BC,(IX+-3)
@@ -1830,9 +1826,9 @@ L_128:
 	CALL	_strcpy
 	POP	BC
 	POP	BC
-	JR	L_148
-;  326	                        case 1: strcpy(result, "VNormed("); break;
-L_129:
+	JR	L_147
+;  322	                        case 1: strcpy(result, "VNormed("); break;
+L_128:
 	LD	BC,L__101
 	PUSH	BC
 	LD	BC,(IX+-3)
@@ -1840,9 +1836,9 @@ L_129:
 	CALL	_strcpy
 	POP	BC
 	POP	BC
-	JR	L_148
-;  327	                        case 2: strcpy(result, "VAng("); break;
-L_130:
+	JR	L_147
+;  323	                        case 2: strcpy(result, "VAng("); break;
+L_129:
 	LD	BC,L__102
 	PUSH	BC
 	LD	BC,(IX+-3)
@@ -1850,9 +1846,9 @@ L_130:
 	CALL	_strcpy
 	POP	BC
 	POP	BC
-	JR	L_148
-;  328	                        case 3: strcpy(result, "VDotP("); break;
-L_131:
+	JR	L_147
+;  324	                        case 3: strcpy(result, "VDotP("); break;
+L_130:
 	LD	BC,L__103
 	PUSH	BC
 	LD	BC,(IX+-3)
@@ -1860,9 +1856,9 @@ L_131:
 	CALL	_strcpy
 	POP	BC
 	POP	BC
-	JR	L_148
-;  329	                        case 4: strcpy(result, "VCrossP("); break;
-L_132:
+	JR	L_147
+;  325	                        case 4: strcpy(result, "VCrossP("); break;
+L_131:
 	LD	BC,L__104
 	PUSH	BC
 	LD	BC,(IX+-3)
@@ -1870,9 +1866,9 @@ L_132:
 	CALL	_strcpy
 	POP	BC
 	POP	BC
-	JR	L_148
-;  330	                        case 5: strcpy(result, "VTripleP("); break;
-L_133:
+	JR	L_147
+;  326	                        case 5: strcpy(result, "VTripleP("); break;
+L_132:
 	LD	BC,L__105
 	PUSH	BC
 	LD	BC,(IX+-3)
@@ -1880,14 +1876,14 @@ L_133:
 	CALL	_strcpy
 	POP	BC
 	POP	BC
-	JR	L_148
-;  331	                    }
-;  332	                } else if (selected_tab == 3) {
-L_143:
+	JR	L_147
+;  327	                    }
+;  328	                } else if (selected_tab == 3) {
+L_142:
 	LD	A,(IX+-5)
 	CP	A,3
-	JR	NZ,L_148
-;  333	                    switch (selected_item) {
+	JR	NZ,L_147
+;  329	                    switch (selected_item) {
 	LD	A,(IX+-4)
 	UEXT	HL
 	LD	L,A
@@ -1896,6 +1892,8 @@ L__107:
 	DW	7
 	DW	0
 	DB	0
+	DW24	L_133	
+
 	DW24	L_134	
 
 	DW24	L_135	
@@ -1908,12 +1906,10 @@ L__107:
 
 	DW24	L_139	
 
-	DW24	L_140	
+	DW24	L_147	
 
-	DW24	L_148	
-
-;  334	                        case 0: strcpy(result, "abs("); break;
-L_134:
+;  330	                        case 0: strcpy(result, "abs("); break;
+L_133:
 	LD	BC,L__108
 	PUSH	BC
 	LD	BC,(IX+-3)
@@ -1921,9 +1917,9 @@ L_134:
 	CALL	_strcpy
 	POP	BC
 	POP	BC
-	JR	L_148
-;  335	                        case 1: strcpy(result, "ln("); break;
-L_135:
+	JR	L_147
+;  331	                        case 1: strcpy(result, "ln("); break;
+L_134:
 	LD	BC,L__109
 	PUSH	BC
 	LD	BC,(IX+-3)
@@ -1931,9 +1927,9 @@ L_135:
 	CALL	_strcpy
 	POP	BC
 	POP	BC
-	JR	L_148
-;  336	                        case 2: strcpy(result, "log("); break;
-L_136:
+	JR	L_147
+;  332	                        case 2: strcpy(result, "log("); break;
+L_135:
 	LD	BC,L__110
 	PUSH	BC
 	LD	BC,(IX+-3)
@@ -1941,9 +1937,9 @@ L_136:
 	CALL	_strcpy
 	POP	BC
 	POP	BC
-	JR	L_148
-;  337	                        case 3: strcpy(result, "sin("); break;
-L_137:
+	JR	L_147
+;  333	                        case 3: strcpy(result, "sin("); break;
+L_136:
 	LD	BC,L__111
 	PUSH	BC
 	LD	BC,(IX+-3)
@@ -1951,9 +1947,9 @@ L_137:
 	CALL	_strcpy
 	POP	BC
 	POP	BC
-	JR	L_148
-;  338	                        case 4: strcpy(result, "arcsin("); break;
-L_138:
+	JR	L_147
+;  334	                        case 4: strcpy(result, "arcsin("); break;
+L_137:
 	LD	BC,L__112
 	PUSH	BC
 	LD	BC,(IX+-3)
@@ -1961,9 +1957,9 @@ L_138:
 	CALL	_strcpy
 	POP	BC
 	POP	BC
-	JR	L_148
-;  339	                        case 5: strcpy(result, "approx("); break;
-L_139:
+	JR	L_147
+;  335	                        case 5: strcpy(result, "approx("); break;
+L_138:
 	LD	BC,L__113
 	PUSH	BC
 	LD	BC,(IX+-3)
@@ -1971,9 +1967,9 @@ L_139:
 	CALL	_strcpy
 	POP	BC
 	POP	BC
-	JR	L_148
-;  340	                        case 6: strcpy(result, "Ls("); break;
-L_140:
+	JR	L_147
+;  336	                        case 6: strcpy(result, "Ls("); break;
+L_139:
 	LD	BC,L__114
 	PUSH	BC
 	LD	BC,(IX+-3)
@@ -1981,41 +1977,41 @@ L_140:
 	CALL	_strcpy
 	POP	BC
 	POP	BC
-;  341	                    }
-;  342	                }
-L_148:
-;  343	                
-;  344	                running = false;
+;  337	                    }
+;  338	                }
+L_147:
+;  339	                
+;  340	                running = false;
 	LD	(IX+-6),0
-;  345	                break;
-	JR	L_151
-;  346	                
-;  347	            case RETS_CHANGED:
+;  341	                break;
+	JR	L_150
+;  342	                
+;  343	            case RETS_CHANGED:
+;  344	                break;
+;  345	                
+;  346	            case RETS_ERROR:
+L_149:
+;  347	                running = false;
+	LD	(IX+-6),0
 ;  348	                break;
 ;  349	                
-;  350	            case RETS_ERROR:
+;  350	        }
+;  351	    }
 L_150:
-;  351	                running = false;
-	LD	(IX+-6),0
-;  352	                break;
-;  353	                
-;  354	        }
-;  355	    }
-L_151:
 	LD	A,(IX+-6)
 	OR	A,A
-	JR	NZ,L_152
-;  356	    
-;  357	    free_menu(menu_data);
+	JR	NZ,L_151
+;  352	    
+;  353	    free_menu(menu_data);
 	LD	BC,(IX+-9)
 	PUSH	BC
 	CALL	_free_menu
 	POP	BC
-;  358	    
-;  359	    return result;
+;  354	    
+;  355	    return result;
 	LD	HL,(IX+-3)
-;  360	    
-;  361	}
+;  356	    
+;  357	}
 	LD	SP,IX
 	POP	IX
 	RET	
@@ -2233,28 +2229,28 @@ L__114:
 	DB	"Ls("
 	DB	0
 	SEGMENT CODE
-;  362	
-;  363	char* draw_handle_history_menu(history* last_queries, uint8_t tab) {
+;  358	
+;  359	char* draw_handle_history_menu(history* last_queries, uint8_t tab) {
 _draw_handle_history_menu:
 	LD	HL,-11
 	CALL	__frameset
-;  364	    
-;  365	    uint8_t i;
-;  366	    uint8_t selected_tab = tab;
+;  360	    
+;  361	    uint8_t i;
+;  362	    uint8_t selected_tab = tab;
 	LD	A,(IX+9)
 	LD	(IX+-11),A
-;  367	    uint8_t selected_item = 0;
+;  363	    uint8_t selected_item = 0;
 	LD	(IX+-2),0
-;  368	    char* result = NULL;
+;  364	    char* result = NULL;
 	LD	BC,0
 	LD	(IX+-5),BC
-;  369	    
-;  370	    bool running = true;
+;  365	    
+;  366	    bool running = true;
 	LD	(IX+-9),1
-;  371	    
-;  372	    menu* menu_data = new_menu(2,
-;  373	                               new_menu_tab("Queries", 0),
-;  374	                               new_menu_tab("Results", 0));
+;  367	    
+;  368	    menu* menu_data = new_menu(2,
+;  369	                               new_menu_tab("Queries", 0),
+;  370	                               new_menu_tab("Results", 0));
 	PUSH	BC
 	LD	BC,L__117
 	PUSH	BC
@@ -2277,12 +2273,12 @@ _draw_handle_history_menu:
 	POP	BC
 	POP	BC
 	LD	(IX+-8),HL
-;  375	    
-;  376	    for (i = 0; i < last_queries->item_count; i++) {
+;  371	    
+;  372	    for (i = 0; i < last_queries->item_count; i++) {
 	LD	(IX+-1),0
-	JR	L_158
-L_156:
-;  377	        menu_data->tabs[0]->items[i] = new_menu_item(last_queries->items[i]->input, "");
+	JR	L_157
+L_155:
+;  373	        menu_data->tabs[0]->items[i] = new_menu_item(last_queries->items[i]->input, "");
 	LD	BC,L__119
 	PUSH	BC
 	LD	A,(IX+-1)
@@ -2313,7 +2309,7 @@ L_156:
 	LD	DE,HL
 	LEA	HL,IY+4
 	ADD	HL,DE
-;  378	        menu_data->tabs[1]->items[i] = new_menu_item(last_queries->items[i]->output, "");
+;  374	        menu_data->tabs[1]->items[i] = new_menu_item(last_queries->items[i]->output, "");
 	LD	DE,L__120
 	PUSH	DE
 	LD	(HL),BC
@@ -2348,32 +2344,32 @@ L_156:
 	ADD	HL,DE
 	LD	(HL),BC
 	INC	(IX+-1)
-;  379	    }
-L_158:
+;  375	    }
+L_157:
 	LD	IY,(IX+6)
 	LD	A,(IY+0)
 	LD	(IX+-10),A
 	LD	A,(IX+-1)
 	CP	A,(IX+-10)
-	JR	C,L_156
-;  380	    
-;  381	    menu_data->tabs[0]->item_count = last_queries->item_count;
+	JR	C,L_155
+;  376	    
+;  377	    menu_data->tabs[0]->item_count = last_queries->item_count;
 	LD	IY,(IX+-8)
 	LD	IY,(IY+1)
 	LD	A,(IX+-10)
 	LD	(IY+3),A
-;  382	    menu_data->tabs[1]->item_count = last_queries->item_count;
+;  378	    menu_data->tabs[1]->item_count = last_queries->item_count;
 	LD	IY,(IX+-8)
 	LEA	HL,IY+4
 	LD	IY,(IX+6)
 	LD	A,(IY+0)
 	LD	IY,(HL)
 	LD	(IY+3),A
-;  383	    
-;  384	    while (running) {
-	JR	L_166
-L_167:
-;  385	        switch (handle_menu(menu_data, &selected_tab, &selected_item)) {
+;  379	    
+;  380	    while (running) {
+	JR	L_165
+L_166:
+;  381	        switch (handle_menu(menu_data, &selected_tab, &selected_item)) {
 	PEA	IX+-2
 	PEA	IX+-11
 	LD	BC,(IX+-8)
@@ -2389,22 +2385,22 @@ L__122:
 	DW	3
 	DW	1
 	DB	0
-	DW24	L_164	
+	DW24	L_163	
 
-	DW24	L_160	
+	DW24	L_159	
 
-	DW24	L_166	
+	DW24	L_165	
 
-	DW24	L_166	
+	DW24	L_165	
 
-;  386	                
-;  387	            case RETS_SUCCESS:
-L_160:
-;  388	                if (selected_tab == 0) {
+;  382	                
+;  383	            case RETS_SUCCESS:
+L_159:
+;  384	                if (selected_tab == 0) {
 	LD	A,(IX+-11)
 	OR	A,A
-	JR	NZ,L_162
-;  389	                    result = calloc(strlen(last_queries->items[selected_item]->input) + 1, sizeof(char));
+	JR	NZ,L_161
+;  385	                    result = calloc(strlen(last_queries->items[selected_item]->input) + 1, sizeof(char));
 	LD	BC,1
 	PUSH	BC
 	LD	A,(IX+-2)
@@ -2428,7 +2424,7 @@ L_160:
 	POP	BC
 	POP	BC
 	LD	(IX+-5),HL
-;  390	                    memset(result, 0, strlen(last_queries->items[selected_item]->input) + 1);
+;  386	                    memset(result, 0, strlen(last_queries->items[selected_item]->input) + 1);
 	LD	A,(IX+-2)
 	LD	IY,(IX+6)
 	UEXT	HL
@@ -2454,7 +2450,7 @@ L_160:
 	POP	BC
 	POP	BC
 	POP	BC
-;  391	                    strcpy(result, last_queries->items[selected_item]->input);
+;  387	                    strcpy(result, last_queries->items[selected_item]->input);
 	LD	A,(IX+-2)
 	LD	IY,(IX+6)
 	UEXT	HL
@@ -2473,88 +2469,88 @@ L_160:
 	CALL	_strcpy
 	POP	BC
 	POP	BC
-;  392	                } else {
-	JR	L_163
+;  388	                } else {
+	JR	L_162
+L_161:
+;  389	                    result = calloc(strlen(last_queries->items[selected_item]->output) + 1, sizeof(char));
+	LD	BC,1
+	PUSH	BC
+	LD	A,(IX+-2)
+	LD	IY,(IX+6)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LEA	HL,IY+1
+	ADD	HL,BC
+	LD	IY,(HL)
+	LD	BC,(IY+3)
+	PUSH	BC
+	CALL	_strlen
+	POP	BC
+	INC	HL
+	PUSH	HL
+	CALL	_calloc
+	POP	BC
+	POP	BC
+	LD	(IX+-5),HL
+;  390	                    memset(result, 0, strlen(last_queries->items[selected_item]->output) + 1);
+	LD	A,(IX+-2)
+	LD	IY,(IX+6)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LEA	HL,IY+1
+	ADD	HL,BC
+	LD	IY,(HL)
+	LD	BC,(IY+3)
+	PUSH	BC
+	CALL	_strlen
+	POP	BC
+	INC	HL
+	PUSH	HL
+	LD	BC,0
+	PUSH	BC
+	LD	BC,(IX+-5)
+	PUSH	BC
+	CALL	_memset
+	POP	BC
+	POP	BC
+	POP	BC
+;  391	                    strcpy(result, last_queries->items[selected_item]->output);
+	LD	A,(IX+-2)
+	LD	IY,(IX+6)
+	UEXT	HL
+	LD	L,A
+	LD	BC,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	LD	BC,HL
+	LEA	HL,IY+1
+	ADD	HL,BC
+	LD	IY,(HL)
+	LD	BC,(IY+3)
+	PUSH	BC
+	LD	BC,(IX+-5)
+	PUSH	BC
+	CALL	_strcpy
+	POP	BC
+	POP	BC
+;  392	                }
 L_162:
-;  393	                    result = calloc(strlen(last_queries->items[selected_item]->output) + 1, sizeof(char));
-	LD	BC,1
-	PUSH	BC
-	LD	A,(IX+-2)
-	LD	IY,(IX+6)
-	UEXT	HL
-	LD	L,A
-	LD	BC,HL
-	ADD	HL,HL
-	ADD	HL,BC
-	LD	BC,HL
-	LEA	HL,IY+1
-	ADD	HL,BC
-	LD	IY,(HL)
-	LD	BC,(IY+3)
-	PUSH	BC
-	CALL	_strlen
-	POP	BC
-	INC	HL
-	PUSH	HL
-	CALL	_calloc
-	POP	BC
-	POP	BC
-	LD	(IX+-5),HL
-;  394	                    memset(result, 0, strlen(last_queries->items[selected_item]->output) + 1);
-	LD	A,(IX+-2)
-	LD	IY,(IX+6)
-	UEXT	HL
-	LD	L,A
-	LD	BC,HL
-	ADD	HL,HL
-	ADD	HL,BC
-	LD	BC,HL
-	LEA	HL,IY+1
-	ADD	HL,BC
-	LD	IY,(HL)
-	LD	BC,(IY+3)
-	PUSH	BC
-	CALL	_strlen
-	POP	BC
-	INC	HL
-	PUSH	HL
-	LD	BC,0
-	PUSH	BC
-	LD	BC,(IX+-5)
-	PUSH	BC
-	CALL	_memset
-	POP	BC
-	POP	BC
-	POP	BC
-;  395	                    strcpy(result, last_queries->items[selected_item]->output);
-	LD	A,(IX+-2)
-	LD	IY,(IX+6)
-	UEXT	HL
-	LD	L,A
-	LD	BC,HL
-	ADD	HL,HL
-	ADD	HL,BC
-	LD	BC,HL
-	LEA	HL,IY+1
-	ADD	HL,BC
-	LD	IY,(HL)
-	LD	BC,(IY+3)
-	PUSH	BC
-	LD	BC,(IX+-5)
-	PUSH	BC
-	CALL	_strcpy
-	POP	BC
-	POP	BC
-;  396	                }
-L_163:
-;  397	                running = false;
+;  393	                running = false;
 	LD	(IX+-9),0
-;  398	                break;
-	JR	L_166
-;  399	                
-;  400	            case RETS_ERROR:
-L_164:
-;  401	                result = calloc(1, sizeof(char));
+;  394	                break;
+	JR	L_165
+;  395	                
+;  396	            case RETS_ERROR:
+L_163:
+;  397	                result = calloc(1, sizeof(char));
 	LD	BC,1
 	PUSH	BC
 	PUSH	BC
@@ -2562,7 +2558,7 @@ L_164:
 	POP	BC
 	POP	BC
 	LD	(IX+-5),HL
-;  402	                strcpy(result, "");
+;  398	                strcpy(result, "");
 	LD	BC,L__124
 	PUSH	BC
 	LD	BC,(IX+-5)
@@ -2570,30 +2566,30 @@ L_164:
 	CALL	_strcpy
 	POP	BC
 	POP	BC
-;  403	                running = false;
+;  399	                running = false;
 	LD	(IX+-9),0
-;  404	                break;
-;  405	                
-;  406	            case RETS_CHANGED:
-;  407	                break;
-;  408	                
-;  409	        }
-;  410	    }
-L_166:
+;  400	                break;
+;  401	                
+;  402	            case RETS_CHANGED:
+;  403	                break;
+;  404	                
+;  405	        }
+;  406	    }
+L_165:
 	LD	A,(IX+-9)
 	OR	A,A
-	JR	NZ,L_167
-;  411	    
-;  412	    free_menu(menu_data);
+	JR	NZ,L_166
+;  407	    
+;  408	    free_menu(menu_data);
 	LD	BC,(IX+-8)
 	PUSH	BC
 	CALL	_free_menu
 	POP	BC
-;  413	    
-;  414	    return result;
+;  409	    
+;  410	    return result;
 	LD	HL,(IX+-5)
-;  415	    
-;  416	}
+;  411	    
+;  412	}
 	LD	SP,IX
 	POP	IX
 	RET	
@@ -2639,49 +2635,48 @@ L__120:
 L__124:
 	DB	0
 	SEGMENT CODE
-;  417	
-;  418	void draw_handle_mode_menu(void) {
+;  413	
+;  414	void draw_handle_mode_menu(void) {
 _draw_handle_mode_menu:
 	LD	HL,-24
 	CALL	__frameset
-;  419	    
-;  420	    uint8_t selected_tab = 0;
+;  415	    
+;  416	    uint8_t selected_tab = 0;
 	LD	(IX+-1),0
-;  421	    uint8_t selected_item = 0;
+;  417	    uint8_t selected_item = 0;
 	LD	(IX+-2),0
-;  422	    
-;  423	    bool running = true;
+;  418	    
+;  419	    bool running = true;
 	LD	(IX+-3),1
-;  424	    
-;  425	    menu* menu_data = new_menu(2,
-;  426	                               new_menu_tab("About & Help", 2,
-;  427	                                            new_menu_item("About", ""),
-;  428	                                            new_menu_item("Terms", "")),
-;  429	                               new_menu_tab("Settings", 3,
-;  430	                                            new_menu_item("Dark Mode", (dark_mode) ? "Enabled" : "Disabled"),
+;  420	    
+;  421	    menu* menu_data = new_menu(2,
+;  422	                               new_menu_tab("About & Help", 2,
+;  423	                                            new_menu_item("About", ""),
+;  424	                                            new_menu_item("Terms", "")),
+;  425	                               new_menu_tab("Settings", 3,
+;  426	                                            new_menu_item("Dark Mode", (dark_mode) ? "Enabled" : "Disabled"),
 	LD	A,(_dark_mode)
 	OR	A,A
-	JR	Z,L_172
+	JR	Z,L_171
 	LD	BC,L__128
 	LD	(IX+-15),BC
-	JR	L_173
-L_172:
+	JR	L_172
+L_171:
 	LD	BC,L__129
 	LD	(IX+-15),BC
-L_173:
-;  431	                                            /* new_menu_item("Sleep Timer", (sleep_timer) ? "Enabled" : "Disabled"), */
-;  432	                                            new_menu_item("Use Spaces", (use_spaces) ? "Enabled" : "Disabled"),
+L_172:
+;  427	                                            new_menu_item("Use Spaces", (use_spaces) ? "Enabled" : "Disabled"),
 	LD	A,(_use_spaces)
 	OR	A,A
-	JR	Z,L_176
+	JR	Z,L_175
 	LD	BC,L__131
 	LD	(IX+-18),BC
-	JR	L_177
-L_176:
+	JR	L_176
+L_175:
 	LD	BC,L__132
 	LD	(IX+-18),BC
-L_177:
-;  433	                                            new_menu_item("Reset", "")));
+L_176:
+;  428	                                            new_menu_item("Reset", "")));
 	LD	BC,L__133
 	PUSH	BC
 	LD	BC,L__134
@@ -2750,11 +2745,11 @@ L_177:
 	POP	BC
 	POP	BC
 	LD	(IX+-6),HL
-;  434	    
-;  435	    while (running) {
-	JR	L_206
-L_207:
-;  436	        switch (handle_menu(menu_data, &selected_tab, &selected_item)) {
+;  429	    
+;  430	    while (running) {
+	JR	L_205
+L_206:
+;  431	        switch (handle_menu(menu_data, &selected_tab, &selected_item)) {
 	PEA	IX+-2
 	PEA	IX+-1
 	LD	BC,(IX+-6)
@@ -2770,23 +2765,23 @@ L__143:
 	DW	3
 	DW	1
 	DB	0
-	DW24	L_204	
+	DW24	L_203	
 
-	DW24	L_178	
+	DW24	L_177	
 
-	DW24	L_206	
+	DW24	L_205	
 
-	DW24	L_206	
+	DW24	L_205	
 
-;  437	                
-;  438	            case RETS_SUCCESS:
-L_178:
-;  439	                
-;  440	                if (selected_tab == 0) {
+;  432	                
+;  433	            case RETS_SUCCESS:
+L_177:
+;  434	                
+;  435	                if (selected_tab == 0) {
 	LD	A,(IX+-1)
 	OR	A,A
-	JR	NZ,L_202
-;  441	                    switch (selected_item) {
+	JR	NZ,L_201
+;  436	                    switch (selected_item) {
 	LD	A,(IX+-2)
 	UEXT	HL
 	LD	L,A
@@ -2794,28 +2789,28 @@ L_178:
 L__145:
 	DW	2
 	DB	0
-	DW24	L_179	
+	DW24	L_178	
 
 	DB	1
-	DW24	L_180	
+	DW24	L_179	
 
-	DW24	L_206	
+	DW24	L_205	
 
-;  442	                        case 0: about(); break;
-L_179:
+;  437	                        case 0: about(); break;
+L_178:
 	CALL	_about
-	JR	L_206
-;  443	                        case 1: about_terms(); break;
-L_180:
+	JR	L_205
+;  438	                        case 1: about_terms(); break;
+L_179:
 	CALL	_about_terms
-	JR	L_206
-;  444	                    }
-;  445	                } else if (selected_tab == 1) {
-L_202:
+	JR	L_205
+;  439	                    }
+;  440	                } else if (selected_tab == 1) {
+L_201:
 	LD	A,(IX+-1)
 	CP	A,1
-	JR	NZ,L_206
-;  446	                    switch (selected_item) {
+	JR	NZ,L_205
+;  441	                    switch (selected_item) {
 	LD	A,(IX+-2)
 	UEXT	HL
 	LD	L,A
@@ -2824,29 +2819,29 @@ L__147:
 	DW	3
 	DW	0
 	DB	0
-	DW24	L_181	
+	DW24	L_180	
 
-	DW24	L_190	
+	DW24	L_189	
 
-	DW24	L_199	
+	DW24	L_198	
 
-	DW24	L_206	
+	DW24	L_205	
 
-;  447	                        case 0:
-L_181:
-;  448	                            dark_mode = !dark_mode;
+;  442	                        case 0:
+L_180:
+;  443	                            dark_mode = !dark_mode;
 	LD	A,(_dark_mode)
 	OR	A,A
-	JR	NZ,L_183
+	JR	NZ,L_182
 	LD	BC,1
 	LD	(IX+-21),BC
-	JR	L_184
-L_183:
+	JR	L_183
+L_182:
 	LD	BC,0
 	LD	(IX+-21),BC
-L_184:
+L_183:
 	LD	A,(IX+-21)
-;  449	                            set_setting(0, dark_mode);
+;  444	                            set_setting(0, dark_mode);
 	LD	C,A
 	LD	B,0
 	PUSH	BC
@@ -2856,117 +2851,110 @@ L_184:
 	CALL	_set_setting
 	POP	BC
 	POP	BC
-;  450	                            menu_data->tabs[1]->items[0]->indicator = (dark_mode) ? "Enabled" : "Disabled";
+;  445	                            menu_data->tabs[1]->items[0]->indicator = (dark_mode) ? "Enabled" : "Disabled";
 	LD	A,(_dark_mode)
 	OR	A,A
-	JR	Z,L_188
+	JR	Z,L_187
 	LD	BC,L__150
 	LD	(IX+-24),BC
-	JR	L_189
-L_188:
+	JR	L_188
+L_187:
 	LD	BC,L__151
 	LD	(IX+-24),BC
-L_189:
+L_188:
 	LD	IY,(IX+-6)
 	LD	IY,(IY+4)
 	LD	IY,(IY+4)
 	LD	BC,(IX+-24)
 	LD	(IY+3),BC
-;  451	                            break;
-	JR	L_206
-;  452	                        /* case 1:
-;  453	                            sleep_timer = !sleep_timer;
-;  454	                            set_setting(1, sleep_timer);
-;  455	                            menu_data->tabs[1]->items[1]->indicator = (sleep_timer) ? "Enabled" : "Disabled";
-;  456	                            break; */
-;  457	                        case 1:
-L_190:
-;  458	                            use_spaces = !use_spaces;
+;  446	                            break;
+	JR	L_205
+;  447	                        case 1:
+L_189:
+;  448	                            use_spaces = !use_spaces;
 	LD	A,(_use_spaces)
 	OR	A,A
-	JR	NZ,L_192
+	JR	NZ,L_191
 	LD	BC,1
 	LD	(IX+-9),BC
-	JR	L_193
-L_192:
+	JR	L_192
+L_191:
 	LD	BC,0
 	LD	(IX+-9),BC
-L_193:
+L_192:
 	LD	A,(IX+-9)
-;  459	                            set_setting(2, use_spaces);
+;  449	                            set_setting(1, use_spaces);
 	LD	C,A
 	LD	B,0
 	PUSH	BC
-	LD	BC,2
+	LD	BC,1
 	PUSH	BC
 	LD	(_use_spaces),A
 	CALL	_set_setting
 	POP	BC
 	POP	BC
-;  460	                            menu_data->tabs[1]->items[1]->indicator = (use_spaces) ? "Enabled" : "Disabled";
+;  450	                            menu_data->tabs[1]->items[1]->indicator = (use_spaces) ? "Enabled" : "Disabled";
 	LD	A,(_use_spaces)
 	OR	A,A
-	JR	Z,L_197
+	JR	Z,L_196
 	LD	BC,L__154
 	LD	(IX+-12),BC
-	JR	L_198
-L_197:
+	JR	L_197
+L_196:
 	LD	BC,L__155
 	LD	(IX+-12),BC
-L_198:
+L_197:
 	LD	IY,(IX+-6)
 	LD	IY,(IY+4)
 	LD	IY,(IY+7)
 	LD	BC,(IX+-12)
 	LD	(IY+3),BC
-;  461	                            break;
-	JR	L_206
-;  462	                        case 2:
-L_199:
-;  463	                            ti_Delete("C3_SET");
+;  451	                            break;
+	JR	L_205
+;  452	                        case 2:
+L_198:
+;  453	                            ti_Delete("C3_SET");
 	LD	BC,L__156
 	PUSH	BC
 	CALL	_ti_Delete
 	POP	BC
-;  464	                            ti_Delete("C3_HIST");
+;  454	                            ti_Delete("C3_HIST");
 	LD	BC,L__157
 	PUSH	BC
 	CALL	_ti_Delete
 	POP	BC
-;  465	                            running = false;
+;  455	                            running = false;
 	LD	(IX+-3),0
-;  466	                            break;
-	JR	L_206
-;  467	                    }
-;  468	                }
-;  469	                
-;  470	                break;
-;  471	                
-;  472	            case RETS_ERROR:
-L_204:
-;  473	                running = false;
+;  456	                            break;
+	JR	L_205
+;  457	                    }
+;  458	                }
+;  459	                
+;  460	                break;
+;  461	                
+;  462	            case RETS_ERROR:
+L_203:
+;  463	                running = false;
 	LD	(IX+-3),0
-;  474	                break;
-;  475	                
-;  476	            case RETS_CHANGED:
-;  477	                break;
-;  478	                
-;  479	        }
-;  480	    }
-L_206:
+;  464	                break;
+;  465	                
+;  466	            case RETS_CHANGED:
+;  467	                break;
+;  468	                
+;  469	        }
+;  470	    }
+L_205:
 	LD	A,(IX+-3)
 	OR	A,A
-	JR	NZ,L_207
-;  481	    
-;  482	    free_menu(menu_data);
+	JR	NZ,L_206
+;  471	    
+;  472	    free_menu(menu_data);
 	LD	BC,(IX+-6)
 	PUSH	BC
 	CALL	_free_menu
 	POP	BC
-;  483	    
-;  484	    return;
-;  485	    
-;  486	}
+;  473	    
+;  474	}
 	LD	SP,IX
 	POP	IX
 	RET	
@@ -2985,12 +2973,12 @@ L_206:
 ;_new_menu                           IMPORT  -----   function
 ;_use_spaces                         IMPORT      1   variable
 ;_dark_mode                          IMPORT      1   variable
-;temp186                              IX-24      3   variable
-;temp185                              IX-21      3   variable
-;temp174                              IX-18      3   variable
-;temp170                              IX-15      3   variable
-;temp195                              IX-12      3   variable
-;temp194                               IX-9      3   variable
+;temp185                              IX-24      3   variable
+;temp184                              IX-21      3   variable
+;temp173                              IX-18      3   variable
+;temp169                              IX-15      3   variable
+;temp194                              IX-12      3   variable
+;temp193                               IX-9      3   variable
 ;menu_data                             IX-6      3   variable
 ;running                               IX-3      1   variable
 ;selected_item                         IX-2      1   variable

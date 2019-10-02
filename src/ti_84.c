@@ -24,8 +24,6 @@
 
 #include "includes.h"
 
-bool sleep_timer = false;
-
 sk_key_t wait_for_any_keydown(void) {
     sk_key_t key;
     while (!(key = os_GetCSC()));
@@ -34,12 +32,10 @@ sk_key_t wait_for_any_keydown(void) {
 
 void wait_for_keydown(sk_key_t key) {
     while (os_GetCSC() != key);
-    return;
 }
 
 void wait_for_any_key_release(void) {
     while (os_GetCSC());
-    return;
 }
 
 sk_key_t wait_for_any_keyup(void) {
@@ -52,7 +48,6 @@ sk_key_t wait_for_any_keyup(void) {
 void wait_for_keyup(sk_key_t key) {
     while (os_GetCSC() != key);
     wait_for_any_key_release();
-    return;
 }
 
 void set_setting(uint8_t position, bool value) {
@@ -77,8 +72,6 @@ void set_setting(uint8_t position, bool value) {
     gfx_Begin();
     gfx_init();
     ti_CloseAll();
-    
-    return;
     
 }
 

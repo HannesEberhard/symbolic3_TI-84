@@ -3,9 +3,7 @@
 ; -localcse -const=ROM 
 	FILE	"SRC\TI_84.C"
 	.assume ADL=1
-	SEGMENT DATA
-_sleep_timer:
-	DB	0
+	SEGMENT CODE
 ;    1	/*
 ;    2	 
 ;    3	 Copyright (c) 2019 Hannes Eberhard
@@ -32,23 +30,20 @@ _sleep_timer:
 ;   24	
 ;   25	#include "includes.h"
 ;   26	
-;   27	bool sleep_timer = false;
-	SEGMENT CODE
-;   28	
-;   29	sk_key_t wait_for_any_keydown(void) {
+;   27	sk_key_t wait_for_any_keydown(void) {
 _wait_for_any_keydown:
 	LD	HL,-1
 	CALL	__frameset
-;   30	    sk_key_t key;
-;   31	    while (!(key = os_GetCSC()));
+;   28	    sk_key_t key;
+;   29	    while (!(key = os_GetCSC()));
 L_1:
 	CALL	_os_GetCSC
 	LD	(IX+-1),A
 	OR	A,A
 	JR	Z,L_1
-;   32	    return key;
+;   30	    return key;
 	LD	A,(IX+-1)
-;   33	}
+;   31	}
 	LD	SP,IX
 	POP	IX
 	RET	
@@ -64,19 +59,18 @@ L_1:
 ;       Spill Code: 0 (instruction)
 
 
-;   34	
-;   35	void wait_for_keydown(sk_key_t key) {
+;   32	
+;   33	void wait_for_keydown(sk_key_t key) {
 _wait_for_keydown:
 	CALL	__frameset0
-;   36	    while (os_GetCSC() != key);
+;   34	    while (os_GetCSC() != key);
 L_5:
 	CALL	_os_GetCSC
 	LD	B,A
 	LD	A,(IX+6)
 	CP	A,B
 	JR	NZ,L_5
-;   37	    return;
-;   38	}
+;   35	}
 	LD	SP,IX
 	POP	IX
 	RET	
@@ -92,16 +86,15 @@ L_5:
 ;       Spill Code: 0 (instruction)
 
 
-;   39	
-;   40	void wait_for_any_key_release(void) {
+;   36	
+;   37	void wait_for_any_key_release(void) {
 _wait_for_any_key_release:
-;   41	    while (os_GetCSC());
-L_9:
+;   38	    while (os_GetCSC());
+L_8:
 	CALL	_os_GetCSC
 	OR	A,A
-	JR	NZ,L_9
-;   42	    return;
-;   43	}
+	JR	NZ,L_8
+;   39	}
 	RET	
 
 
@@ -114,23 +107,23 @@ L_9:
 ;       Spill Code: 0 (instruction)
 
 
-;   44	
-;   45	sk_key_t wait_for_any_keyup(void) {
+;   40	
+;   41	sk_key_t wait_for_any_keyup(void) {
 _wait_for_any_keyup:
 	LD	HL,-1
 	CALL	__frameset
-;   46	    sk_key_t key;
-;   47	    while (!(key = os_GetCSC()));
-L_13:
+;   42	    sk_key_t key;
+;   43	    while (!(key = os_GetCSC()));
+L_11:
 	CALL	_os_GetCSC
 	LD	(IX+-1),A
 	OR	A,A
-	JR	Z,L_13
-;   48	    wait_for_any_key_release();
+	JR	Z,L_11
+;   44	    wait_for_any_key_release();
 	CALL	_wait_for_any_key_release
-;   49	    return key;
+;   45	    return key;
 	LD	A,(IX+-1)
-;   50	}
+;   46	}
 	LD	SP,IX
 	POP	IX
 	RET	
@@ -147,21 +140,20 @@ L_13:
 ;       Spill Code: 0 (instruction)
 
 
-;   51	
-;   52	void wait_for_keyup(sk_key_t key) {
+;   47	
+;   48	void wait_for_keyup(sk_key_t key) {
 _wait_for_keyup:
 	CALL	__frameset0
-;   53	    while (os_GetCSC() != key);
-L_17:
+;   49	    while (os_GetCSC() != key);
+L_15:
 	CALL	_os_GetCSC
 	LD	B,A
 	LD	A,(IX+6)
 	CP	A,B
-	JR	NZ,L_17
-;   54	    wait_for_any_key_release();
+	JR	NZ,L_15
+;   50	    wait_for_any_key_release();
 	CALL	_wait_for_any_key_release
-;   55	    return;
-;   56	}
+;   51	}
 	LD	SP,IX
 	POP	IX
 	RET	
@@ -178,33 +170,33 @@ L_17:
 ;       Spill Code: 0 (instruction)
 
 
-;   57	
-;   58	void set_setting(uint8_t position, bool value) {
+;   52	
+;   53	void set_setting(uint8_t position, bool value) {
 _set_setting:
 	LD	HL,-6
 	CALL	__frameset
-;   59	    
-;   60	    ti_var_t var;
-;   61	    settings data;
-;   62	    
-;   63	    uint8_t bit = (value) ? 1 : 0;
+;   54	    
+;   55	    ti_var_t var;
+;   56	    settings data;
+;   57	    
+;   58	    uint8_t bit = (value) ? 1 : 0;
 	LD	A,(IX+9)
 	OR	A,A
-	JR	Z,L_22
+	JR	Z,L_20
 	LD	BC,1
 	LD	(IX+-6),BC
-	JR	L_23
-L_22:
+	JR	L_21
+L_20:
 	LD	BC,0
 	LD	(IX+-6),BC
-L_23:
+L_21:
 	LD	A,(IX+-6)
 	LD	(IX+-3),A
-;   64	    
-;   65	    ti_CloseAll();
+;   59	    
+;   60	    ti_CloseAll();
 	CALL	_ti_CloseAll
-;   66	    
-;   67	    var = ti_Open("C3_SET", "r");
+;   61	    
+;   62	    var = ti_Open("C3_SET", "r");
 	LD	BC,L__11
 	PUSH	BC
 	LD	BC,L__12
@@ -213,7 +205,7 @@ L_23:
 	POP	BC
 	POP	BC
 	LD	(IX+-1),A
-;   68	    ti_Read(&data, sizeof(settings), 1, var);
+;   63	    ti_Read(&data, sizeof(settings), 1, var);
 	LD	C,(IX+-1)
 	LD	B,0
 	PUSH	BC
@@ -226,10 +218,10 @@ L_23:
 	POP	BC
 	POP	BC
 	POP	BC
-;   69	    ti_CloseAll();
+;   64	    ti_CloseAll();
 	CALL	_ti_CloseAll
-;   70	    
-;   71	    data.data = (data.data & ~(1 << position)) | (bit << position);
+;   65	    
+;   66	    data.data = (data.data & ~(1 << position)) | (bit << position);
 	LD	A,1
 	LD	B,(IX+6)
 	CALL	__bshl
@@ -245,8 +237,8 @@ L_23:
 	LD	A,D
 	OR	A,B
 	LD	(IX+-2),A
-;   72	    
-;   73	    var = ti_Open("C3_SET", "w");
+;   67	    
+;   68	    var = ti_Open("C3_SET", "w");
 	LD	BC,L__13
 	PUSH	BC
 	LD	BC,L__14
@@ -255,7 +247,7 @@ L_23:
 	POP	BC
 	POP	BC
 	LD	(IX+-1),A
-;   74	    ti_Write(&data, sizeof(settings), 1, var);
+;   69	    ti_Write(&data, sizeof(settings), 1, var);
 	LD	C,(IX+-1)
 	LD	B,0
 	PUSH	BC
@@ -268,9 +260,9 @@ L_23:
 	POP	BC
 	POP	BC
 	POP	BC
-;   75	    gfx_End();
+;   70	    gfx_End();
 	CALL	_gfx_End
-;   76	    ti_SetArchiveStatus(true, var);
+;   71	    ti_SetArchiveStatus(true, var);
 	LD	C,(IX+-1)
 	LD	B,0
 	PUSH	BC
@@ -279,16 +271,14 @@ L_23:
 	CALL	_ti_SetArchiveStatus
 	POP	BC
 	POP	BC
-;   77	    gfx_Begin();
+;   72	    gfx_Begin();
 	CALL	_gfx_Begin
-;   78	    gfx_init();
+;   73	    gfx_init();
 	CALL	_gfx_init
-;   79	    ti_CloseAll();
+;   74	    ti_CloseAll();
 	CALL	_ti_CloseAll
-;   80	    
-;   81	    return;
-;   82	    
-;   83	}
+;   75	    
+;   76	}
 	LD	SP,IX
 	POP	IX
 	RET	
@@ -304,7 +294,7 @@ L_23:
 ;_ti_Read                            IMPORT  -----   function
 ;_ti_Open                            IMPORT  -----   function
 ;_ti_CloseAll                        IMPORT  -----   function
-;temp20                                IX-6      3   variable
+;temp18                                IX-6      3   variable
 ;bit                                   IX-3      1   variable
 ;data                                  IX-2      1   variable
 ;var                                   IX-1      1   variable
@@ -330,16 +320,16 @@ L__14:
 	DB	"C3_SET"
 	DB	0
 	SEGMENT CODE
-;   84	
-;   85	bool get_setting(uint8_t position) {
+;   77	
+;   78	bool get_setting(uint8_t position) {
 _get_setting:
 	LD	HL,-2
 	CALL	__frameset
-;   86	    
-;   87	    ti_var_t var;
-;   88	    settings data;
-;   89	    
-;   90	    var = ti_Open("C3_SET", "r");
+;   79	    
+;   80	    ti_var_t var;
+;   81	    settings data;
+;   82	    
+;   83	    var = ti_Open("C3_SET", "r");
 	LD	BC,L__16
 	PUSH	BC
 	LD	BC,L__17
@@ -348,7 +338,7 @@ _get_setting:
 	POP	BC
 	POP	BC
 	LD	(IX+-1),A
-;   91	    ti_Read(&data, sizeof(settings), 1, var);
+;   84	    ti_Read(&data, sizeof(settings), 1, var);
 	LD	C,(IX+-1)
 	LD	B,0
 	PUSH	BC
@@ -361,10 +351,10 @@ _get_setting:
 	POP	BC
 	POP	BC
 	POP	BC
-;   92	    ti_CloseAll();
+;   85	    ti_CloseAll();
 	CALL	_ti_CloseAll
-;   93	    
-;   94	    if ((data.data & (1 << position)) == 0) {
+;   86	    
+;   87	    if ((data.data & (1 << position)) == 0) {
 	LD	A,(IX+6)
 	UEXT	HL
 	LD	L,A
@@ -373,18 +363,18 @@ _get_setting:
 	CALL	__ishl
 	LD	A,(IX+-2)
 	AND	A,L
-	JR	NZ,L_26
-;   95	        return false;
+	JR	NZ,L_24
+;   88	        return false;
 	XOR	A,A
-	JR	L_27
-;   96	    } else {
-L_26:
-;   97	        return true;
+	JR	L_25
+;   89	    } else {
+L_24:
+;   90	        return true;
 	LD	A,1
-;   98	    }
-;   99	    
-;  100	}
-L_27:
+;   91	    }
+;   92	    
+;   93	}
+L_25:
 	LD	SP,IX
 	POP	IX
 	RET	
@@ -431,5 +421,4 @@ L__17:
 	XDEF _wait_for_any_key_release
 	XDEF _wait_for_keydown
 	XDEF _wait_for_any_keydown
-	XDEF _sleep_timer
 	END

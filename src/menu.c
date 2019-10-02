@@ -97,8 +97,6 @@ void free_menu(menu* source) {
     
     free(source);
     
-    return;
-    
 }
 
 void draw_menu(menu* source, uint8_t selected_tab, uint8_t selected_item) {
@@ -146,8 +144,6 @@ void draw_menu(menu* source, uint8_t selected_tab, uint8_t selected_item) {
         gfx_print_justified(source->tabs[selected_tab]->items[i]->indicator, JUST_RIGHT, 0, JUST_NULL, 0);
         
     }
-    
-    return;
     
 }
 
@@ -289,7 +285,7 @@ char* draw_handle_function_menu(uint8_t tab) {
                                             new_menu_item("VectorDotProduct()", ""),
                                             new_menu_item("VectorCrossProduct()", ""),
                                             new_menu_item("VectorTripleProduct()", "")),
-                               new_menu_tab("Misc", 6,
+                               new_menu_tab("Misc", 7,
                                             new_menu_item("abs()", ""),
                                             new_menu_item("ln()", ""),
                                             new_menu_item("log()", ""),
@@ -428,7 +424,6 @@ void draw_handle_mode_menu(void) {
                                             new_menu_item("Terms", "")),
                                new_menu_tab("Settings", 3,
                                             new_menu_item("Dark Mode", (dark_mode) ? "Enabled" : "Disabled"),
-                                            /* new_menu_item("Sleep Timer", (sleep_timer) ? "Enabled" : "Disabled"), */
                                             new_menu_item("Use Spaces", (use_spaces) ? "Enabled" : "Disabled"),
                                             new_menu_item("Reset", "")));
     
@@ -449,14 +444,9 @@ void draw_handle_mode_menu(void) {
                             set_setting(0, dark_mode);
                             menu_data->tabs[1]->items[0]->indicator = (dark_mode) ? "Enabled" : "Disabled";
                             break;
-                        /* case 1:
-                            sleep_timer = !sleep_timer;
-                            set_setting(1, sleep_timer);
-                            menu_data->tabs[1]->items[1]->indicator = (sleep_timer) ? "Enabled" : "Disabled";
-                            break; */
                         case 1:
                             use_spaces = !use_spaces;
-                            set_setting(2, use_spaces);
+                            set_setting(1, use_spaces);
                             menu_data->tabs[1]->items[1]->indicator = (use_spaces) ? "Enabled" : "Disabled";
                             break;
                         case 2:
@@ -480,7 +470,5 @@ void draw_handle_mode_menu(void) {
     }
     
     free_menu(menu_data);
-    
-    return;
     
 }
